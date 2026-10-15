@@ -198,12 +198,15 @@ BuildArch:      x86_64
 
 AutoReqProv:    no
 
+Source0:        %{{name}}-%{{version}}.tar.gz
+
 %description
 Weget provides modular Cairo desktop widgets (Clock, Calendar,
 Weather, Storage, Media, Rings, Quotes, Network) powered by an inbuilt
 Conky runtime engine with zero manual dependencies.
 
 %prep
+%setup -q
 
 %build
 
@@ -216,12 +219,12 @@ mkdir -p %{{buildroot}}/usr/share/weget
 mkdir -p %{{buildroot}}/usr/share/applications
 mkdir -p %{{buildroot}}/usr/share/icons/hicolor/256x256/apps
 
-install -m 755 %{{_sourcedir}}/usr/bin/weget %{{buildroot}}/usr/bin/weget
-install -m 755 %{{_sourcedir}}/usr/lib/weget/engine/bin/conky %{{buildroot}}/usr/lib/weget/engine/bin/conky
-install -m 644 %{{_sourcedir}}/usr/lib/weget/engine/lib/*.so %{{buildroot}}/usr/lib/weget/engine/lib/
-cp -a %{{_sourcedir}}/usr/share/weget/* %{{buildroot}}/usr/share/weget/
-install -m 644 %{{_sourcedir}}/usr/share/applications/weget.desktop %{{buildroot}}/usr/share/applications/weget.desktop
-install -m 644 %{{_sourcedir}}/usr/share/icons/hicolor/256x256/apps/weget.png %{{buildroot}}/usr/share/icons/hicolor/256x256/apps/weget.png
+install -m 755 usr/bin/weget %{{buildroot}}/usr/bin/weget
+install -m 755 usr/lib/weget/engine/bin/conky %{{buildroot}}/usr/lib/weget/engine/bin/conky
+install -m 644 usr/lib/weget/engine/lib/*.so %{{buildroot}}/usr/lib/weget/engine/lib/
+cp -a usr/share/weget/* %{{buildroot}}/usr/share/weget/
+install -m 644 usr/share/applications/weget.desktop %{{buildroot}}/usr/share/applications/weget.desktop
+install -m 644 usr/share/icons/hicolor/256x256/apps/weget.png %{{buildroot}}/usr/share/icons/hicolor/256x256/apps/weget.png
 
 %files
 /usr/bin/weget
@@ -245,11 +248,17 @@ install -m 644 %{{_sourcedir}}/usr/share/icons/hicolor/256x256/apps/weget.png %{
             tar.add(stage_dir, arcname=f"{PKG_NAME}-{VERSION}")
 
     # Build RPM directly if rpmbuild is available, or use cpio-based packaging
-    rpm_output = DIST_DIR / f"{PKG_NAME}-{VERSION}.x86_64.rpm"
     if shutil.which("rpmbuild"):
+        topdir = DIST_DIR / "rpmbuild"
+        sources_dir = topdir / "SOURCES"
+        sources_dir.mkdir(parents=True, exist_ok=True)
+        # rpmbuild looks for Source0 inside %{_sourcedir}.
+        shutil.copy2(tar_output, sources_dir / tar_output.name)
         try:
-            run_cmd(["rpmbuild", "-bb", "--define", f"_topdir {DIST_DIR / 'rpmbuild'}", str(spec_file)])
-            log_ok("RPM built via rpmbuild")
+            run_cmd(["rpmbuild", "-bb", "--define", f"_topdir {topdir}", str(spec_file)])
+            for rpm in (topdir / "RPMS").rglob("*.rpm"):
+                shutil.copy2(rpm, DIST_DIR / rpm.name)
+                log_ok(f"Created RPM package: {DIST_DIR / rpm.name}")
         except Exception as e:
             log(f"rpmbuild execution noted: {e}")
 
@@ -344,7 +353,8 @@ modules:
       - install -d /app/share/weget
       - cp -a engine/macwidget.lua engine/conky.conf engine/settings engine/helpers assets /app/share/weget/
       - install -D -m 644 package/weget.desktop /app/share/applications/org.weget.Weget.desktop
-      - install -D -m 644 assets/rounded-corners.png /app/share/icons/hicolor/256x256/apps/org.weget.Weget.png
+      - sed -i 's|^Icon=.*|Icon=org.weget.Weget|' /app/share/applications/org.weget.Weget.desktop
+      - install -D -m 644 assets/icon.png /app/share/icons/hicolor/512x512/apps/org.weget.Weget.png
     sources:
       - type: dir
         path: ..
