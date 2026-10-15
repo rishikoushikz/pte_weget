@@ -25,7 +25,8 @@ modules:
       - cp -a engine/macwidget.lua engine/conky.conf engine/settings engine/helpers assets /app/share/weget/
       - install -D -m 644 package/weget.desktop /app/share/applications/org.weget.Weget.desktop
       - sed -i 's|^Icon=.*|Icon=org.weget.Weget|' /app/share/applications/org.weget.Weget.desktop
-      - install -D -m 644 assets/icon.png /app/share/icons/hicolor/512x512/apps/org.weget.Weget.png
+      - sed -i 's|^StartupWMClass=.*|StartupWMClass=org.weget.Weget|' /app/share/applications/org.weget.Weget.desktop
+      - for s in 16 32 48 64 128 256 512; do install -D -m 644 assets/icons/hicolor/${s}x${s}/apps/weget.png /app/share/icons/hicolor/${s}x${s}/apps/org.weget.Weget.png; done
     sources:
       - type: dir
         path: ..

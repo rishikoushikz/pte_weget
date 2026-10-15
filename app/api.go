@@ -9,6 +9,7 @@ import (
 
 func SetupAPIRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/settings", handleSettings)
+	mux.HandleFunc("/api/autostart", handleAutostart)
 	mux.HandleFunc("/api/slots", handleSlots)
 	mux.HandleFunc("/api/daemon/", handleDaemon)
 	mux.HandleFunc("/api/media/", handleMedia)
@@ -39,6 +40,46 @@ func handleSettings(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 		return
 	}
+	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+}
+
+func handleAutostart(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	if r.Method == http.MethodGet {
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"enabled": IsAutostartEnabled(),
+			"path":    getAutostartFilePath(),
+			"exec":    GetAutostartExecPath(),
+		})
+		return
+	}
+
+	if r.Method == http.MethodPost {
+		var req struct {
+			Enabled bool `json:"enabled"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		if err := SetAutostart(req.Enabled); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		s, err := LoadSettings()
+		if err == nil {
+			s.Autostart = req.Enabled
+			_ = SaveSettings(s)
+		}
+
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status":  "ok",
+			"enabled": IsAutostartEnabled(),
+		})
+		return
+	}
+
 	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 }
 

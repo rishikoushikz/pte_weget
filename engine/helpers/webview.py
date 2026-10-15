@@ -23,10 +23,16 @@ def main():
         sys.exit(1)
 
     url = sys.argv[1]
-    title = sys.argv[2] if len(sys.argv) > 2 else "Weget — Conky Ecosystem"
+    title = sys.argv[2] if len(sys.argv) > 2 else "Weget — Modern Desktop Widgets"
     icon_path = sys.argv[3] if len(sys.argv) > 3 else ""
     width = int(sys.argv[4]) if len(sys.argv) > 4 else 820
     height = int(sys.argv[5]) if len(sys.argv) > 5 else 680
+
+    # Ensure application identity and WM_CLASS / Wayland app_id are set
+    # This links the running window to weget.desktop on dock, taskbar, and alt-tab
+    app_id = os.environ.get("FLATPAK_ID", "weget")
+    GLib.set_prgname(app_id)
+    GLib.set_application_name("Weget")
 
     win = Gtk.Window(title=title)
     win.set_default_size(width, height)
@@ -37,13 +43,23 @@ def main():
     if gtk_settings:
         gtk_settings.set_property("gtk-application-prefer-dark-theme", True)
 
+    icon_loaded = False
     if icon_path and os.path.exists(icon_path):
         try:
             win.set_icon_from_file(icon_path)
+            Gtk.Window.set_default_icon_from_file(icon_path)
+            icon_loaded = True
         except Exception:
-            win.set_icon_name("weget")
-    else:
-        win.set_icon_name("weget")
+            pass
+
+    if not icon_loaded:
+        for candidate in [app_id, "weget", "org.weget.Weget"]:
+            try:
+                win.set_icon_name(candidate)
+                Gtk.Window.set_default_icon_name(candidate)
+                break
+            except Exception:
+                continue
 
     # Configure WebKit settings
     settings = WebKit2.Settings()

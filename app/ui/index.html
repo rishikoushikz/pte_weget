@@ -511,6 +511,17 @@
               <input type="hidden" id="sel-units" value="metric">
             </div>
           </div>
+
+          <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-white">Launch at Login</p>
+              <p class="text-[11px] text-zinc-400">Automatically start widgets when signing into desktop (XDG autostart)</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="chk-autostart" onchange="toggleAutostart()">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
         </div>
       </section>
 
@@ -1042,6 +1053,10 @@
 
       document.getElementById('input-location').value = state.location || "Mumbai";
 
+      // Launch at login toggle
+      const chkAutostart = document.getElementById('chk-autostart');
+      if (chkAutostart) chkAutostart.checked = !!state.autostart;
+
       // Background Blur toggle & controls
       const chkGlass = document.getElementById('chk-glass');
       if (chkGlass) chkGlass.checked = !!state.glass_effect;
@@ -1121,6 +1136,21 @@
       renderUI();
       saveState();
       showToast(state.glass_effect ? "Background blur enabled" : "Background blur disabled");
+    }
+
+    async function toggleAutostart() {
+      const chk = document.getElementById('chk-autostart');
+      const enabled = chk ? chk.checked : false;
+      state.autostart = enabled;
+      showToast(enabled ? "Launch at login enabled (XDG autostart)" : "Launch at login disabled");
+
+      try {
+        await fetch('/api/autostart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled })
+        });
+      } catch (e) {}
     }
 
     function navTo(page) {

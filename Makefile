@@ -1,4 +1,4 @@
-.PHONY: all build run start stop restart status install uninstall deb rpm appimage flatpak flatpak-bundle tarball packages clean help
+.PHONY: all build run start stop restart status autostart install uninstall deb rpm appimage flatpak flatpak-bundle tarball packages clean help
 
 PYTHON ?= python3
 
@@ -14,6 +14,7 @@ help:
 	@echo "  make stop       - Stop desktop widgets"
 	@echo "  make restart    - Restart desktop widgets"
 	@echo "  make status     - Check widget daemon status"
+	@echo "  make autostart  - Check or configure login autostart (no .sh)"
 	@echo ""
 	@echo "System Installation:"
 	@echo "  make install    - Install to ~/.local (no root required)"
@@ -46,6 +47,9 @@ restart:
 
 status:
 	@$(PYTHON) package/builder.py status
+
+autostart:
+	@$(PYTHON) package/builder.py autostart $(filter-out $@,$(MAKECMDGOALS))
 
 install:
 	@$(PYTHON) package/builder.py install

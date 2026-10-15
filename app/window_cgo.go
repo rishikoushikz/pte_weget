@@ -13,13 +13,22 @@ static void on_destroy(GtkWidget *widget, gpointer data) {
 }
 
 static void setup_window(GtkWidget *window, GtkWidget *webview, const char *title, const char *icon_path, int width, int height) {
+    const char *app_id = g_getenv("FLATPAK_ID");
+    if (!app_id || !*app_id) {
+        app_id = "weget";
+    }
+    g_set_prgname(app_id);
+    g_set_application_name("Weget");
+
     gtk_window_set_title(GTK_WINDOW(window), title);
     gtk_window_set_default_size(GTK_WINDOW(window), width, height);
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
     if (icon_path != NULL && g_file_test(icon_path, G_FILE_TEST_EXISTS)) {
         gtk_window_set_icon_from_file(GTK_WINDOW(window), icon_path, NULL);
+        gtk_window_set_default_icon_from_file(icon_path, NULL);
     } else {
-        gtk_window_set_icon_name(GTK_WINDOW(window), "weget");
+        gtk_window_set_icon_name(GTK_WINDOW(window), app_id);
+        gtk_window_set_default_icon_name(app_id);
     }
     gtk_container_add(GTK_CONTAINER(window), webview);
     g_signal_connect(window, "destroy", G_CALLBACK(on_destroy), NULL);

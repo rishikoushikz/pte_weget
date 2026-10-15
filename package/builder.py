@@ -117,7 +117,7 @@ def stage_package_tree(target_root: Path):
         for a in (ROOT_DIR / "assets").glob("*.*"):
             shutil.copy2(a, assets_target / a.name)
 
-    # 4. Desktop entry & Icon
+    # 4. Desktop entry & Multi-Resolution Icons
     desktop_file = apps_dir / "weget.desktop"
     desktop_content = """[Desktop Entry]
 Name=Weget
@@ -129,15 +129,30 @@ Terminal=false
 Type=Application
 Categories=Utility;DesktopSettings;GTK;
 StartupNotify=true
+StartupWMClass=weget
 Keywords=widget;desktop;system;clock;calendar;weather;conky;
 """
     desktop_file.write_text(desktop_content)
 
-    icon_src = ROOT_DIR / "assets" / "rounded-corners.png"
-    if not icon_src.exists():
-        icon_src = ROOT_DIR / "assets" / "icon-1024.png"
-    if icon_src.exists():
-        shutil.copy2(icon_src, icons_dir / "weget.png")
+    # Multi-resolution hicolor icon suite (16x16 to 512x512)
+    sizes = [16, 32, 48, 64, 128, 256, 512]
+    for s in sizes:
+        d = target_root / "usr" / "share" / "icons" / "hicolor" / f"{s}x{s}" / "apps"
+        d.mkdir(parents=True, exist_ok=True)
+        src_icon = ROOT_DIR / "assets" / "icons" / "hicolor" / f"{s}x{s}" / "apps" / "weget.png"
+        if src_icon.exists():
+            shutil.copy2(src_icon, d / "weget.png")
+        else:
+            shutil.copy2(ROOT_DIR / "assets" / "icon.png", d / "weget.png")
+
+    # Universal pixmaps fallback
+    pixmaps_dir = target_root / "usr" / "share" / "pixmaps"
+    pixmaps_dir.mkdir(parents=True, exist_ok=True)
+    pixmap_src = ROOT_DIR / "assets" / "icons" / "pixmaps" / "weget.png"
+    if pixmap_src.exists():
+        shutil.copy2(pixmap_src, pixmaps_dir / "weget.png")
+    else:
+        shutil.copy2(ROOT_DIR / "assets" / "icon.png", pixmaps_dir / "weget.png")
 
 
 def build_deb():
@@ -178,6 +193,20 @@ exit 0
 """)
         os.chmod(postinst, 0o755)
 
+        # Post-remove hook: clean icon and desktop cache
+        postrm = debian_dir / "postrm"
+        postrm.write_text("""#!/bin/sh
+set -e
+if [ -x /usr/bin/update-desktop-database ]; then
+    /usr/bin/update-desktop-database -q /usr/share/applications || true
+fi
+if [ -x /usr/bin/gtk-update-icon-cache ]; then
+    /usr/bin/gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
+fi
+exit 0
+""")
+        os.chmod(postrm, 0o755)
+
         output_deb = DIST_DIR / f"{PKG_NAME}_{VERSION}_amd64.deb"
         run_cmd(["dpkg-deb", "--build", "--root-owner-group", str(stage_dir), str(output_deb)])
         log_ok(f"Created Debian package: {output_deb} ({output_deb.stat().st_size // 1024} KB)")
@@ -217,21 +246,37 @@ mkdir -p %{{buildroot}}/usr/lib/weget/engine/bin
 mkdir -p %{{buildroot}}/usr/lib/weget/engine/lib
 mkdir -p %{{buildroot}}/usr/share/weget
 mkdir -p %{{buildroot}}/usr/share/applications
-mkdir -p %{{buildroot}}/usr/share/icons/hicolor/256x256/apps
+mkdir -p %{{buildroot}}/usr/share/pixmaps
 
 install -m 755 usr/bin/weget %{{buildroot}}/usr/bin/weget
 install -m 755 usr/lib/weget/engine/bin/conky %{{buildroot}}/usr/lib/weget/engine/bin/conky
 install -m 644 usr/lib/weget/engine/lib/*.so %{{buildroot}}/usr/lib/weget/engine/lib/
 cp -a usr/share/weget/* %{{buildroot}}/usr/share/weget/
 install -m 644 usr/share/applications/weget.desktop %{{buildroot}}/usr/share/applications/weget.desktop
-install -m 644 usr/share/icons/hicolor/256x256/apps/weget.png %{{buildroot}}/usr/share/icons/hicolor/256x256/apps/weget.png
+cp -a usr/share/icons %{{buildroot}}/usr/share/
+install -m 644 usr/share/pixmaps/weget.png %{{buildroot}}/usr/share/pixmaps/weget.png
+
+%post
+/bin/touch --no-create %{{_datadir}}/icons/hicolor &>/dev/null || :
+/usr/bin/update-desktop-database &>/dev/null || :
+
+%postun
+if [ $1 -eq 0 ] ; then
+    /bin/touch --no-create %{{_datadir}}/icons/hicolor &>/dev/null
+    /usr/bin/gtk-update-icon-cache %{{_datadir}}/icons/hicolor &>/dev/null || :
+fi
+/usr/bin/update-desktop-database &>/dev/null || :
+
+%posttrans
+/usr/bin/gtk-update-icon-cache %{{_datadir}}/icons/hicolor &>/dev/null || :
 
 %files
 /usr/bin/weget
 /usr/lib/weget
 /usr/share/weget
 /usr/share/applications/weget.desktop
-/usr/share/icons/hicolor/256x256/apps/weget.png
+/usr/share/icons/hicolor/*/apps/weget.png
+/usr/share/pixmaps/weget.png
 
 %changelog
 * Wed Oct 15 2026 Weget Team <support@weget.org> - {VERSION}-1
@@ -354,7 +399,8 @@ modules:
       - cp -a engine/macwidget.lua engine/conky.conf engine/settings engine/helpers assets /app/share/weget/
       - install -D -m 644 package/weget.desktop /app/share/applications/org.weget.Weget.desktop
       - sed -i 's|^Icon=.*|Icon=org.weget.Weget|' /app/share/applications/org.weget.Weget.desktop
-      - install -D -m 644 assets/icon.png /app/share/icons/hicolor/512x512/apps/org.weget.Weget.png
+      - sed -i 's|^StartupWMClass=.*|StartupWMClass=org.weget.Weget|' /app/share/applications/org.weget.Weget.desktop
+      - for s in 16 32 48 64 128 256 512; do install -D -m 644 assets/icons/hicolor/${{s}}x${{s}}/apps/weget.png /app/share/icons/hicolor/${{s}}x${{s}}/apps/org.weget.Weget.png; done
     sources:
       - type: dir
         path: ..
@@ -495,11 +541,20 @@ def install_local():
             safe_copy(h, local_share / "helpers" / h.name)
             os.chmod(local_share / "helpers" / h.name, 0o755)
 
-    # 4. Icon & Desktop launcher
-    icon_src = ROOT_DIR / "assets" / "rounded-corners.png"
-    if icon_src.exists():
-        safe_copy(icon_src, local_icons / "weget.png")
+    # 4. Multi-Resolution Icons & Desktop launcher
+    sizes = [16, 32, 48, 64, 128, 256, 512]
+    for s in sizes:
+        local_size_dir = home / ".local" / "share" / "icons" / "hicolor" / f"{s}x{s}" / "apps"
+        local_size_dir.mkdir(parents=True, exist_ok=True)
+        src_icon = ROOT_DIR / "assets" / "icons" / "hicolor" / f"{s}x{s}" / "apps" / "weget.png"
+        if src_icon.exists():
+            safe_copy(src_icon, local_size_dir / "weget.png")
 
+    local_pixmaps = home / ".local" / "share" / "pixmaps"
+    local_pixmaps.mkdir(parents=True, exist_ok=True)
+    pixmap_src = ROOT_DIR / "assets" / "icons" / "pixmaps" / "weget.png"
+    if pixmap_src.exists():
+        safe_copy(pixmap_src, local_pixmaps / "weget.png")
 
     desktop_content = f"""[Desktop Entry]
 Name=Weget
@@ -510,8 +565,17 @@ Icon=weget
 Terminal=false
 Type=Application
 Categories=Utility;DesktopSettings;GTK;
+StartupNotify=true
+StartupWMClass=weget
 """
     (local_apps / "weget.desktop").write_text(desktop_content)
+
+    # Refresh icon cache if gtk-update-icon-cache is present
+    if shutil.which("gtk-update-icon-cache"):
+        subprocess.run(["gtk-update-icon-cache", "-q", "-t", "-f", str(home / ".local" / "share" / "icons" / "hicolor")], check=False)
+    if shutil.which("update-desktop-database"):
+        subprocess.run(["update-desktop-database", "-q", str(local_apps)], check=False)
+
     log_ok("Successfully installed Weget to ~/.local/bin/weget")
 
 
@@ -530,6 +594,9 @@ def uninstall_local():
     for p in [local_bin, local_desktop, local_icon]:
         if p.exists():
             p.unlink()
+    autostart_p = home / ".config" / "autostart" / "weget.desktop"
+    if autostart_p.exists():
+        autostart_p.unlink()
     if local_share.exists():
         shutil.rmtree(local_share)
     log_ok("Successfully uninstalled Weget from ~/.local")
@@ -560,6 +627,7 @@ Available targets:
   make stop       - Stop desktop widgets
   make restart    - Restart desktop widgets
   make status     - Check widget daemon status
+  make autostart  - Enable, disable, or check login autostart
   make install    - Install to ~/.local (no root required)
   make uninstall  - Remove from ~/.local
   make deb        - Export Debian package (.deb)
@@ -574,10 +642,11 @@ Available targets:
         if not (ROOT_DIR / "weget").exists():
             build_binary()
         os.execv(str(ROOT_DIR / "weget"), [str(ROOT_DIR / "weget")])
-    elif target in ["start", "stop", "restart", "status"]:
+    elif target in ["start", "stop", "restart", "status", "autostart"]:
         if not (ROOT_DIR / "weget").exists():
             build_binary()
-        run_cmd([str(ROOT_DIR / "weget"), target])
+        args = sys.argv[1:]
+        run_cmd([str(ROOT_DIR / "weget")] + args)
     elif target == "deb":
         build_deb()
     elif target == "rpm":

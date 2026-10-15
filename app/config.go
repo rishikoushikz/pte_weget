@@ -18,6 +18,7 @@ type Settings struct {
 	TimeFormat        string            `json:"time_format"`
 	MeasurementSystem string            `json:"measurement_system"`
 	Location          string            `json:"location"`
+	Autostart         bool              `json:"autostart"`
 	Slots             map[string]string `json:"slots"`
 }
 
@@ -46,6 +47,7 @@ func DefaultSettings() Settings {
 		TimeFormat:        "24h",
 		MeasurementSystem: "metric",
 		Location:          "Mumbai",
+		Autostart:         IsAutostartEnabled(),
 		Slots: map[string]string{
 			"A1": "CALN_2x1_WID",
 			"B1": "WEAT_1x1_MIN",
@@ -64,11 +66,14 @@ func LoadSettings() (Settings, error) {
 	path := getSettingsPath()
 	data, err := os.ReadFile(path)
 	if err != nil {
+		s.Autostart = IsAutostartEnabled()
 		return s, err
 	}
 
 	if err := json.Unmarshal(data, &s); err != nil {
-		return DefaultSettings(), err
+		s = DefaultSettings()
+		s.Autostart = IsAutostartEnabled()
+		return s, err
 	}
 
 	// Graceful migration: if legacy color_mode was "glass", migrate to dark + glass_effect = true
@@ -84,6 +89,8 @@ func LoadSettings() (Settings, error) {
 		s.BlurOpacity = 0.60
 	}
 
+	s.Autostart = IsAutostartEnabled()
+
 	if s.Slots == nil {
 		s.Slots = DefaultSettings().Slots
 	}
@@ -93,6 +100,11 @@ func LoadSettings() (Settings, error) {
 func SaveSettings(s Settings) error {
 	settingsLock.Lock()
 	defer settingsLock.Unlock()
+
+	// Sync autostart XDG desktop entry
+	if s.Autostart != IsAutostartEnabled() {
+		_ = SetAutostart(s.Autostart)
+	}
 
 	path := getSettingsPath()
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {

@@ -29,9 +29,61 @@ Usage:
   weget stop           Stop the desktop widget daemon natively
   weget restart        Restart the desktop widget daemon
   weget status         Show running status, PID, and engine mode
+  weget autostart      Check or configure autostart on login (no .sh required)
   weget daemon         Run headless background telemetry and widget supervisor
   weget version        Show version info
 `, Version)
+}
+
+func findAppIcon() string {
+	home := os.Getenv("HOME")
+	candidates := []string{
+		// 1. System pixmaps (standard universal location for .deb / .rpm)
+		"/usr/share/pixmaps/weget.png",
+		// 2. System hicolor sizes
+		"/usr/share/icons/hicolor/256x256/apps/weget.png",
+		"/usr/share/icons/hicolor/512x512/apps/weget.png",
+		"/usr/share/icons/hicolor/128x128/apps/weget.png",
+		"/usr/share/icons/hicolor/64x64/apps/weget.png",
+		// 3. User local hicolor / pixmaps
+		filepath.Join(home, ".local/share/icons/hicolor/256x256/apps/weget.png"),
+		filepath.Join(home, ".local/share/icons/hicolor/512x512/apps/weget.png"),
+		filepath.Join(home, ".local/share/pixmaps/weget.png"),
+		// 4. Flatpak hicolor location
+		"/app/share/icons/hicolor/512x512/apps/org.weget.Weget.png",
+		"/app/share/icons/hicolor/256x256/apps/org.weget.Weget.png",
+		// 5. System share weget assets
+		"/usr/share/weget/assets/icon.png",
+		filepath.Join(home, ".local/share/weget/assets/icon.png"),
+	}
+
+	// 6. Relative to currently running executable
+	if exe, err := os.Executable(); err == nil {
+		dir := filepath.Dir(exe)
+		candidates = append(candidates,
+			filepath.Join(dir, "assets/icons/hicolor/256x256/apps/weget.png"),
+			filepath.Join(dir, "assets/icon.png"),
+			filepath.Join(dir, "../assets/icon.png"),
+			filepath.Join(dir, "usr/share/pixmaps/weget.png"),
+		)
+	}
+
+	for _, p := range candidates {
+		if _, err := os.Stat(p); err == nil {
+			return p
+		}
+	}
+
+	// 7. Fallback: extract embedded ui/icon.png to ~/.cache/weget/icon.png
+	cacheIcon := filepath.Join(home, ".cache/weget/icon.png")
+	if data, err := fs.ReadFile(uiFS, "ui/icon.png"); err == nil && len(data) > 0 {
+		_ = os.MkdirAll(filepath.Dir(cacheIcon), 0755)
+		if err := os.WriteFile(cacheIcon, data, 0644); err == nil {
+			return cacheIcon
+		}
+	}
+
+	return ""
 }
 
 func main() {
@@ -90,6 +142,47 @@ func main() {
 				fmt.Printf("Status: RUNNING (PID %s)\nEngine: %s\nUptime: %s\n", pid, engine, uptime)
 			} else {
 				fmt.Println("Status: STOPPED")
+			}
+			return
+
+		case "autostart":
+			action := "status"
+			if len(os.Args) > 2 {
+				action = strings.ToLower(os.Args[2])
+			}
+			switch action {
+			case "enable", "on", "1":
+				if err := EnableAutostart(); err != nil {
+					fmt.Fprintf(os.Stderr, "Error enabling autostart: %v\n", err)
+					os.Exit(1)
+				}
+				fmt.Printf("✓ Autostart enabled via XDG Desktop Entry\n  File: %s\n  Exec: %s\n", getAutostartFilePath(), GetAutostartExecPath())
+			case "disable", "off", "0":
+				if err := DisableAutostart(); err != nil {
+					fmt.Fprintf(os.Stderr, "Error disabling autostart: %v\n", err)
+					os.Exit(1)
+				}
+				fmt.Println("✓ Autostart disabled (entry removed from ~/.config/autostart)")
+			case "toggle":
+				enabled := IsAutostartEnabled()
+				if err := SetAutostart(!enabled); err != nil {
+					fmt.Fprintf(os.Stderr, "Error toggling autostart: %v\n", err)
+					os.Exit(1)
+				}
+				if !enabled {
+					fmt.Printf("✓ Autostart enabled (%s)\n", getAutostartFilePath())
+				} else {
+					fmt.Println("✓ Autostart disabled")
+				}
+			case "status":
+				if IsAutostartEnabled() {
+					fmt.Printf("Autostart: ENABLED\nEntry: %s\nExec:  %s\n", getAutostartFilePath(), GetAutostartExecPath())
+				} else {
+					fmt.Println("Autostart: DISABLED")
+				}
+			default:
+				fmt.Fprintf(os.Stderr, "Unknown autostart action: %s (use enable, disable, toggle, or status)\n", action)
+				os.Exit(1)
 			}
 			return
 
@@ -159,6 +252,6 @@ func main() {
 		}
 	}()
 
-	iconPath := filepath.Join(os.Getenv("HOME"), ".local/share/icons/hicolor/256x256/apps/weget.png")
+	iconPath := findAppIcon()
 	launchAppWindow(url, "Weget — Modern Desktop Widgets", iconPath, 840, 700)
 }
