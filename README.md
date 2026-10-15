@@ -18,10 +18,10 @@ A native Linux desktop widget manager built in Go with a bundled Conky / Cairo r
 
 ```mermaid
 graph TD
-    UI[Weget App: Native Go Manager] -->|REST API| Config[engine/settings/settings.json]
-    Daemon[Go Daemon & Telemetry Engine] -->|Async Poller| Cache[/tmp/weget_telemetry.json]
-    Engine[Bundled Conky Cairo Engine: engine/conky] -->|Read Cache| Lua[engine/macwidget.lua]
-    Lua -->|Pure Cairo Vector Drawing| Desktop[Desktop Widget Window]
+    UI["Weget App: Native Go Manager"] -->|REST API| Config["engine/settings/settings.json"]
+    Daemon["Go Daemon & Telemetry Engine"] -->|Async Poller| Cache["/tmp/weget_telemetry.json"]
+    Engine["Bundled Conky Cairo Engine: engine/conky"] -->|Read Cache| Lua["engine/macwidget.lua"]
+    Lua -->|Pure Cairo Vector Drawing| Desktop["Desktop Widget Window"]
 ```
 
 ---
