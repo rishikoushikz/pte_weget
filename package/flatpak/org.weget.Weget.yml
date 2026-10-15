@@ -1,0 +1,30 @@
+app-id: org.weget.Weget
+runtime: org.gnome.Platform
+runtime-version: '46'
+sdk: org.gnome.Sdk
+command: weget
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+  - --share=network
+  - --talk-name=org.mpris.MediaPlayer2.*
+  - --filesystem=home:ro
+  - --filesystem=xdg-config/conky:create
+  - --filesystem=xdg-cache/weget:create
+
+modules:
+  - name: weget
+    buildsystem: simple
+    build-commands:
+      - install -D -m 755 weget /app/bin/weget
+      - install -D -m 755 engine/conky/bin/conky /app/lib/weget/engine/bin/conky
+      - install -d /app/lib/weget/engine/lib
+      - install -m 644 engine/conky/lib/*.so /app/lib/weget/engine/lib/
+      - install -d /app/share/weget
+      - cp -a engine/macwidget.lua engine/conky.conf engine/settings engine/helpers assets /app/share/weget/
+      - install -D -m 644 package/weget.desktop /app/share/applications/org.weget.Weget.desktop
+      - install -D -m 644 assets/rounded-corners.png /app/share/icons/hicolor/256x256/apps/org.weget.Weget.png
+    sources:
+      - type: dir
+        path: ..

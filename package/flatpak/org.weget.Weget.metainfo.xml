@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.weget.Weget</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Weget</name>
+  <summary>Modern macOS-style interactive desktop widgets for Linux</summary>
+  <description>
+    <p>
+      Weget delivers a modular, beautiful desktop widget experience on Linux,
+      with full hardware rings, network charts, weather forecasts, quotes, and media player controls.
+    </p>
+  </description>
+  <launchable type="desktop-id">org.weget.Weget.desktop</launchable>
+  <releases>
+    <release version="0.1" date="2026-10-15"/>
+  </releases>
+</component>

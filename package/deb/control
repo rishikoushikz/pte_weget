@@ -1,0 +1,10 @@
+Package: weget
+Version: 0.1
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: Weget Project <support@weget.org>
+Description: Modern macOS-style interactive desktop widgets for Linux
+ Weget provides modular, pixel-perfect Cairo desktop widgets (Clock, Calendar,
+ Weather, Storage, Media, Rings, Quotes, Network) powered by an inbuilt
+ Conky runtime engine with zero manual dependencies.

@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.tmp
+.DS_Store
+app/weget
+/weget
+/dist/

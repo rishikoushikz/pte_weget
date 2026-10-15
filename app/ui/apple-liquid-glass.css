@@ -1,0 +1,402 @@
+/**
+ * Apple Liquid Glass iOS 26 Design System
+ * Measured directly from Apple Liquid Glass iOS 26 Control Center UI Kit (Figma #105:23)
+ *
+ * The One Rule:
+ * Glass goes on an empty background layer behind content — never on the frame holding icons.
+ * This preserves artwork sharpness while achieving realistic optical refraction and depth.
+ */
+
+:root {
+  /* Dimensions & Grid (iOS 26 4-column 68px unit / 15px gutter) */
+  --glass-unit: 68px;
+  --glass-gutter: 15px;
+  --glass-radius-tile-2x2: 30px;
+  --glass-radius-pill: 9999px;
+  --glass-radius-circle: 50%;
+  --glass-radius-well: 9999px;
+
+  /* Material Tokens - Regular (Over Wallpaper & Busy Desktop) */
+  --glass-bg-regular: rgba(36, 36, 36, 0.52);
+  --glass-blur-regular: 28px;
+  --glass-saturate-regular: 190%;
+  --glass-rim-regular: rgba(255, 255, 255, 0.22);
+  --glass-top-light-regular: rgba(255, 255, 255, 0.45);
+  --glass-shadow-regular: 0 14px 34px rgba(0, 0, 0, 0.28), 0 2px 8px rgba(0, 0, 0, 0.16);
+
+  /* Material Tokens - Clear (Over Photos & Media) */
+  --glass-bg-clear: rgba(255, 255, 255, 0.08);
+  --glass-blur-clear: 24px;
+  --glass-saturate-clear: 180%;
+  --glass-rim-clear: rgba(255, 255, 255, 0.35);
+  --glass-top-light-clear: rgba(255, 255, 255, 0.65);
+  --glass-shadow-clear: 0 18px 40px rgba(0, 0, 0, 0.22), 0 4px 12px rgba(0, 0, 0, 0.12);
+
+  /* Inner Wells & Tints */
+  --glass-well-bg: rgba(255, 255, 255, 0.08);
+  --glass-well-bg-hover: rgba(255, 255, 255, 0.14);
+  --glass-well-border: rgba(255, 255, 255, 0.12);
+
+  /* Accents */
+  --glass-accent-blue: #0088FF;
+  --glass-accent-green: #34C759;
+  --glass-accent-orange: #FF9500;
+  --glass-accent-red: #FF3B30;
+  --glass-accent-purple: #AF52DE;
+
+  /* Typography */
+  --glass-text-primary: #FFFFFF;
+  --glass-text-secondary: rgba(255, 255, 255, 0.62);
+  --glass-text-tertiary: rgba(255, 255, 255, 0.38);
+  --glass-font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+}
+
+/* ========================================================================= */
+/* BASE GLASS CONTAINER & CARD ARCHITECTURE                                 */
+/* ========================================================================= */
+
+.liquid-glass,
+.liquid-glass-card {
+  position: relative;
+  isolation: isolate;
+  background: var(--glass-bg-regular);
+  backdrop-filter: blur(var(--glass-blur-regular)) saturate(var(--glass-saturate-regular));
+  -webkit-backdrop-filter: blur(var(--glass-blur-regular)) saturate(var(--glass-saturate-regular));
+  box-shadow: 
+    var(--glass-shadow-regular),
+    inset 0 1px 1.5px 0 var(--glass-top-light-regular),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.25),
+    inset 0 0 14px 0 rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-rim-regular);
+  font-family: var(--glass-font-family);
+  color: var(--glass-text-primary);
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+/* 315° Inset Meniscus Refraction Curve (Top Specular Highlight) */
+.liquid-glass::before,
+.liquid-glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    175deg,
+    rgba(255, 255, 255, 0.32) 0%,
+    rgba(255, 255, 255, 0.10) 24%,
+    rgba(255, 255, 255, 0.00) 55%
+  );
+  z-index: 1;
+}
+
+/* Clear Material Variation (Over photos and vibrant art) */
+.liquid-glass.material-clear,
+.liquid-glass-card.material-clear {
+  background: var(--glass-bg-clear);
+  backdrop-filter: blur(var(--glass-blur-clear)) saturate(var(--glass-saturate-clear));
+  -webkit-backdrop-filter: blur(var(--glass-blur-clear)) saturate(var(--glass-saturate-clear));
+  border-color: var(--glass-rim-clear);
+  box-shadow: 
+    var(--glass-shadow-clear),
+    inset 0 1.2px 1.8px 0 var(--glass-top-light-clear),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.15),
+    inset 0 0 20px 0 rgba(255, 255, 255, 0.12);
+}
+
+.liquid-glass.material-clear::before,
+.liquid-glass-card.material-clear::before {
+  background: linear-gradient(
+    175deg,
+    rgba(255, 255, 255, 0.48) 0%,
+    rgba(255, 255, 255, 0.18) 30%,
+    rgba(255, 255, 255, 0.00) 65%
+  );
+}
+
+/* Interactive Feedback */
+.liquid-glass:active,
+.liquid-glass-card:active {
+  transform: scale(0.965);
+}
+
+/* Ensure all child icons and text live on an unrefracted layer */
+.liquid-glass > *,
+.liquid-glass-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* ========================================================================= */
+/* WEGET APP INTEGRATION (SLOT CARDS IN GLASS MODE)                          */
+/* ========================================================================= */
+
+body.mode-glass {
+  background: radial-gradient(circle at 80% 20%, rgba(200, 30, 60, 0.16) 0%, transparent 45%),
+              radial-gradient(circle at 20% 80%, rgba(120, 40, 180, 0.14) 0%, transparent 50%),
+              #131316 !important;
+}
+
+body.mode-glass .slot-card {
+  background: rgba(26, 26, 28, 0.65) !important;
+  backdrop-filter: blur(24px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+body.mode-glass .slot-card::before {
+  display: none !important;
+}
+
+body.mode-glass .slot-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+body.mode-glass .slot-card:hover {
+  background: rgba(38, 38, 42, 0.80) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.mode-glass .slot-card.selected {
+  border-color: #FF5A52 !important;
+  box-shadow: 0 0 0 1.5px #FF5A52, 0 8px 24px rgba(255, 90, 82, 0.30) !important;
+}
+
+/* Light Mode Acrylic Blur Variant */
+body.mode-glass.theme-light {
+  background: radial-gradient(circle at 80% 20%, rgba(14, 165, 233, 0.14) 0%, transparent 45%),
+              radial-gradient(circle at 20% 80%, rgba(244, 63, 94, 0.10) 0%, transparent 50%),
+              #F4F4F6 !important;
+}
+
+body.mode-glass.theme-light .slot-card {
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(24px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+  color: #111114 !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.mode-glass.theme-light .slot-card h4 {
+  color: #111114 !important;
+}
+
+/* ========================================================================= */
+/* GEOMETRY & SIZING VARIANTS (iOS 26 SPEC)                                  */
+/* ========================================================================= */
+
+/* 1x1 Circular Toggle (68px x 68px) */
+.glass-tile-1x1 {
+  width: var(--glass-unit);
+  height: var(--glass-unit);
+  border-radius: var(--glass-radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* 2x1 Horizontal Pill Tile (151px x 68px) */
+.glass-tile-2x1 {
+  width: 151px;
+  height: var(--glass-unit);
+  border-radius: var(--glass-radius-pill);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 12px;
+  cursor: pointer;
+}
+
+/* 2x2 Squircle Tile (151px x 151px) */
+.glass-tile-2x2 {
+  width: 151px;
+  height: 151px;
+  border-radius: var(--glass-radius-tile-2x2);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* 1x2 Vertical Slider Capsule (68px x 151px) */
+.glass-slider-1x2 {
+  width: var(--glass-unit);
+  height: 151px;
+  border-radius: var(--glass-radius-pill);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  touch-action: none;
+}
+
+/* ========================================================================= */
+/* SLIDER MECHANICS (INTERACTIVE BOTTOM-UP FILL + DUAL CONTRAST)            */
+/* ========================================================================= */
+
+.glass-slider-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #FFFFFF;
+  border-radius: 0 0 9999px 9999px;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+  transition: height 0.08s ease-out;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* When fill is near 100%, top corners round into pill */
+.glass-slider-fill.full {
+  border-radius: 9999px;
+}
+
+.glass-slider-icon {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 3;
+  transition: color 0.15s ease;
+}
+
+/* Dynamic contrast: when icon is immersed in white fill */
+.glass-slider-icon.in-fill {
+  color: #000000 !important;
+}
+.glass-slider-icon.out-fill {
+  color: #FFFFFF !important;
+}
+
+/* ========================================================================= */
+/* SYMBOL WELLS & ACTIVE ACCENT CHIPS                                        */
+/* ========================================================================= */
+
+.glass-well {
+  background: var(--glass-well-bg);
+  border: 1px solid var(--glass-well-border);
+  border-radius: var(--glass-radius-well);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+.glass-well:hover {
+  background: var(--glass-well-bg-hover);
+}
+
+/* Active State Colors */
+.glass-active-blue {
+  background: var(--glass-accent-blue) !important;
+  color: #FFFFFF !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 0 20px rgba(0, 136, 255, 0.5), inset 0 1px 1.5px rgba(255, 255, 255, 0.6) !important;
+}
+
+.glass-active-green {
+  background: var(--glass-accent-green) !important;
+  color: #FFFFFF !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 0 20px rgba(52, 199, 89, 0.5), inset 0 1px 1.5px rgba(255, 255, 255, 0.6) !important;
+}
+
+.glass-active-orange {
+  background: var(--glass-accent-orange) !important;
+  color: #FFFFFF !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 0 20px rgba(255, 149, 0, 0.5), inset 0 1px 1.5px rgba(255, 255, 255, 0.6) !important;
+}
+
+.glass-active-white {
+  background: #FFFFFF !important;
+  color: #000000 !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.6), inset 0 1px 1.5px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* ========================================================================= */
+/* VIBRANT WALLPAPER BACKGROUND PRESETS                                      */
+/* ========================================================================= */
+
+.wall-mesh {
+  background-color: #040811;
+  position: relative;
+}
+.wall-mesh::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: 
+    radial-gradient(circle at 10% 15%, rgba(166, 208, 255, 0.85) 0%, transparent 45%),
+    radial-gradient(circle at 65% 10%, rgba(184, 82, 235, 0.85) 0%, transparent 55%),
+    radial-gradient(circle at 85% 65%, rgba(255, 166, 170, 0.80) 0%, transparent 50%),
+    radial-gradient(circle at 15% 75%, rgba(41, 117, 242, 0.70) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(117, 71, 235, 0.55) 0%, transparent 50%),
+    radial-gradient(circle at 45% 85%, rgba(245, 107, 133, 0.60) 0%, transparent 40%);
+  filter: blur(65px);
+  z-index: 0;
+}
+
+.wall-aurora {
+  background-color: #05141A;
+  position: relative;
+}
+.wall-aurora::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(48, 209, 88, 0.75) 0%, transparent 50%),
+    radial-gradient(circle at 80% 30%, rgba(10, 132, 255, 0.85) 0%, transparent 55%),
+    radial-gradient(circle at 50% 80%, rgba(191, 90, 242, 0.70) 0%, transparent 50%);
+  filter: blur(65px);
+  z-index: 0;
+}
+
+.wall-sunset {
+  background-color: #19050A;
+  position: relative;
+}
+.wall-sunset::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(255, 159, 10, 0.85) 0%, transparent 50%),
+    radial-gradient(circle at 80% 40%, rgba(255, 69, 58, 0.85) 0%, transparent 55%),
+    radial-gradient(circle at 50% 85%, rgba(175, 82, 222, 0.75) 0%, transparent 50%);
+  filter: blur(65px);
+  z-index: 0;
+}
+
+.wall-dark {
+  background-color: #09090C;
+  position: relative;
+}
+.wall-dark::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: 
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+  filter: blur(50px);
+  z-index: 0;
+}

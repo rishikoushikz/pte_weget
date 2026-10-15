@@ -1,0 +1,20 @@
+{
+  "color_mode": "dark",
+  "glass_effect": true,
+  "blur_radius": 10,
+  "blur_opacity": 0.5,
+  "widget_border": true,
+  "scale": 1,
+  "time_format": "12h",
+  "measurement_system": "metric",
+  "location": "Mumbai",
+  "slots": {
+    "A1": "CLKD_1x1_MIN",
+    "A2": "NETW_1x1_MIN",
+    "B1": "CLKA_2x1_WID",
+    "B2": "EMPTY",
+    "C1": "CLKD_2x1_WID",
+    "C2": "EMPTY",
+    "D1": "MEDI_2x1_WID"
+  }
+}

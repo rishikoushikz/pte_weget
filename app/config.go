@@ -1,0 +1,122 @@
+package main
+
+import (
+	"encoding/json"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"sync"
+)
+
+type Settings struct {
+	ColorMode         string            `json:"color_mode"`
+	GlassEffect       bool              `json:"glass_effect"`
+	BlurRadius        int               `json:"blur_radius"`
+	BlurOpacity       float64           `json:"blur_opacity"`
+	WidgetBorder      bool              `json:"widget_border"`
+	Scale             float64           `json:"scale"`
+	TimeFormat        string            `json:"time_format"`
+	MeasurementSystem string            `json:"measurement_system"`
+	Location          string            `json:"location"`
+	Slots             map[string]string `json:"slots"`
+}
+
+var settingsLock sync.RWMutex
+
+func getSettingsPath() string {
+	primary := filepath.Join(os.Getenv("HOME"), ".config/conky/macwidget/settings/settings.json")
+	if _, err := os.Stat(primary); err == nil {
+		return primary
+	}
+	if _, err := os.Stat("engine/settings/settings.json"); err == nil {
+		p, _ := filepath.Abs("engine/settings/settings.json")
+		return p
+	}
+	return primary
+}
+
+func DefaultSettings() Settings {
+	return Settings{
+		ColorMode:         "dark",
+		GlassEffect:       true,
+		BlurRadius:        30,
+		BlurOpacity:       0.60,
+		WidgetBorder:      true,
+		Scale:             1.0,
+		TimeFormat:        "24h",
+		MeasurementSystem: "metric",
+		Location:          "Mumbai",
+		Slots: map[string]string{
+			"A1": "CALN_2x1_WID",
+			"B1": "WEAT_1x1_MIN",
+			"B2": "RING_1x1_MIN",
+			"C1": "NETW_2x1_WID",
+			"D1": "MEDI_2x1_WID",
+		},
+	}
+}
+
+func LoadSettings() (Settings, error) {
+	settingsLock.RLock()
+	defer settingsLock.RUnlock()
+
+	s := DefaultSettings()
+	path := getSettingsPath()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return s, err
+	}
+
+	if err := json.Unmarshal(data, &s); err != nil {
+		return DefaultSettings(), err
+	}
+
+	// Graceful migration: if legacy color_mode was "glass", migrate to dark + glass_effect = true
+	if s.ColorMode == "glass" {
+		s.ColorMode = "dark"
+		s.GlassEffect = true
+	}
+
+	if s.BlurRadius <= 0 {
+		s.BlurRadius = 30
+	}
+	if s.BlurOpacity <= 0 {
+		s.BlurOpacity = 0.60
+	}
+
+	if s.Slots == nil {
+		s.Slots = DefaultSettings().Slots
+	}
+	return s, nil
+}
+
+func SaveSettings(s Settings) error {
+	settingsLock.Lock()
+	defer settingsLock.Unlock()
+
+	path := getSettingsPath()
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return err
+	}
+
+	data, err := json.MarshalIndent(s, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	tmpFile := path + ".tmp"
+	if err := os.WriteFile(tmpFile, data, 0644); err != nil {
+		return err
+	}
+
+	err = os.Rename(tmpFile, path)
+	if err == nil && s.GlassEffect {
+		go func() {
+			helper := findBlurHelper()
+			if helper != "" {
+				_ = exec.Command("python3", helper).Run()
+			}
+		}()
+	}
+	return err
+}

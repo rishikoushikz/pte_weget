@@ -1,0 +1,108 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build (used for manual runs, e.g. 0.1.1)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & publish packages
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: app/go.mod
+          cache: false
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgtk-3-dev libwebkit2gtk-4.1-dev pkg-config \
+            rpm squashfs-tools python3 \
+            flatpak flatpak-builder
+
+      - name: Cache appimagetool
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/weget/tools
+          key: appimagetool-continuous-x86_64
+
+      - name: Install appimagetool
+        run: |
+          mkdir -p ~/.cache/weget/tools
+          if [ ! -x ~/.cache/weget/tools/appimagetool ]; then
+            wget -q -O ~/.cache/weget/tools/appimagetool \
+              https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+            chmod +x ~/.cache/weget/tools/appimagetool
+          fi
+
+      - name: Install Flatpak runtime
+        run: |
+          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install -y --noninteractive flathub org.gnome.Platform//46 org.gnome.Sdk//46
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            VER="${GITHUB_REF_NAME#v}"
+          else
+            VER="${{ github.event.inputs.version }}"
+          fi
+          [ -n "$VER" ] || VER="0.0.0"
+          echo "value=$VER" >> "$GITHUB_OUTPUT"
+          echo "Building Weget $VER"
+
+      - name: Build packages
+        env:
+          WEGET_VERSION: ${{ steps.version.outputs.value }}
+          # appimagetool is an AppImage; runners lack FUSE, so extract-and-run.
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+        run: make packages
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: weget-packages-${{ steps.version.outputs.value }}
+          path: |
+            dist/*.deb
+            dist/*.rpm
+            dist/*.AppImage
+            dist/*.flatpak
+            dist/*.tar.gz
+            dist/*.spec
+            dist/org.weget.Weget.yml
+            dist/org.weget.Weget.metainfo.xml
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.deb
+            dist/*.rpm
+            dist/*.AppImage
+            dist/*.flatpak
+            dist/*.tar.gz
+            dist/*.spec
+            dist/org.weget.Weget.yml
+            dist/org.weget.Weget.metainfo.xml
+          generate_release_notes: true
+          fail_on_unmatched_files: false

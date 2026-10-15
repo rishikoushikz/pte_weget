@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Weget
+GenericName=Desktop Widget System
+Comment=Modern macOS-style interactive desktop widgets for Linux
+Exec=weget
+Icon=weget
+Terminal=false
+Type=Application
+Categories=Utility;DesktopSettings;GTK;
+StartupNotify=true
+Keywords=widget;desktop;system;clock;calendar;weather;conky;

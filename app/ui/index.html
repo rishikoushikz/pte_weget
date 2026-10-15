@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weget — Conky Ecosystem</title>
+  <script src="tailwind.min.js"></script>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="stylesheet" href="apple-liquid-glass.css">
+  <style>
+    body {
+      background-color: #131316;
+      color: #E1E1E6;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      user-select: none;
+    }
+    .sidebar-item {
+      transition: all 0.15s ease;
+    }
+    .sidebar-item.active {
+      background-color: #28282D;
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+    .slot-card {
+      background-color: #222226;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .slot-card:hover {
+      background-color: #28282E;
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+    .slot-card.selected {
+      border-color: #FF5A52;
+      box-shadow: 0 0 0 1px #FF5A52, 0 4px 20px rgba(255, 90, 82, 0.2);
+      background-color: #26262B;
+    }
+    .mod-card {
+      background-color: #1E1E22;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      transition: all 0.18s ease;
+      cursor: pointer;
+    }
+    .mod-card:hover {
+      background-color: #26262C;
+      border-color: #FF5A52;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    }
+    .btn-press:active {
+      transform: scale(0.96);
+    }
+    select {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-color: #242429 !important;
+      color: #FFFFFF !important;
+    }
+    option {
+      background-color: #242429 !important;
+      color: #FFFFFF !important;
+    }
+    /* Sleek Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #131316;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2E2E36;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3E3E48;
+    }
+
+    /* Modern Pill Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background-color: #2C2C32;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: 24px;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 2px;
+      bottom: 2px;
+      background-color: #FFFFFF;
+      border-radius: 50%;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    input:checked + .toggle-slider {
+      background-color: #FF5A52;
+      border-color: #FF5A52;
+    }
+    input:checked + .toggle-slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Sleek Range Sliders */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 9999px;
+      background: #2C2C32;
+      outline: none;
+      transition: background 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #FF5A52;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 0 4px rgba(255, 90, 82, 0.2);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #FF5A52;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+    input[type="range"]::-moz-range-thumb:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 0 4px rgba(255, 90, 82, 0.2);
+    }
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col antialiased">
+
+  <!-- Main Grid Frame -->
+  <div class="flex-1 flex overflow-hidden">
+    
+    <!-- Left Navigation Sidebar -->
+    <aside class="w-60 bg-[#16161A] border-r border-white/5 flex flex-col justify-between p-5 shrink-0">
+      <div class="space-y-6">
+        <!-- Logo / Title -->
+        <div class="px-2 flex items-center gap-3">
+          <img src="icon.png" alt="Weget Logo" class="w-9 h-9 rounded-xl shadow-md shrink-0">
+          <div>
+            <h1 class="text-xl font-black text-white tracking-tight leading-none">Weget</h1>
+            <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Conky Ecosystem</p>
+          </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="space-y-1">
+          <button onclick="navTo('dashboard')" id="nav-dashboard" class="sidebar-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-zinc-400 hover:text-white hover:bg-white/5">
+            <svg class="w-4 h-4 shrink-0 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="9" rx="1"></rect>
+              <rect x="14" y="3" width="7" height="5" rx="1"></rect>
+              <rect x="14" y="12" width="7" height="9" rx="1"></rect>
+              <rect x="3" y="16" width="7" height="5" rx="1"></rect>
+            </svg>
+            Dashboard
+          </button>
+          <button onclick="navTo('layout')" id="nav-layout" class="sidebar-item active w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-zinc-400 hover:text-white hover:bg-white/5">
+            <svg class="w-4 h-4 shrink-0 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/>
+            </svg>
+            Layout
+          </button>
+          <button onclick="navTo('colorscheme')" id="nav-colorscheme" class="sidebar-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-zinc-400 hover:text-white hover:bg-white/5">
+            <svg class="w-4 h-4 shrink-0 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+              <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+              <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+              <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+              <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"></path>
+            </svg>
+            Colorscheme
+          </button>
+          <button onclick="navTo('scale')" id="nav-scale" class="sidebar-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-zinc-400 hover:text-white hover:bg-white/5">
+            <svg class="w-4 h-4 shrink-0 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+            </svg>
+            Scale
+          </button>
+          <button onclick="navTo('preferences')" id="nav-preferences" class="sidebar-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-zinc-400 hover:text-white hover:bg-white/5">
+            <svg class="w-4 h-4 shrink-0 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="21" x2="4" y2="14"></line>
+              <line x1="4" y1="10" x2="4" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12" y2="3"></line>
+              <line x1="20" y1="21" x2="20" y2="16"></line>
+              <line x1="20" y1="12" x2="20" y2="3"></line>
+              <line x1="1" y1="14" x2="7" y2="14"></line>
+              <line x1="9" y1="8" x2="15" y2="8"></line>
+              <line x1="17" y1="16" x2="23" y2="16"></line>
+            </svg>
+            Preferences
+          </button>
+          <button onclick="navTo('location')" id="nav-location" class="sidebar-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-zinc-400 hover:text-white hover:bg-white/5">
+            <svg class="w-4 h-4 shrink-0 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            Location
+          </button>
+          <button onclick="navTo('about')" id="nav-about" class="sidebar-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-zinc-400 hover:text-white hover:bg-white/5">
+            <svg class="w-4 h-4 shrink-0 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            About
+          </button>
+        </nav>
+      </div>
+
+      <!-- Watermark Bottom -->
+      <div class="px-2 text-[11px] text-zinc-500 border-t border-white/5 pt-4 flex items-center justify-between">
+        <span class="font-semibold text-zinc-400">Weget Engine</span>
+        <span class="text-[10px] font-mono text-zinc-600">v0.1</span>
+      </div>
+    </aside>
+
+    <!-- Content Workspace -->
+    <main class="flex-1 bg-[#131316] p-8 overflow-y-auto relative">
+      
+      <!-- =================================================================== -->
+      <!-- PAGE: LAYOUT -->
+      <!-- =================================================================== -->
+      <section id="page-layout" class="space-y-6 max-w-xl mx-auto">
+        <div>
+          <h2 class="text-2xl font-black text-white tracking-tight">Layout</h2>
+          <p class="text-xs text-zinc-400 mt-1">Manage active slots and module arrangement.</p>
+        </div>
+
+        <!-- Dynamic Slot Matrix -->
+        <div id="slots-container" class="space-y-3.5">
+          <!-- Rendered dynamically by renderSlots() to reflect exact 1x1 vs 2x1 geometry -->
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-between pt-6 border-t border-white/5">
+          <button onclick="resetLayout()" class="btn-press px-6 py-2.5 rounded-xl bg-[#FF5A52] hover:bg-[#ff4238] text-white text-xs font-bold shadow-lg shadow-[#FF5A52]/20 transition flex items-center gap-2">
+            Reset Layout
+          </button>
+          <button onclick="openAddModuleModal(currentSelectedSlot)" class="btn-press px-6 py-2.5 rounded-xl bg-[#28282D] hover:bg-[#34343A] text-white text-xs font-bold border border-white/10 transition flex items-center gap-2">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Add Module
+          </button>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- PAGE: DASHBOARD -->
+      <!-- =================================================================== -->
+      <section id="page-dashboard" class="hidden space-y-6 max-w-xl mx-auto">
+        <div>
+          <h2 class="text-2xl font-black text-white tracking-tight">Dashboard</h2>
+          <p class="text-xs text-zinc-400 mt-1">Conky background service status and diagnostics.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-[#1A1A1E] border border-white/10 space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Service Status</span>
+            <span id="daemon-badge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span> Running
+            </span>
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-xs pt-3 border-t border-white/5">
+            <div>
+              <p class="text-zinc-500 font-medium">Process PID</p>
+              <p id="daemon-pid" class="font-mono font-bold text-white text-sm mt-0.5">--</p>
+            </div>
+            <div>
+              <p class="text-zinc-500 font-medium">Engine</p>
+              <p id="daemon-engine" class="font-bold text-emerald-400 text-sm mt-0.5">Inbuilt Cairo</p>
+            </div>
+            <div>
+              <p class="text-zinc-500 font-medium">System Uptime</p>
+              <p id="daemon-uptime" class="font-bold text-white text-sm mt-0.5">--</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button onclick="triggerDaemon('restart')" class="btn-press flex-1 py-3 rounded-xl bg-[#0A84FF] hover:bg-[#0071e3] text-white text-xs font-bold shadow-md transition">
+            Restart Widgets
+          </button>
+          <button onclick="triggerDaemon('start')" class="btn-press flex-1 py-3 rounded-xl bg-[#28282D] hover:bg-[#34343A] text-white text-xs font-bold border border-white/10 transition">
+            Start
+          </button>
+          <button onclick="triggerDaemon('stop')" class="btn-press flex-1 py-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 text-xs font-bold border border-red-500/25 transition">
+            Stop
+          </button>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- PAGE: COLORSCHEME -->
+      <!-- =================================================================== -->
+      <section id="page-colorscheme" class="hidden space-y-6 max-w-xl mx-auto">
+        <div>
+          <h2 class="text-2xl font-black text-white tracking-tight">Colorscheme</h2>
+          <p class="text-xs text-zinc-400 mt-1">Configure theme mode, borders, and accents.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-[#1A1A1E] border border-white/10 space-y-5">
+          <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Theme Mode</span>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <button onclick="setColorMode('dark')" id="theme-btn-dark" class="btn-press p-5 rounded-2xl bg-[#131316] border-2 border-[#FF5A52] text-left transition">
+              <svg class="w-5 h-5 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+              <p class="text-sm font-bold text-white mt-2.5">Dark Mode</p>
+              <p class="text-[11px] text-zinc-400 mt-0.5">Charcoal squircle surface (#16161A)</p>
+            </button>
+            <button onclick="setColorMode('light')" id="theme-btn-light" class="btn-press p-5 rounded-2xl bg-white border border-zinc-300 text-left transition">
+              <svg class="w-5 h-5 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+              <p class="text-sm font-bold text-zinc-900 mt-2.5">Light Mode</p>
+              <p class="text-[11px] text-zinc-600 mt-0.5">Crisp paper squircle surface (#FFFFFF)</p>
+            </button>
+          </div>
+
+          <!-- Background Blur Toggle -->
+          <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+            <div class="pr-4">
+              <p class="text-xs font-bold text-white">Background Blur</p>
+              <p class="text-[11px] text-zinc-400 mt-0.5">Frosted backdrop blur behind widget cards</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="chk-glass" onchange="toggleGlassEffect()">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <!-- Blur Control Options (Visible when enabled) -->
+          <div id="blur-controls" class="space-y-4 pt-4 border-t border-white/5 hidden">
+            <!-- Blur Intensity Slider -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs font-bold text-white">Blur Intensity</p>
+                  <p class="text-[11px] text-zinc-400">Gaussian blur spread (radius)</p>
+                </div>
+                <span id="label-blur-radius" class="text-xs font-mono font-bold text-[#FF5A52] px-2.5 py-0.5 bg-[#FF5A52]/10 rounded-md border border-[#FF5A52]/20">30px</span>
+              </div>
+              <input type="range" id="range-blur-radius" min="10" max="60" step="5" value="30" oninput="setBlurRadius(this.value)" class="w-full">
+              <div class="flex justify-between text-[10px] text-zinc-500 font-medium">
+                <span>Subtle (10px)</span>
+                <span>Balanced (30px)</span>
+                <span>Deep (60px)</span>
+              </div>
+            </div>
+
+            <!-- Surface Opacity Slider -->
+            <div class="space-y-2 pt-2 border-t border-white/5">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-xs font-bold text-white">Surface Opacity</p>
+                  <p class="text-[11px] text-zinc-400">Acrylic smoke tint density</p>
+                </div>
+                <span id="label-blur-opacity" class="text-xs font-mono font-bold text-[#FF5A52] px-2.5 py-0.5 bg-[#FF5A52]/10 rounded-md border border-[#FF5A52]/20">60%</span>
+              </div>
+              <input type="range" id="range-blur-opacity" min="30" max="90" step="5" value="60" oninput="setBlurOpacity(this.value)" class="w-full">
+              <div class="flex justify-between text-[10px] text-zinc-500 font-medium">
+                <span>Light (30%)</span>
+                <span>Balanced (60%)</span>
+                <span>Solid (90%)</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-white">1px Widget Border</p>
+              <p class="text-[11px] text-zinc-400">Subtle hairline boundary around cards</p>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="chk-border" onchange="toggleBorder()">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- PAGE: SCALE -->
+      <!-- =================================================================== -->
+      <section id="page-scale" class="hidden space-y-6 max-w-xl mx-auto">
+        <div>
+          <h2 class="text-2xl font-black text-white tracking-tight">Scale</h2>
+          <p class="text-xs text-zinc-400 mt-1">Display scaling multiplier for Retina / 4K screens.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-[#1A1A1E] border border-white/10 space-y-3">
+          <p class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Multiplier</p>
+          <div class="grid grid-cols-5 gap-2.5" id="scale-options">
+            <button onclick="setScale(0.8)" data-scale="0.8" class="scale-btn py-3 rounded-xl bg-[#242429] text-xs font-bold text-white hover:bg-white/10">80%</button>
+            <button onclick="setScale(1.0)" data-scale="1.0" class="scale-btn py-3 rounded-xl bg-[#242429] border border-[#FF5A52] text-xs font-bold text-white">100%</button>
+            <button onclick="setScale(1.25)" data-scale="1.25" class="scale-btn py-3 rounded-xl bg-[#242429] text-xs font-bold text-white hover:bg-white/10">125%</button>
+            <button onclick="setScale(1.5)" data-scale="1.5" class="scale-btn py-3 rounded-xl bg-[#242429] text-xs font-bold text-white hover:bg-white/10">150%</button>
+            <button onclick="setScale(2.0)" data-scale="2.0" class="scale-btn py-3 rounded-xl bg-[#242429] text-xs font-bold text-white hover:bg-white/10">200%</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- PAGE: PREFERENCES -->
+      <!-- =================================================================== -->
+      <section id="page-preferences" class="hidden space-y-6 max-w-xl mx-auto">
+        <div>
+          <h2 class="text-2xl font-black text-white tracking-tight">Preferences</h2>
+          <p class="text-xs text-zinc-400 mt-1">Clock format, units, and system metrics.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-[#1A1A1E] border border-white/10 space-y-5">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-white">Clock Format</p>
+              <p class="text-[11px] text-zinc-400">24-hour military vs 12-hour AM/PM</p>
+            </div>
+            <!-- Custom Sleek Dropdown (Clock Format) -->
+            <div class="relative" id="dropdown-time-container">
+              <button type="button" onclick="toggleDropdown('time')" id="btn-dropdown-time" class="h-9 min-w-[175px] px-3.5 bg-[#242429] hover:bg-[#2C2C32] text-xs text-white border border-white/10 rounded-xl flex items-center justify-between gap-3 cursor-pointer outline-none focus:border-[#FF5A52] transition">
+                <span id="label-time">24-Hour (13:45)</span>
+                <svg id="arrow-time" class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <div id="menu-dropdown-time" class="hidden absolute right-0 top-full mt-1.5 w-full min-w-[185px] bg-[#1E1E22] border border-white/10 rounded-xl shadow-2xl py-1 z-50">
+                <div onclick="selectTimeFormat('24h')" id="opt-time-24h" class="px-3 py-2 text-xs text-zinc-300 hover:text-white hover:bg-white/10 cursor-pointer flex items-center justify-between transition rounded-lg mx-1 my-0.5">
+                  <span>24-Hour (13:45)</span>
+                  <svg class="check-icon w-3.5 h-3.5 text-[#FF5A52] hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div onclick="selectTimeFormat('12h')" id="opt-time-12h" class="px-3 py-2 text-xs text-zinc-300 hover:text-white hover:bg-white/10 cursor-pointer flex items-center justify-between transition rounded-lg mx-1 my-0.5">
+                  <span>12-Hour (01:45 PM)</span>
+                  <svg class="check-icon w-3.5 h-3.5 text-[#FF5A52] hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+              </div>
+              <input type="hidden" id="sel-time" value="24h">
+            </div>
+          </div>
+
+          <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-white">Measurement System</p>
+              <p class="text-[11px] text-zinc-400">Celsius (°C, km/h) vs Fahrenheit (°F, mph)</p>
+            </div>
+            <!-- Custom Sleek Dropdown (Measurement System) -->
+            <div class="relative" id="dropdown-units-container">
+              <button type="button" onclick="toggleDropdown('units')" id="btn-dropdown-units" class="h-9 min-w-[175px] px-3.5 bg-[#242429] hover:bg-[#2C2C32] text-xs text-white border border-white/10 rounded-xl flex items-center justify-between gap-3 cursor-pointer outline-none focus:border-[#FF5A52] transition">
+                <span id="label-units">Metric (°C, km/h)</span>
+                <svg id="arrow-units" class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <div id="menu-dropdown-units" class="hidden absolute right-0 top-full mt-1.5 w-full min-w-[185px] bg-[#1E1E22] border border-white/10 rounded-xl shadow-2xl py-1 z-50">
+                <div onclick="selectMeasurementSystem('metric')" id="opt-units-metric" class="px-3 py-2 text-xs text-zinc-300 hover:text-white hover:bg-white/10 cursor-pointer flex items-center justify-between transition rounded-lg mx-1 my-0.5">
+                  <span>Metric (°C, km/h)</span>
+                  <svg class="check-icon w-3.5 h-3.5 text-[#FF5A52] hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div onclick="selectMeasurementSystem('imperial')" id="opt-units-imperial" class="px-3 py-2 text-xs text-zinc-300 hover:text-white hover:bg-white/10 cursor-pointer flex items-center justify-between transition rounded-lg mx-1 my-0.5">
+                  <span>Imperial (°F, mph)</span>
+                  <svg class="check-icon w-3.5 h-3.5 text-[#FF5A52] hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+              </div>
+              <input type="hidden" id="sel-units" value="metric">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- PAGE: LOCATION -->
+      <!-- =================================================================== -->
+      <section id="page-location" class="hidden space-y-6 max-w-xl mx-auto">
+        <div>
+          <h2 class="text-2xl font-black text-white tracking-tight">Location</h2>
+          <p class="text-xs text-zinc-400 mt-1">Configure weather forecast city.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl bg-[#1A1A1E] border border-white/10 space-y-4">
+          <div>
+            <label class="text-xs font-bold text-white">City / Location</label>
+            <input type="text" id="input-location" placeholder="e.g. Mumbai, London, Surabaya" class="w-full mt-2 px-4 py-2.5 rounded-xl bg-[#242429] border border-white/10 text-xs text-white outline-none focus:border-[#FF5A52]">
+          </div>
+          <button onclick="saveLocation()" class="btn-press px-5 py-2.5 rounded-xl bg-[#FF5A52] hover:bg-[#ff4238] text-white text-xs font-bold transition">
+            Save & Update Weather
+          </button>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- PAGE: ABOUT -->
+      <!-- =================================================================== -->
+      <section id="page-about" class="hidden space-y-6 max-w-xl mx-auto">
+        <div>
+          <h2 class="text-2xl font-black text-white tracking-tight">About</h2>
+          <p class="text-xs text-zinc-400 mt-1">Weget Desktop Widget Engine</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- =================================================================== -->
+  <!-- MODAL DIALOG: ADD MODULE (Clean Two-Step Picker) -->
+  <!-- =================================================================== -->
+  <div id="modal-add-module" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-[#1C1C20] border border-white/15 rounded-3xl w-full max-w-3xl max-h-[88vh] flex flex-col shadow-2xl overflow-hidden">
+      
+      <!-- Step 1 Header: Choose Module Family -->
+      <div id="modal-header-step1" class="p-6 pb-4 border-b border-white/5 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-black text-white tracking-tight">Add Module</h3>
+            <p class="text-xs text-zinc-400 mt-0.5">Select a module category for slot <span id="target-slot-badge" class="font-bold text-[#FF5A52]">B1</span>.</p>
+          </div>
+          <button onclick="selectModule('EMPTY')" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-red-500/10 text-xs font-bold text-zinc-400 hover:text-red-400 border border-white/5 transition flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+            Clear Slot
+          </button>
+        </div>
+
+        <!-- Search Bar with clean SVG icon -->
+        <div class="relative">
+          <input type="text" id="family-search" oninput="filterFamilies()" placeholder="Search modules..." class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#28282E] border border-white/10 focus:border-[#FF5A52] text-xs text-white placeholder-zinc-500 outline-none transition">
+          <span class="absolute left-3.5 top-3 text-xs text-zinc-500">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+        </div>
+      </div>
+
+      <!-- Step 2 Header: Choose Variant (hidden by default) -->
+      <div id="modal-header-step2" class="hidden p-6 pb-4 border-b border-white/5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <button onclick="goToStep1()" class="p-2 rounded-xl bg-[#28282E] hover:bg-[#34343A] text-zinc-300 hover:text-white transition" title="Back to Modules">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <div>
+              <div class="flex items-center gap-2">
+                <span id="step2-icon" class="text-sm"></span>
+                <h3 id="step2-title" class="text-lg font-black text-white tracking-tight">Module</h3>
+              </div>
+              <p class="text-xs text-zinc-400 mt-0.5">Select a format variant for slot <span id="target-slot-badge-step2" class="font-bold text-[#FF5A52]">B1</span>.</p>
+            </div>
+          </div>
+          <span id="step2-category" class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider px-2.5 py-1 rounded-lg bg-white/5 border border-white/5">Category</span>
+        </div>
+      </div>
+
+      <!-- Step 1 Content: 9 Module Families Grid (Clean 3-column layout) -->
+      <div id="view-families" class="p-6 overflow-y-auto grid grid-cols-3 gap-3.5">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Step 2 Content: 3 Variant Cards side-by-side (hidden by default) -->
+      <div id="view-variants" class="hidden p-6 overflow-y-auto grid grid-cols-3 gap-3.5">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 px-6 border-t border-white/5 bg-[#17171B] flex items-center justify-between">
+        <span class="text-xs text-zinc-500 font-medium" id="modal-footer-hint">Click any module family to view its 3 format variants.</span>
+        <button onclick="closeAddModuleModal()" class="btn-press px-6 py-2 rounded-xl bg-[#28282D] hover:bg-[#34343A] text-white text-xs font-bold transition">
+          Close
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-box" class="fixed bottom-6 right-6 z-50 pointer-events-none transition-all duration-300 opacity-0 translate-y-3">
+    <div id="toast-msg" class="bg-[#1C1C20] border border-white/15 px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold text-white flex items-center gap-2.5">
+      <svg class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      <span id="toast-text">Slot updated</span>
+    </div>
+  </div>
+
+  <script>
+    let currentSelectedSlot = "B1";
+    let state = {
+      color_mode: "dark",
+      widget_border: true,
+      scale: 1.0,
+      time_format: "24h",
+      measurement_system: "metric",
+      location: "Mumbai",
+      slots: {
+        A1: "TIME_2x1_A01",
+        B1: "WEAT_1x1_W01",
+        B2: "SYST_1x1_S01",
+        C1: "NETW_2x1_N01",
+        C2: "EMPTY",
+        D1: "MEDI_2x1_M01",
+        D2: "EMPTY"
+      }
+    };
+
+    const MODULE_CATALOG = [
+      {
+        id: "network",
+        name: "Network Monitor",
+        category: "Connectivity",
+        icon: `<svg class="w-4 h-4 text-[#FF5A52]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>`,
+        variants: [
+          { id: "NETW_1x1_MIN", name: "1x1 Minimal", title: "Network Pulse", size: "1x1", desc: "Mirrored bidirectional traffic waveform with live transfer rates" },
+          { id: "NETW_1x1_DET", name: "1x1 Detailed", title: "Dual Bandwidth Track", size: "1x1", desc: "Stacked upload & download trendlines with session totals" },
+          { id: "NETW_2x1_WID", name: "2x1 Wide", title: "Network Seismograph", size: "2x1", desc: "Panoramic seismograph with 4-line telemetry table" }
+        ]
+      },
+      {
+        id: "calendar",
+        name: "Calendar & Agenda",
+        category: "Schedule",
+        icon: `<svg class="w-4 h-4 text-[#FF5A52]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+        variants: [
+          { id: "CALN_1x1_MIN", name: "1x1 Minimal", title: "Monthly Matrix", size: "1x1", desc: "7-day calendar matrix with active day coral badge" },
+          { id: "CALN_1x1_DET", name: "1x1 Detailed", title: "Day & Agenda", size: "1x1", desc: "Bold date typography with weekday and event pill" },
+          { id: "CALN_2x1_WID", name: "2x1 Wide", title: "Panoramic Calendar", size: "2x1", desc: "Split calendar pairing big date with full matrix" }
+        ]
+      },
+      {
+        id: "analog_clock",
+        name: "Analog Clock",
+        category: "Timekeeping",
+        icon: `<svg class="w-4 h-4 text-[#FF9F0A]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+        variants: [
+          { id: "CLKA_1x1_MIN", name: "1x1 Minimal", title: "Classic Chrono", size: "1x1", desc: "12-hour circular watch face with sweeping orange hand" },
+          { id: "CLKA_1x1_DET", name: "1x1 Detailed", title: "Precision Squircle", size: "1x1", desc: "Edge-to-edge dial with 12/3/6/9 and border ticks" },
+          { id: "CLKA_2x1_WID", name: "2x1 Wide", title: "World Chronometer", size: "2x1", desc: "Quad timezone array (Local, Tokyo, London, LA)" }
+        ]
+      },
+      {
+        id: "digital_clock",
+        name: "Digital Clock",
+        category: "Timekeeping",
+        icon: `<svg class="w-4 h-4 text-[#0A84FF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="8" cy="12" r="1"/><circle cx="16" cy="12" r="1"/><line x1="12" y1="9" x2="12" y2="15"/></svg>`,
+        variants: [
+          { id: "CLKD_1x1_MIN", name: "1x1 Minimal", title: "Digital Glance", size: "1x1", desc: "Clean modern digital time with coral accent colon" },
+          { id: "CLKD_1x1_DET", name: "1x1 Detailed", title: "Chrono Telemetry", size: "1x1", desc: "Precision clock with seconds, weekday, and uptime" },
+          { id: "CLKD_2x1_WID", name: "2x1 Wide", title: "Horizon Digital Clock", size: "2x1", desc: "Panoramic digital time with UTC reference and week" }
+        ]
+      },
+      {
+        id: "storage",
+        name: "Disk Storage",
+        category: "Hardware",
+        icon: `<svg class="w-4 h-4 text-[#0A84FF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`,
+        variants: [
+          { id: "STOR_1x1_MIN", name: "1x1 Minimal", title: "Storage Dual Bar", size: "1x1", desc: "Dual capsule progress bars for Root and Home" },
+          { id: "STOR_1x1_DET", name: "1x1 Detailed", title: "Concentric Disk Rings", size: "1x1", desc: "Concentric circular rings for Root, Home, and USB" },
+          { id: "STOR_2x1_WID", name: "2x1 Wide", title: "Quad Drive Array", size: "2x1", desc: "4 discrete disk arc meters with capacity readouts" }
+        ]
+      },
+      {
+        id: "system_sensors",
+        name: "System Sensors",
+        category: "Diagnostics",
+        icon: `<svg class="w-4 h-4 text-[#30D158]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/></svg>`,
+        variants: [
+          { id: "RING_1x1_MIN", name: "1x1 Minimal", title: "Activity Quad Rings", size: "1x1", desc: "2x2 circular arc cluster with vector icons" },
+          { id: "RING_1x1_DET", name: "1x1 Detailed", title: "Telemetry Rings", size: "1x1", desc: "2x2 numerical sensor matrix with live percentages" },
+          { id: "RING_2x1_WID", name: "2x1 Wide", title: "Horizon Ring Cluster", size: "2x1", desc: "Linear 4-gauge hardware array with vector icons" }
+        ]
+      },
+      {
+        id: "weather",
+        name: "Weather Forecast",
+        category: "Climate",
+        icon: `<svg class="w-4 h-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>`,
+        variants: [
+          { id: "WEAT_1x1_MIN", name: "1x1 Minimal", title: "Weather Squircle", size: "1x1", desc: "High-visibility temperature with condition icon" },
+          { id: "WEAT_1x1_DET", name: "1x1 Detailed", title: "Meteorology Station", size: "1x1", desc: "Climate telemetry with humidity, wind, and feels-like" },
+          { id: "WEAT_2x1_WID", name: "2x1 Wide", title: "Forecast Panorama", size: "2x1", desc: "Live weather dashboard with 4-day mini forecast" }
+        ]
+      },
+      {
+        id: "daily_inspiration",
+        name: "Daily Inspiration",
+        category: "Lifestyle",
+        icon: `<svg class="w-4 h-4 text-[#FF5A52]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.75-2-2-2H4c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 3-2 5-2 6z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.75-2-2-2h-4c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 3-2 5-2 6z"/></svg>`,
+        variants: [
+          { id: "QUOT_1x1_MIN", name: "1x1 Minimal", title: "Inspiration Spark", size: "1x1", desc: "Compact daily wisdom card" },
+          { id: "QUOT_1x1_DET", name: "1x1 Detailed", title: "Philosophical Insight", size: "1x1", desc: "Curated quote with category & author" },
+          { id: "QUOT_2x1_WID", name: "2x1 Wide", title: "Wisdom Banner", size: "2x1", desc: "Panoramic quote with coral accent border" }
+        ]
+      },
+      {
+        id: "now_playing",
+        name: "Now Playing",
+        category: "Entertainment",
+        icon: `<svg class="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
+        variants: [
+          { id: "MEDI_1x1_MIN", name: "1x1 Minimal", title: "Media Compact", size: "1x1", desc: "Album artwork with title and play state" },
+          { id: "MEDI_1x1_DET", name: "1x1 Detailed", title: "Track Controller", size: "1x1", desc: "Scrubber bar and transport buttons" },
+          { id: "MEDI_2x1_WID", name: "2x1 Wide", title: "Studio Master Deck", size: "2x1", desc: "Full media center with audio waveform" }
+        ]
+      }
+    ];
+
+    // Aliases for backwards compatibility with existing state
+    const LEGACY_MAP = {
+      "TIME_2x1_A01": "CALN_2x1_WID", "TIME": "CALN_2x1_WID",
+      "WEAT_1x1_W01": "WEAT_1x1_MIN", "WEATHER": "WEAT_1x1_MIN",
+      "SYST_1x1_S01": "RING_1x1_MIN", "SYSTEM": "RING_1x1_MIN",
+      "SYST_2x1_S03": "RING_2x1_WID",
+      "NETW_2x1_N01": "NETW_2x1_WID", "NETWORK": "NETW_2x1_WID",
+      "MEDI_2x1_M01": "MEDI_2x1_WID", "MEDIA": "MEDI_2x1_WID",
+      "QUOT_2x1_Q01": "QUOT_2x1_WID", "QUOTE": "QUOT_2x1_WID"
+    };
+
+    function getModuleInfo(modId) {
+      if (!modId || modId === "EMPTY") {
+        return { isEmp: true, parentName: "Empty Slot", displayName: "Empty", is2x1: false };
+      }
+      const mappedId = LEGACY_MAP[modId] || modId;
+      for (const parent of MODULE_CATALOG) {
+        for (const v of parent.variants) {
+          if (v.id === mappedId) {
+            return {
+              isEmp: false,
+              parentId: parent.id,
+              parentName: parent.name,
+              category: parent.category,
+              parentMod: parent,
+              variant: v,
+              variantId: v.id,
+              variantTitle: v.title,
+              displayName: `${parent.name} — ${v.title}`,
+              is2x1: v.size === "2x1"
+            };
+          }
+        }
+      }
+      return { isEmp: false, parentName: modId, displayName: modId, is2x1: modId.includes("2x1") };
+    }
+
+    function is2x1(mod) {
+      if (!mod || mod === "EMPTY") return false;
+      return getModuleInfo(mod).is2x1;
+    }
+
+    function formatModuleName(m) {
+      if (!m || m === "EMPTY") return "Empty Slot";
+      const info = getModuleInfo(m);
+      return info.displayName || m;
+    }
+
+    // Dynamic Bento Slot Matrix Rendering
+    function renderSlots() {
+      const container = document.getElementById('slots-container');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const slots = state.slots || {};
+
+      const createCard = (slotId, modVal, fullWidth = false) => {
+        const isSelected = (slotId === currentSelectedSlot);
+        const info = getModuleInfo(modVal);
+        const isEmp = info.isEmp;
+
+        const card = document.createElement('div');
+        card.className = `slot-card p-5 ${fullWidth ? 'w-full' : ''} ${isSelected ? 'selected' : ''}`;
+        card.onclick = () => selectSlot(slotId);
+        card.ondblclick = () => openAddModuleModal(slotId);
+
+        let bodyHtml = '';
+        if (isEmp) {
+          bodyHtml = `
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">${slotId}</p>
+                <p class="text-sm font-bold text-zinc-500 mt-0.5">Empty Slot</p>
+              </div>
+              <button onclick="event.stopPropagation(); openAddModuleModal('${slotId}')" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-xs font-semibold border border-white/5 transition flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add Module
+              </button>
+            </div>
+          `;
+        } else {
+          bodyHtml = `
+            <div class="flex items-center justify-between">
+              <div class="min-w-0 pr-3">
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider px-2 py-0.5 rounded bg-white/5 border border-white/5">${slotId}</span>
+                  <span class="text-[10px] font-semibold text-zinc-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">${info.is2x1 ? '2x1 Wide' : '1x1'}</span>
+                  <span class="text-[10px] text-zinc-500 font-medium">${info.category || ''}</span>
+                </div>
+                <h4 class="text-sm font-black text-white mt-1.5 truncate">${info.parentName}</h4>
+                <p class="text-xs font-semibold text-[#FF5A52] mt-0.5 truncate">${info.variantTitle || ''}</p>
+              </div>
+
+              <!-- Clean Actions -->
+              <div class="flex items-center gap-1.5 opacity-80 shrink-0">
+                <button onclick="event.stopPropagation(); openAddModuleModal('${slotId}')" title="Change Module" class="p-2 rounded-xl hover:bg-white/10 text-zinc-400 hover:text-white transition flex items-center justify-center border border-white/5">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+                <button onclick="event.stopPropagation(); clearSlot('${slotId}')" title="Clear Slot" class="p-2 rounded-xl hover:bg-red-500/20 text-zinc-400 hover:text-red-400 transition flex items-center justify-center border border-white/5">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          `;
+        }
+
+        card.innerHTML = bodyHtml;
+        return card;
+      };
+
+      // Row A (Banner or 1x1 pair)
+      const modA1 = slots.A1 || "CALN_2x1_WID";
+      const modA2 = slots.A2 || "EMPTY";
+      if (is2x1(modA1)) {
+        container.appendChild(createCard('A1', modA1, true));
+      } else {
+        const rowA = document.createElement('div');
+        rowA.className = "grid grid-cols-2 gap-3.5";
+        rowA.appendChild(createCard('A1', modA1));
+        rowA.appendChild(createCard('A2', modA2));
+        container.appendChild(rowA);
+      }
+
+      // Row B
+      const modB1 = slots.B1 || "EMPTY";
+      const modB2 = slots.B2 || "EMPTY";
+      if (is2x1(modB1)) {
+        container.appendChild(createCard('B1', modB1, true));
+      } else {
+        const rowB = document.createElement('div');
+        rowB.className = "grid grid-cols-2 gap-3.5";
+        rowB.appendChild(createCard('B1', modB1));
+        rowB.appendChild(createCard('B2', modB2));
+        container.appendChild(rowB);
+      }
+
+      // Row C
+      const modC1 = slots.C1 || "EMPTY";
+      const modC2 = slots.C2 || "EMPTY";
+      if (is2x1(modC1)) {
+        container.appendChild(createCard('C1', modC1, true));
+      } else {
+        const rowC = document.createElement('div');
+        rowC.className = "grid grid-cols-2 gap-3.5";
+        rowC.appendChild(createCard('C1', modC1));
+        rowC.appendChild(createCard('C2', modC2));
+        container.appendChild(rowC);
+      }
+
+      // Row D
+      const modD1 = slots.D1 || "EMPTY";
+      const modD2 = slots.D2 || "EMPTY";
+      if (is2x1(modD1)) {
+        container.appendChild(createCard('D1', modD1, true));
+      } else {
+        const rowD = document.createElement('div');
+        rowD.className = "grid grid-cols-2 gap-3.5";
+        rowD.appendChild(createCard('D1', modD1));
+        rowD.appendChild(createCard('D2', modD2));
+        container.appendChild(rowD);
+      }
+    }
+
+    async function changeSlotVariant(slotId, newVariantId) {
+      if (!state.slots) state.slots = {};
+      if (is2x1(newVariantId)) {
+        if (slotId === 'A1') state.slots.A2 = "EMPTY";
+        else if (slotId === 'B1') state.slots.B2 = "EMPTY";
+        else if (slotId === 'C1') state.slots.C2 = "EMPTY";
+        else if (slotId === 'D1') state.slots.D2 = "EMPTY";
+      }
+      state.slots[slotId] = newVariantId;
+      renderSlots();
+      showToast(`Switched to ${formatModuleName(newVariantId)}`);
+      try {
+        await fetch('/api/slots', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slots: state.slots })
+        });
+      } catch (e) {}
+    }
+
+    function selectSlot(slotId) {
+      currentSelectedSlot = slotId;
+      renderSlots();
+    }
+
+    function showToast(msg) {
+      const box = document.getElementById('toast-box');
+      const text = document.getElementById('toast-text');
+      if (!box || !text) return;
+      text.innerText = msg;
+      box.classList.remove('opacity-0', 'translate-y-3');
+      box.classList.add('opacity-100', 'translate-y-0');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        box.classList.remove('opacity-100', 'translate-y-0');
+        box.classList.add('opacity-0', 'translate-y-3');
+      }, 2400);
+    }
+
+    async function loadData() {
+      try {
+        const res = await fetch('/api/settings');
+        if (res.ok) {
+          state = await res.json();
+          renderUI();
+        }
+      } catch (e) {
+        console.error("Error loading settings:", e);
+      }
+      loadStatus();
+    }
+
+    async function loadStatus() {
+      try {
+        const res = await fetch('/api/status');
+        if (res.ok) {
+          const st = await res.json();
+          document.getElementById('daemon-pid').innerText = st.pid || "Stopped";
+          document.getElementById('daemon-uptime').innerText = st.uptime || "--";
+          const engEl = document.getElementById('daemon-engine');
+          if (engEl) engEl.innerText = (st.engine === 'bundled') ? 'Inbuilt Cairo' : 'System';
+          const badge = document.getElementById('daemon-badge');
+          if (st.running) {
+            badge.className = "inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+            badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span> Running';
+          } else {
+            badge.className = "inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/20";
+            badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-400 mr-2"></span> Stopped';
+          }
+        }
+      } catch (e) {}
+    }
+
+    function renderUI() {
+      renderSlots();
+
+      // Preferences inputs
+      document.getElementById('chk-border').checked = !!state.widget_border;
+
+      const timeFmt = state.time_format || "24h";
+      const selTime = document.getElementById('sel-time');
+      if (selTime) selTime.value = timeFmt;
+      const labelTime = document.getElementById('label-time');
+      if (labelTime) labelTime.textContent = (timeFmt === '12h') ? '12-Hour (01:45 PM)' : '24-Hour (13:45)';
+      ['24h', '12h'].forEach(f => {
+        const el = document.getElementById(`opt-time-${f}`);
+        if (el) {
+          const check = el.querySelector('.check-icon');
+          if (f === timeFmt) {
+            el.classList.add('bg-white/[0.08]', 'text-white', 'font-semibold');
+            el.classList.remove('text-zinc-300');
+            if (check) check.classList.remove('hidden');
+          } else {
+            el.classList.remove('bg-white/[0.08]', 'text-white', 'font-semibold');
+            el.classList.add('text-zinc-300');
+            if (check) check.classList.add('hidden');
+          }
+        }
+      });
+
+      const unitsFmt = state.measurement_system || "metric";
+      const selUnits = document.getElementById('sel-units');
+      if (selUnits) selUnits.value = unitsFmt;
+      const labelUnits = document.getElementById('label-units');
+      if (labelUnits) labelUnits.textContent = (unitsFmt === 'imperial') ? 'Imperial (°F, mph)' : 'Metric (°C, km/h)';
+      ['metric', 'imperial'].forEach(u => {
+        const el = document.getElementById(`opt-units-${u}`);
+        if (el) {
+          const check = el.querySelector('.check-icon');
+          if (u === unitsFmt) {
+            el.classList.add('bg-white/[0.08]', 'text-white', 'font-semibold');
+            el.classList.remove('text-zinc-300');
+            if (check) check.classList.remove('hidden');
+          } else {
+            el.classList.remove('bg-white/[0.08]', 'text-white', 'font-semibold');
+            el.classList.add('text-zinc-300');
+            if (check) check.classList.add('hidden');
+          }
+        }
+      });
+
+      document.getElementById('input-location').value = state.location || "Mumbai";
+
+      // Background Blur toggle & controls
+      const chkGlass = document.getElementById('chk-glass');
+      if (chkGlass) chkGlass.checked = !!state.glass_effect;
+
+      const blurControls = document.getElementById('blur-controls');
+      if (blurControls) {
+        blurControls.classList.toggle('hidden', !state.glass_effect);
+      }
+
+      const radiusVal = state.blur_radius || 30;
+      const rangeRadius = document.getElementById('range-blur-radius');
+      if (rangeRadius) rangeRadius.value = radiusVal;
+      const labelRadius = document.getElementById('label-blur-radius');
+      if (labelRadius) labelRadius.textContent = `${radiusVal}px`;
+
+      const opacityVal = Math.round((state.blur_opacity !== undefined ? state.blur_opacity : 0.60) * 100);
+      const rangeOpacity = document.getElementById('range-blur-opacity');
+      if (rangeOpacity) rangeOpacity.value = opacityVal;
+      const labelOpacity = document.getElementById('label-blur-opacity');
+      if (labelOpacity) labelOpacity.textContent = `${opacityVal}%`;
+
+      // Theme Mode styling
+      const btnDark = document.getElementById('theme-btn-dark');
+      const btnLight = document.getElementById('theme-btn-light');
+
+      [btnDark, btnLight].forEach(b => {
+        if (b) b.classList.remove('border-2', 'border-[#FF5A52]');
+      });
+
+      if (state.color_mode === 'light' && btnLight) {
+        btnLight.classList.add('border-2', 'border-[#FF5A52]');
+      } else if (btnDark) {
+        btnDark.classList.add('border-2', 'border-[#FF5A52]');
+      }
+
+      document.body.classList.toggle('mode-glass', !!state.glass_effect);
+      document.body.classList.toggle('theme-light', state.color_mode === 'light');
+
+      // Scale buttons styling
+      const sc = state.scale || 1.0;
+      document.querySelectorAll('.scale-btn').forEach(b => {
+        if (parseFloat(b.dataset.scale) === sc) {
+          b.className = "scale-btn py-3 rounded-xl bg-[#242429] border border-[#FF5A52] text-xs font-bold text-white shadow-sm";
+        } else {
+          b.className = "scale-btn py-3 rounded-xl bg-[#242429] text-xs font-bold text-white hover:bg-white/10";
+        }
+      });
+    }
+
+    let blurDebounceTimer = null;
+
+    function setBlurRadius(val) {
+      val = parseInt(val, 10);
+      state.blur_radius = val;
+      const lbl = document.getElementById('label-blur-radius');
+      if (lbl) lbl.textContent = `${val}px`;
+      clearTimeout(blurDebounceTimer);
+      blurDebounceTimer = setTimeout(() => {
+        saveState();
+      }, 250);
+    }
+
+    function setBlurOpacity(val) {
+      val = parseInt(val, 10);
+      state.blur_opacity = val / 100.0;
+      const lbl = document.getElementById('label-blur-opacity');
+      if (lbl) lbl.textContent = `${val}%`;
+      clearTimeout(blurDebounceTimer);
+      blurDebounceTimer = setTimeout(() => {
+        saveState();
+      }, 200);
+    }
+
+    function toggleGlassEffect() {
+      const chk = document.getElementById('chk-glass');
+      state.glass_effect = chk ? chk.checked : false;
+      renderUI();
+      saveState();
+      showToast(state.glass_effect ? "Background blur enabled" : "Background blur disabled");
+    }
+
+    function navTo(page) {
+      document.querySelectorAll('nav .sidebar-item').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`nav-${page}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+      const activeSection = document.getElementById(`page-${page}`);
+      if (activeSection) activeSection.classList.remove('hidden');
+    }
+
+
+    let selectedVariants = {
+      network: "NETW_1x1_MIN",
+      calendar: "CALN_1x1_MIN",
+      analog_clock: "CLKA_1x1_MIN",
+      digital_clock: "CLKD_1x1_MIN",
+      storage: "STOR_1x1_MIN",
+      system_sensors: "RING_1x1_MIN",
+      weather: "WEAT_1x1_MIN",
+      daily_inspiration: "QUOT_1x1_MIN",
+      now_playing: "MEDI_1x1_MIN"
+    };
+    let currentCatalogFilter = 'all';
+
+    function getVariantPreviewSVG(vid) {
+      switch (vid) {
+        // --- 1. NETWORK MONITOR (Ref: media_1792052858600_fbb6f07f.png) ---
+        case 'NETW_1x1_MIN':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="netw1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#netw1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <text x="20" y="24" fill="#FFFFFF" font-size="11" font-weight="bold">Wi-Fi : Latisha_Ntwrk</text>
+            <rect x="16" y="32" width="208" height="74" rx="10" fill="#13141A" stroke="#22232C" stroke-width="1"/>
+            <text x="24" y="48" fill="#FFFFFF" font-size="9.5" font-weight="bold">22 KB/s</text>
+            <text x="24" y="96" fill="#FFFFFF" font-size="9.5" font-weight="bold">42 KB/s</text>
+            <line x1="20" y1="69" x2="220" y2="69" stroke="#FF5A52" stroke-width="1.2" stroke-opacity="0.8"/>
+            <path d="M 22 69 L 45 69 L 52 64 L 60 69 L 95 69 L 102 65 L 110 69 L 140 69 L 146 38 L 150 69 L 178 69 L 183 50 L 188 69 L 218 69" fill="none" stroke="#FF5A52" stroke-width="1.8" stroke-linejoin="round"/>
+            <path d="M 22 69 L 48 69 L 55 74 L 62 69 L 98 69 L 105 73 L 112 69 L 142 69 L 148 98 L 152 69 L 180 69 L 185 86 L 190 69 L 218 69" fill="none" stroke="#BF5AF2" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>`;
+        case 'NETW_1x1_DET':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="netw2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#netw2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <text x="20" y="24" fill="#FFFFFF" font-size="11" font-weight="bold">Wi-Fi : Latisha_Ntwrk</text>
+            <rect x="16" y="32" width="208" height="34" rx="8" fill="#13141A" stroke="#22232C" stroke-width="1"/>
+            <path d="M 20 62 L 60 62 L 72 38 L 80 58 L 88 44 L 100 62 L 150 62 L 160 42 L 170 62 L 220 62" fill="none" stroke="#FF5A52" stroke-width="1.6" stroke-linejoin="round"/>
+            <text x="24" y="44" fill="#FFFFFF" font-size="9" font-weight="bold">38 KB/s</text>
+            <text x="216" y="44" text-anchor="end" fill="#FFFFFF" font-size="9" font-weight="bold">14,7MiB</text>
+            <rect x="16" y="72" width="208" height="34" rx="8" fill="#13141A" stroke="#22232C" stroke-width="1"/>
+            <path d="M 20 102 L 70 102 L 80 82 L 90 98 L 105 88 L 115 102 L 160 102 L 170 78 L 180 102 L 220 102" fill="none" stroke="#30D158" stroke-width="1.6" stroke-linejoin="round"/>
+            <text x="24" y="84" fill="#FFFFFF" font-size="9" font-weight="bold">1,5 MB/s</text>
+            <text x="216" y="84" text-anchor="end" fill="#FFFFFF" font-size="9" font-weight="bold">45,1MiB</text>
+          </svg>`;
+        case 'NETW_2x1_WID':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="netw3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#netw3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <text x="20" y="24" fill="#FFFFFF" font-size="11" font-weight="bold">Wi-Fi : Latisha_Ntwrk</text>
+            <rect x="16" y="32" width="130" height="74" rx="10" fill="#13141A" stroke="#22232C" stroke-width="1"/>
+            <line x1="20" y1="69" x2="142" y2="69" stroke="#FF5A52" stroke-width="1.2" stroke-opacity="0.8"/>
+            <path d="M 22 69 L 45 69 L 50 63 L 56 69 L 75 69 L 80 44 L 84 69 L 100 69 L 105 52 L 110 69 L 142 69" fill="none" stroke="#FF5A52" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M 22 69 L 48 69 L 53 74 L 59 69 L 76 69 L 82 92 L 86 69 L 102 69 L 107 84 L 112 69 L 142 69" fill="none" stroke="#0A84FF" stroke-width="1.6" stroke-linejoin="round"/>
+            <text x="156" y="42" fill="#A1A1AA" font-size="8">Upload Speed</text>
+            <text x="156" y="53" fill="#FF5A52" font-size="9" font-weight="bold">0 KB/s</text>
+            <text x="156" y="65" fill="#A1A1AA" font-size="8">Total Upload</text>
+            <text x="156" y="76" fill="#FF5A52" font-size="9" font-weight="bold">6,91MiB</text>
+            <text x="156" y="88" fill="#A1A1AA" font-size="8">Download Speed</text>
+            <text x="156" y="99" fill="#0A84FF" font-size="9" font-weight="bold">0 KB/s</text>
+            <text x="156" y="108" fill="#0A84FF" font-size="7.8" font-weight="bold">Total Download 11,7MiB</text>
+          </svg>`;
+
+        // --- 2. CALENDAR & AGENDA (Ref: media_1792052873475_70ec0a1f.png) ---
+        case 'CALN_1x1_MIN':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="cal1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#cal1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <text x="26" y="25" fill="#FF5A52" font-size="12" font-weight="900" letter-spacing="1">JULY</text>
+            <g fill="#A1A1AA" font-size="8.5" font-weight="bold" text-anchor="middle">
+              <text x="36" y="40">M</text><text x="64" y="40">T</text><text x="92" y="40">W</text><text x="120" y="40">T</text><text x="148" y="40">F</text><text x="176" y="40">S</text><text x="204" y="40">S</text>
+            </g>
+            <g fill="#71717A" font-size="8.5" text-anchor="middle">
+              <text x="36" y="55" fill="#4B4D5A">29</text><text x="64" y="55" fill="#4B4D5A">30</text><text x="92" y="55" fill="#FFF">1</text><text x="120" y="55" fill="#FFF">2</text><text x="148" y="55" fill="#FFF">3</text><text x="176" y="55" fill="#FFF">4</text>
+              <circle cx="204" cy="52" r="7.5" fill="#FF5A52"/>
+              <text x="204" y="55" fill="#FFF" font-weight="bold">5</text>
+              <text x="36" y="70" fill="#FFF">6</text><text x="64" y="70" fill="#FFF">7</text><text x="92" y="70" fill="#FFF">8</text><text x="120" y="70" fill="#FFF">9</text><text x="148" y="70" fill="#FFF">10</text><text x="176" y="70" fill="#FFF">11</text><text x="204" y="70" fill="#FFF">12</text>
+              <text x="36" y="85" fill="#FFF">13</text><text x="64" y="85" fill="#FFF">14</text><text x="92" y="85" fill="#FFF">15</text><text x="120" y="85" fill="#FFF">16</text><text x="148" y="85" fill="#FFF">17</text><text x="176" y="85" fill="#FFF">18</text><text x="204" y="85" fill="#FFF">19</text>
+              <text x="36" y="100" fill="#FFF">20</text><text x="64" y="100" fill="#FFF">21</text><text x="92" y="100" fill="#FFF">22</text><text x="120" y="100" fill="#FFF">23</text><text x="148" y="100" fill="#FFF">24</text><text x="176" y="100" fill="#FFF">25</text><text x="204" y="100" fill="#FFF">26</text>
+            </g>
+          </svg>`;
+        case 'CALN_1x1_DET':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="cal2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#cal2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <text x="26" y="28" fill="#A1A1AA" font-size="10" font-weight="bold" letter-spacing="0.5">JULY</text>
+            <text x="26" y="44" fill="#FF5A52" font-size="12" font-weight="bold">Sunday</text>
+            <text x="24" y="86" fill="#FFFFFF" font-size="44" font-weight="900" letter-spacing="-1">05</text>
+            <rect x="122" y="60" width="3.5" height="26" rx="1.75" fill="#FF5A52"/>
+            <text x="132" y="71" fill="#FFFFFF" font-size="11" font-weight="bold">Caricom Day</text>
+            <text x="132" y="83" fill="#A1A1AA" font-size="9">Tomorrow</text>
+          </svg>`;
+        case 'CALN_2x1_WID':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="cal3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#cal3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <text x="22" y="26" fill="#A1A1AA" font-size="9" font-weight="bold">JULY</text>
+            <text x="22" y="40" fill="#FF5A52" font-size="11" font-weight="bold">Sunday</text>
+            <text x="20" y="78" fill="#FFFFFF" font-size="38" font-weight="900">05</text>
+            <rect x="22" y="88" width="3" height="18" rx="1.5" fill="#FF5A52"/>
+            <text x="30" y="96" fill="#FFFFFF" font-size="9" font-weight="bold">Caricom Day</text>
+            <text x="30" y="105" fill="#A1A1AA" font-size="7.5">Tomorrow</text>
+            <line x1="108" y1="18" x2="108" y2="102" stroke="#2B2D38" stroke-width="1"/>
+            <g fill="#A1A1AA" font-size="7.5" font-weight="bold" text-anchor="middle">
+              <text x="122" y="30">M</text><text x="138" y="30">T</text><text x="154" y="30">W</text><text x="170" y="30">T</text><text x="186" y="30">F</text><text x="202" y="30">S</text><text x="218" y="30">S</text>
+            </g>
+            <g fill="#71717A" font-size="7.5" text-anchor="middle">
+              <text x="122" y="44" fill="#4B4D5A">29</text><text x="138" y="44" fill="#4B4D5A">30</text><text x="154" y="44" fill="#FFF">1</text><text x="170" y="44" fill="#FFF">2</text><text x="186" y="44" fill="#FFF">3</text><text x="202" y="44" fill="#FFF">4</text>
+              <circle cx="218" cy="41.5" r="6" fill="#FF5A52"/>
+              <text x="218" y="44" fill="#FFF" font-weight="bold">5</text>
+              <text x="122" y="58" fill="#FFF">6</text><text x="138" y="58" fill="#FFF">7</text><text x="154" y="58" fill="#FFF">8</text><text x="170" y="58" fill="#FFF">9</text><text x="186" y="58" fill="#FFF">10</text><text x="202" y="58" fill="#FFF">11</text><text x="218" y="58" fill="#FFF">12</text>
+              <text x="122" y="72" fill="#FFF">13</text><text x="138" y="72" fill="#FFF">14</text><text x="154" y="72" fill="#FFF">15</text><text x="170" y="72" fill="#FFF">16</text><text x="186" y="72" fill="#FFF">17</text><text x="202" y="72" fill="#FFF">18</text><text x="218" y="72" fill="#FFF">19</text>
+              <text x="122" y="86" fill="#FFF">20</text><text x="138" y="86" fill="#FFF">21</text><text x="154" y="86" fill="#FFF">22</text><text x="170" y="86" fill="#FFF">23</text><text x="186" y="86" fill="#FFF">24</text><text x="202" y="86" fill="#FFF">25</text><text x="218" y="86" fill="#FFF">26</text>
+              <text x="122" y="100" fill="#FFF">27</text><text x="138" y="100" fill="#FFF">28</text><text x="154" y="100" fill="#FFF">29</text><text x="170" y="100" fill="#FFF">30</text><text x="186" y="100" fill="#FFF">31</text>
+            </g>
+          </svg>`;
+
+        // --- 3. ANALOG CLOCK (Ref: media_1792052879301_4eb1fe3f.png) ---
+        case 'CLKA_1x1_MIN':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="clka1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#clka1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <circle cx="120" cy="60" r="46" fill="#14151B" stroke="#2B2D38" stroke-width="1.5"/>
+            <g fill="#A1A1AA" font-size="7.5" font-weight="bold" text-anchor="middle">
+              <text x="120" y="24">12</text><text x="140" y="29">1</text><text x="153" y="43">2</text><text x="158" y="62">3</text>
+              <text x="153" y="81">4</text><text x="140" y="95">5</text><text x="120" y="100">6</text><text x="100" y="95">7</text>
+              <text x="87" y="81">8</text><text x="82" y="62">9</text><text x="87" y="43">10</text><text x="100" y="29">11</text>
+            </g>
+            <line x1="120" y1="60" x2="98" y2="44" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="120" y1="60" x2="148" y2="60" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+            <line x1="120" y1="60" x2="152" y2="62" stroke="#FF9F0A" stroke-width="1.2" stroke-linecap="round"/>
+            <circle cx="120" cy="60" r="3" fill="#FF9F0A"/>
+          </svg>`;
+        case 'CLKA_1x1_DET':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="clka2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#clka2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <rect x="66" y="8" width="108" height="104" rx="20" fill="#14151B" stroke="#2B2D38" stroke-width="1.5"/>
+            <g stroke="#FFF" stroke-width="1" opacity="0.4">
+              <line x1="120" y1="12" x2="120" y2="18"/>
+              <line x1="120" y1="108" x2="120" y2="102"/>
+              <line x1="70" y1="60" x2="76" y2="60"/>
+              <line x1="170" y1="60" x2="164" y2="60"/>
+            </g>
+            <text x="120" y="30" text-anchor="middle" fill="#FFFFFF" font-size="12" font-weight="900">12</text>
+            <text x="160" y="64" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="bold">3</text>
+            <text x="120" y="98" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="bold">6</text>
+            <text x="80" y="64" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="bold">9</text>
+            <line x1="120" y1="60" x2="102" y2="48" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="120" y1="60" x2="124" y2="28" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+            <line x1="120" y1="60" x2="140" y2="92" stroke="#FF9F0A" stroke-width="1.4" stroke-linecap="round"/>
+            <circle cx="120" cy="60" r="3" fill="#FF9F0A"/>
+          </svg>`;
+        case 'CLKA_2x1_WID':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="clka3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#clka3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <g transform="translate(36, 44)">
+              <circle r="22" fill="#14151B" stroke="#2B2D38" stroke-width="1.2"/>
+              <line x1="0" y1="0" x2="-8" y2="-8" stroke="#FFF" stroke-width="1.6" stroke-linecap="round"/>
+              <line x1="0" y1="0" x2="11" y2="0" stroke="#FFF" stroke-width="1.4" stroke-linecap="round"/>
+              <line x1="0" y1="0" x2="0" y2="14" stroke="#FF9F0A" stroke-width="1"/>
+              <circle r="1.8" fill="#FF9F0A"/>
+              <text y="36" text-anchor="middle" fill="#FFFFFF" font-size="9" font-weight="bold">Local</text>
+              <text y="48" text-anchor="middle" fill="#A1A1AA" font-size="7.5">Current</text>
+            </g>
+            <g transform="translate(92, 44)">
+              <circle r="22" fill="#14151B" stroke="#2B2D38" stroke-width="1.2"/>
+              <line x1="0" y1="0" x2="-9" y2="-5" stroke="#FFF" stroke-width="1.6" stroke-linecap="round"/>
+              <line x1="0" y1="0" x2="8" y2="9" stroke="#FFF" stroke-width="1.4" stroke-linecap="round"/>
+              <line x1="0" y1="0" x2="0" y2="14" stroke="#0A84FF" stroke-width="1"/>
+              <circle r="1.8" fill="#0A84FF"/>
+              <text y="36" text-anchor="middle" fill="#FFFFFF" font-size="9" font-weight="bold">Tokyo</text>
+              <text y="48" text-anchor="middle" fill="#A1A1AA" font-size="7.5">+2 HRS</text>
+            </g>
+            <g transform="translate(148, 44)">
+              <circle r="22" fill="#E6E6EA" stroke="#D1D1D8" stroke-width="1.2"/>
+              <line x1="0" y1="0" x2="-8" y2="7" stroke="#111" stroke-width="1.6" stroke-linecap="round"/>
+              <line x1="0" y1="0" x2="11" y2="-3" stroke="#111" stroke-width="1.4" stroke-linecap="round"/>
+              <line x1="0" y1="0" x2="-5" y2="-12" stroke="#30D158" stroke-width="1"/>
+              <circle r="1.8" fill="#30D158"/>
+              <text y="36" text-anchor="middle" fill="#FFFFFF" font-size="9" font-weight="bold">London</text>
+              <text y="48" text-anchor="middle" fill="#A1A1AA" font-size="7.5">-6 HRS</text>
+            </g>
+            <g transform="translate(204, 44)">
+              <circle r="22" fill="#E6E6EA" stroke="#D1D1D8" stroke-width="1.2"/>
+              <line x1="0" y1="0" x2="0" y2="-11" stroke="#111" stroke-width="1.6" stroke-linecap="round"/>
+              <line x1="0" y1="0" x2="9" y2="5" stroke="#111" stroke-width="1.4" stroke-linecap="round"/>
+              <line x1="0" y1="0" x2="1" y2="13" stroke="#BF5AF2" stroke-width="1"/>
+              <circle r="1.8" fill="#BF5AF2"/>
+              <text y="36" text-anchor="middle" fill="#FFFFFF" font-size="9" font-weight="bold">Los Angeles</text>
+              <text y="48" text-anchor="middle" fill="#A1A1AA" font-size="7.5">+10 HRS</text>
+            </g>
+          </svg>`;
+
+        // --- 4. DIGITAL CLOCK ---
+        case 'CLKD_1x1_MIN':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="clkd1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#clkd1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <text x="120" y="66" text-anchor="middle" fill="#FFFFFF" font-size="44" font-weight="900" letter-spacing="1">14<tspan fill="#FF5A52">:</tspan>28</text>
+            <text x="120" y="92" text-anchor="middle" fill="#71717A" font-size="11" font-weight="bold" letter-spacing="0.5">WEDNESDAY, OCT 15</text>
+          </svg>`;
+        case 'CLKD_1x1_DET':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="clkd2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#clkd2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <text x="120" y="52" text-anchor="middle" fill="#FFFFFF" font-size="36" font-weight="900">14:28<tspan fill="#FF5A52" font-size="20"> 45</tspan></text>
+            <text x="120" y="72" text-anchor="middle" fill="#A1A1AA" font-size="11" font-weight="bold">OCTOBER 15, 2026</text>
+            <rect x="68" y="82" width="104" height="20" rx="6" fill="#242B3A" stroke="#364058" stroke-width="1"/>
+            <circle cx="82" cy="92" r="3" fill="#30D158"/>
+            <text x="124" y="95.5" text-anchor="middle" fill="#30D158" font-size="9.5" font-weight="bold">UPTIME 4D 12H</text>
+          </svg>`;
+        case 'CLKD_2x1_WID':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="clkd3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#clkd3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <text x="22" y="58" fill="#FFFFFF" font-size="32" font-weight="900" letter-spacing="-0.5">14:28<tspan fill="#FF5A52" font-size="18"> 45</tspan></text>
+            <text x="22" y="80" fill="#FF5A52" font-size="10" font-weight="bold" letter-spacing="0.5">LOCAL TIME</text>
+            <text x="22" y="96" fill="#71717A" font-size="9" font-weight="bold">WEDNESDAY • 15 OCT 2026</text>
+            <line x1="152" y1="20" x2="152" y2="100" stroke="#2B2D38" stroke-width="1.5"/>
+            <text x="166" y="38" fill="#71717A" font-size="9" font-weight="bold" letter-spacing="0.5">UTC / GMT</text>
+            <text x="166" y="58" fill="#FFFFFF" font-size="14" font-weight="extrabold">08:58:45</text>
+            <rect x="166" y="74" width="56" height="18" rx="5" fill="#30D158" fill-opacity="0.15"/>
+            <text x="194" y="86.5" text-anchor="middle" fill="#30D158" font-size="8.5" font-weight="extrabold">WEEK 42</text>
+          </svg>`;
+
+        // --- 5. DISK STORAGE (Ref: media_1792052885543_32152b30.png) ---
+        case 'STOR_1x1_MIN':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="stor1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#stor1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <text x="22" y="28" fill="#FFFFFF" font-size="12" font-weight="bold">Storage +1</text>
+            <text x="22" y="48" fill="#A1A1AA" font-size="9.5">Root: 26% (25,9 GB)</text>
+            <rect x="22" y="55" width="196" height="14" rx="7" fill="#1C1E26"/>
+            <rect x="22" y="55" width="51" height="14" rx="7" fill="#0A84FF"/>
+            <text x="22" y="86" fill="#A1A1AA" font-size="9.5">Home: 26% (25,9 GB)</text>
+            <rect x="22" y="93" width="196" height="14" rx="7" fill="#1C1E26"/>
+            <rect x="22" y="93" width="51" height="14" rx="7" fill="#30D158"/>
+          </svg>`;
+        case 'STOR_1x1_DET':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="stor2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#stor2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <g transform="translate(68, 60)">
+              <circle r="36" fill="none" stroke="#1D202A" stroke-width="6"/>
+              <circle r="36" fill="none" stroke="#0A84FF" stroke-width="6" stroke-dasharray="60 230" stroke-linecap="round"/>
+              <circle r="25" fill="none" stroke="#1D202A" stroke-width="5"/>
+              <circle r="25" fill="none" stroke="#30D158" stroke-width="5" stroke-dasharray="45 160" stroke-linecap="round"/>
+              <circle r="14" fill="none" stroke="#1D202A" stroke-width="4"/>
+              <circle r="14" fill="none" stroke="#FF9F0A" stroke-width="4" stroke-dasharray="5 90" stroke-linecap="round"/>
+            </g>
+            <text x="136" y="50" fill="#0A84FF" font-size="11" font-weight="bold">R 26/109 GB</text>
+            <text x="136" y="70" fill="#30D158" font-size="11" font-weight="bold">H 26/109 GB</text>
+            <text x="136" y="90" fill="#FF9F0A" font-size="11" font-weight="bold">U 0,0/15 GB</text>
+          </svg>`;
+        case 'STOR_2x1_WID':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="stor3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#stor3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <g transform="translate(36, 44)">
+              <circle r="22" fill="#161820" stroke="#222530" stroke-width="4"/>
+              <circle r="22" fill="none" stroke="#0A84FF" stroke-width="4" stroke-dasharray="36 140" stroke-linecap="round"/>
+              <rect x="-6" y="-5" width="12" height="10" rx="2" fill="none" stroke="#FFF" stroke-width="1.2"/>
+              <circle cx="-1" cy="0" r="2.5" fill="none" stroke="#FFF" stroke-width="1"/>
+              <circle cx="3" cy="2.5" r="0.8" fill="#FFF"/>
+              <text y="38" text-anchor="middle" fill="#FFFFFF" font-size="10.5" font-weight="bold">26%</text>
+              <text y="50" text-anchor="middle" fill="#A1A1AA" font-size="8">109G</text>
+            </g>
+            <g transform="translate(92, 44)">
+              <circle r="22" fill="#161820" stroke="#222530" stroke-width="4"/>
+              <circle r="22" fill="none" stroke="#30D158" stroke-width="4" stroke-dasharray="36 140" stroke-linecap="round"/>
+              <polygon points="0,-6 7,0 4,0 4,6 -4,6 -4,0 -7,0" fill="#FFF"/>
+              <text y="38" text-anchor="middle" fill="#FFFFFF" font-size="10.5" font-weight="bold">26%</text>
+              <text y="50" text-anchor="middle" fill="#A1A1AA" font-size="8">109G</text>
+            </g>
+            <g transform="translate(148, 44)">
+              <circle r="22" fill="#161820" stroke="#222530" stroke-width="4"/>
+              <circle r="22" fill="none" stroke="#BF5AF2" stroke-width="4" stroke-dasharray="5 140" stroke-linecap="round"/>
+              <rect x="-4" y="-5" width="8" height="10" rx="1.5" fill="none" stroke="#FFF" stroke-width="1.2"/>
+              <rect x="-2" y="-7" width="4" height="2" fill="#FFF"/>
+              <text y="38" text-anchor="middle" fill="#FFFFFF" font-size="10.5" font-weight="bold">1%</text>
+              <text y="50" text-anchor="middle" fill="#A1A1AA" font-size="8">15G</text>
+            </g>
+            <g transform="translate(204, 44)">
+              <circle r="22" fill="#161820" stroke="#222530" stroke-width="4"/>
+              <circle cx="0" cy="0" r="6" fill="none" stroke="#555" stroke-width="1.2"/>
+              <line x1="-4" y1="4" x2="4" y2="-4" stroke="#555" stroke-width="1.2"/>
+              <text y="38" text-anchor="middle" fill="#A1A1AA" font-size="10.5" font-weight="bold">--</text>
+              <text y="50" text-anchor="middle" fill="#71717A" font-size="8">--</text>
+            </g>
+          </svg>`;
+
+        // --- 6. SYSTEM SENSORS (Ref: media_1792052899435_a5862063.png) ---
+        case 'RING_1x1_MIN':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="ring1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#ring1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <g transform="translate(70, 38)">
+              <circle r="18" fill="#161820" stroke="#222530" stroke-width="4"/>
+              <circle r="18" fill="none" stroke="#FF5A52" stroke-width="4" stroke-dasharray="10 115" stroke-linecap="round"/>
+              <rect x="-4" y="-4" width="8" height="8" rx="1" fill="none" stroke="#FFF" stroke-width="1.2"/>
+              <circle cx="0" cy="0" r="1.5" fill="#FFF"/>
+            </g>
+            <g transform="translate(170, 38)">
+              <circle r="18" fill="#161820" stroke="#222530" stroke-width="4"/>
+              <circle r="18" fill="none" stroke="#30D158" stroke-width="4" stroke-dasharray="70 115" stroke-linecap="round"/>
+              <rect x="-6" y="-3.5" width="12" height="7" rx="1" fill="none" stroke="#FFF" stroke-width="1.2"/>
+              <line x1="-3" y1="-1" x2="-3" y2="1" stroke="#FFF" stroke-width="1"/>
+              <line x1="1" y1="-1" x2="1" y2="1" stroke="#FFF" stroke-width="1"/>
+            </g>
+            <g transform="translate(70, 84)">
+              <circle r="18" fill="#161820" stroke="#222530" stroke-width="4"/>
+              <circle r="18" fill="none" stroke="#0A84FF" stroke-width="4" stroke-dasharray="98 115" stroke-linecap="round"/>
+              <rect x="-5" y="-3" width="9" height="6" rx="1.5" fill="none" stroke="#FFF" stroke-width="1.2"/>
+              <rect x="4" y="-1.5" width="1.5" height="3" rx="0.5" fill="#FFF"/>
+              <rect x="-3.5" y="-1.8" width="5" height="3.6" fill="#FFF"/>
+            </g>
+            <g transform="translate(170, 84)">
+              <circle r="18" fill="#161820" stroke="#222530" stroke-width="4"/>
+              <circle r="18" fill="none" stroke="#FF9F0A" stroke-width="4" stroke-dasharray="60 115" stroke-linecap="round"/>
+              <circle cx="0" cy="2.5" r="2.5" fill="#FFF"/>
+              <rect x="-1" y="-5.5" width="2" height="6" rx="1" fill="#FFF"/>
+            </g>
+          </svg>`;
+        case 'RING_1x1_DET':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="ring2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#ring2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <g transform="translate(70, 38)">
+              <circle r="18" fill="#161820" stroke="#222530" stroke-width="4"/>
+              <circle r="18" fill="none" stroke="#FF5A52" stroke-width="4" stroke-dasharray="10 115" stroke-linecap="round"/>
+              <text y="0" text-anchor="middle" fill="#FFF" font-size="11" font-weight="900">4</text>
+              <text y="9" text-anchor="middle" fill="#A1A1AA" font-size="7" font-weight="bold">CPU</text>
+            </g>
+            <g transform="translate(170, 38)">
+              <circle r="18" fill="#161820" stroke="#222530" stroke-width="4"/>
+              <circle r="18" fill="none" stroke="#30D158" stroke-width="4" stroke-dasharray="70 115" stroke-linecap="round"/>
+              <text y="0" text-anchor="middle" fill="#FFF" font-size="11" font-weight="900">60</text>
+              <text y="9" text-anchor="middle" fill="#A1A1AA" font-size="7" font-weight="bold">RAM</text>
+            </g>
+            <g transform="translate(70, 84)">
+              <circle r="18" fill="#161820" stroke="#222530" stroke-width="4"/>
+              <circle r="18" fill="none" stroke="#0A84FF" stroke-width="4" stroke-dasharray="98 115" stroke-linecap="round"/>
+              <text y="0" text-anchor="middle" fill="#FFF" font-size="11" font-weight="900">89</text>
+              <text y="9" text-anchor="middle" fill="#A1A1AA" font-size="7" font-weight="bold">BAT</text>
+            </g>
+            <g transform="translate(170, 84)">
+              <circle r="18" fill="#161820" stroke="#222530" stroke-width="4"/>
+              <circle r="18" fill="none" stroke="#FF9F0A" stroke-width="4" stroke-dasharray="60 115" stroke-linecap="round"/>
+              <text y="0" text-anchor="middle" fill="#FFF" font-size="11" font-weight="900">52°</text>
+              <text y="9" text-anchor="middle" fill="#A1A1AA" font-size="7" font-weight="bold">TEMP</text>
+            </g>
+          </svg>`;
+        case 'RING_2x1_WID':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="ring3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#ring3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <g transform="translate(36, 44)">
+              <circle r="22" fill="#161820" stroke="#222530" stroke-width="4"/>
+              <circle r="22" fill="none" stroke="#FF5A52" stroke-width="4" stroke-dasharray="10 140" stroke-linecap="round"/>
+              <rect x="-5" y="-5" width="10" height="10" rx="1.5" fill="none" stroke="#FFF" stroke-width="1.2"/>
+              <circle cx="0" cy="0" r="2" fill="#FFF"/>
+              <text y="40" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="bold">4%</text>
+            </g>
+            <g transform="translate(92, 44)">
+              <circle r="22" fill="#161820" stroke="#222530" stroke-width="4"/>
+              <circle r="22" fill="none" stroke="#30D158" stroke-width="4" stroke-dasharray="84 140" stroke-linecap="round"/>
+              <rect x="-7" y="-4" width="14" height="8" rx="1.5" fill="none" stroke="#FFF" stroke-width="1.2"/>
+              <line x1="-3" y1="-1" x2="-3" y2="1" stroke="#FFF" stroke-width="1"/>
+              <line x1="2" y1="-1" x2="2" y2="1" stroke="#FFF" stroke-width="1"/>
+              <text y="40" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="bold">60%</text>
+            </g>
+            <g transform="translate(148, 44)">
+              <circle r="22" fill="#161820" stroke="#222530" stroke-width="4"/>
+              <circle r="22" fill="none" stroke="#0A84FF" stroke-width="4" stroke-dasharray="124 140" stroke-linecap="round"/>
+              <rect x="-6" y="-3.5" width="10" height="7" rx="1.5" fill="none" stroke="#FFF" stroke-width="1.2"/>
+              <rect x="4.5" y="-1.8" width="1.8" height="3.6" rx="0.5" fill="#FFF"/>
+              <rect x="-4.5" y="-2" width="6" height="4" fill="#FFF"/>
+              <text y="40" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="bold">89%</text>
+            </g>
+            <g transform="translate(204, 44)">
+              <circle r="22" fill="#161820" stroke="#222530" stroke-width="4"/>
+              <circle r="22" fill="none" stroke="#FF9F0A" stroke-width="4" stroke-dasharray="72 140" stroke-linecap="round"/>
+              <circle cx="0" cy="3" r="3" fill="#FFF"/>
+              <rect x="-1.2" y="-6.5" width="2.4" height="7" rx="1.2" fill="#FFF"/>
+              <text y="40" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="bold">49°C</text>
+            </g>
+          </svg>`;
+
+        // --- 7. WEATHER FORECAST ---
+        case 'WEAT_1x1_MIN':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="weat1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#weat1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <circle cx="56" cy="60" r="22" fill="#FF9F0A" fill-opacity="0.2"/>
+            <circle cx="56" cy="60" r="14" fill="#FF9F0A"/>
+            <text x="104" y="58" fill="#FFFFFF" font-size="34" font-weight="900">22°</text>
+            <text x="104" y="78" fill="#FF9F0A" font-size="12" font-weight="bold">Clear Sky</text>
+            <text x="104" y="94" fill="#71717A" font-size="10" font-weight="bold">Goa</text>
+          </svg>`;
+        case 'WEAT_1x1_DET':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="weat2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#weat2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <text x="24" y="32" fill="#FFFFFF" font-size="13" font-weight="bold">Panaji, Goa</text>
+            <text x="24" y="66" fill="#FFFFFF" font-size="32" font-weight="900">22°<tspan fill="#A1A1AA" font-size="12" font-weight="normal"> H:26° L:19°</tspan></text>
+            <text x="24" y="82" fill="#FF9F0A" font-size="11" font-weight="bold">Partly Cloudy</text>
+            <rect x="24" y="90" width="88" height="18" rx="5" fill="#222532"/>
+            <text x="68" y="102" text-anchor="middle" fill="#A1A1AA" font-size="8.5">💧 64% Humidity</text>
+            <rect x="120" y="90" width="94" height="18" rx="5" fill="#222532"/>
+            <text x="167" y="102" text-anchor="middle" fill="#A1A1AA" font-size="8.5">💨 12 km/h Wind</text>
+          </svg>`;
+        case 'WEAT_2x1_WID':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="weat3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#weat3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <circle cx="38" cy="50" r="14" fill="#FF9F0A"/>
+            <text x="62" y="48" fill="#FFFFFF" font-size="24" font-weight="900">22°</text>
+            <text x="22" y="76" fill="#FFFFFF" font-size="11" font-weight="bold">Goa</text>
+            <text x="22" y="90" fill="#FF9F0A" font-size="9.5" font-weight="bold">Clear Sky</text>
+            <line x1="110" y1="20" x2="110" y2="100" stroke="#2B2D38" stroke-width="1.2"/>
+            <g transform="translate(132, 54)">
+              <text y="-20" text-anchor="middle" fill="#A1A1AA" font-size="8.5" font-weight="bold">TODAY</text>
+              <circle r="7" fill="#FF9F0A"/>
+              <text y="24" text-anchor="middle" fill="#FFF" font-size="9.5" font-weight="bold">24°</text>
+            </g>
+            <g transform="translate(172, 54)">
+              <text y="-20" text-anchor="middle" fill="#A1A1AA" font-size="8.5" font-weight="bold">THU</text>
+              <circle r="7" fill="#FF9F0A"/>
+              <text y="24" text-anchor="middle" fill="#FFF" font-size="9.5" font-weight="bold">26°</text>
+            </g>
+            <g transform="translate(212, 54)">
+              <text y="-20" text-anchor="middle" fill="#A1A1AA" font-size="8.5" font-weight="bold">FRI</text>
+              <circle r="7" fill="#30D158"/>
+              <text y="24" text-anchor="middle" fill="#FFF" font-size="9.5" font-weight="bold">23°</text>
+            </g>
+          </svg>`;
+
+        // --- 8. DAILY INSPIRATION ---
+        case 'QUOT_1x1_MIN':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="quot1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#quot1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <text x="24" y="44" fill="#FF5A52" font-size="36" font-weight="900" font-family="Georgia, serif">“</text>
+            <text x="48" y="36" fill="#FFFFFF" font-size="11" font-style="italic">Act as if what you do</text>
+            <text x="24" y="56" fill="#FFFFFF" font-size="11" font-style="italic">makes a difference.</text>
+            <text x="216" y="88" text-anchor="end" fill="#FF5A52" font-size="9.5" font-weight="bold">— William James</text>
+          </svg>`;
+        case 'QUOT_1x1_DET':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="quot2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#quot2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <rect x="22" y="18" width="68" height="18" rx="5" fill="#FF5A52" fill-opacity="0.2"/>
+            <text x="56" y="30.5" text-anchor="middle" fill="#FF5A52" font-size="8.5" font-weight="extrabold">STOICISM</text>
+            <text x="22" y="56" fill="#FFFFFF" font-size="11" font-style="italic">“Waste no more time arguing</text>
+            <text x="22" y="74" fill="#FFFFFF" font-size="11" font-style="italic">about what a good man is.”</text>
+            <text x="218" y="98" text-anchor="end" fill="#A1A1AA" font-size="9" font-weight="bold">— Marcus Aurelius</text>
+          </svg>`;
+        case 'QUOT_2x1_WID':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="quot3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#quot3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <rect x="22" y="24" width="4" height="68" rx="2" fill="#FF5A52"/>
+            <text x="36" y="48" fill="#FFFFFF" font-size="12" font-style="italic">“He who has a why to live can bear</text>
+            <text x="36" y="68" fill="#FFFFFF" font-size="12" font-style="italic">almost any how.”</text>
+            <text x="216" y="94" text-anchor="end" fill="#FF5A52" font-size="10" font-weight="bold">— Friedrich Nietzsche</text>
+          </svg>`;
+
+        // --- 9. NOW PLAYING ---
+        case 'MEDI_1x1_MIN':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="medi1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+              <linearGradient id="art_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#BF5AF2"/>
+                <stop offset="100%" stop-color="#5E5CE6"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#medi1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <rect x="24" y="26" width="68" height="68" rx="14" fill="url(#art_bg)"/>
+            <polygon points="54,50 54,70 70,60" fill="#FFFFFF"/>
+            <text x="106" y="52" fill="#FFFFFF" font-size="14" font-weight="900">Starboy</text>
+            <text x="106" y="70" fill="#A1A1AA" font-size="11" font-weight="bold">The Weeknd</text>
+            <text x="106" y="86" fill="#BF5AF2" font-size="9" font-weight="extrabold">PLAYING • 02:45</text>
+          </svg>`;
+        case 'MEDI_1x1_DET':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="medi2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#medi2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <text x="24" y="32" fill="#FFFFFF" font-size="13" font-weight="900">Blinding Lights</text>
+            <text x="24" y="48" fill="#A1A1AA" font-size="10">The Weeknd — After Hours</text>
+            <rect x="24" y="62" width="192" height="5" rx="2.5" fill="#222530"/>
+            <rect x="24" y="62" width="118" height="5" rx="2.5" fill="#BF5AF2"/>
+            <circle cx="142" cy="64.5" r="5" fill="#FFFFFF"/>
+            <g fill="#FFF" transform="translate(120, 92)">
+              <polygon points="-36,-6 -36,6 -24,0"/>
+              <circle cx="0" cy="0" r="10" fill="#BF5AF2"/>
+              <rect x="-3,-4" width="2" height="8" fill="#FFF"/>
+              <rect x="1,-4" width="2" height="8" fill="#FFF"/>
+              <polygon points="24,-6 24,6 36,0"/>
+            </g>
+          </svg>`;
+        case 'MEDI_2x1_WID':
+          return `<svg viewBox="0 0 240 120" class="w-full h-full">
+            <defs>
+              <linearGradient id="medi3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#1B1C22"/>
+                <stop offset="100%" stop-color="#111216"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#medi3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
+            <circle cx="48" cy="60" r="34" fill="#14151B" stroke="#2B2D38" stroke-width="2"/>
+            <circle cx="48" cy="60" r="26" fill="none" stroke="#222530" stroke-width="1"/>
+            <circle cx="48" cy="60" r="18" fill="none" stroke="#222530" stroke-width="1"/>
+            <circle cx="48" cy="60" r="12" fill="#BF5AF2"/>
+            <circle cx="48" cy="60" r="3.5" fill="#14151B"/>
+            <text x="96" y="38" fill="#FFFFFF" font-size="13" font-weight="900">Midnight City</text>
+            <text x="96" y="54" fill="#A1A1AA" font-size="10">M83 • Hurry Up, We're Dreaming</text>
+            <rect x="96" y="66" width="124" height="4.5" rx="2.25" fill="#222530"/>
+            <rect x="96" y="66" width="76" height="4.5" rx="2.25" fill="#BF5AF2"/>
+            <g fill="#A1A1AA" transform="translate(160, 92)">
+              <polygon points="-24,-5 -24,5 -14,0"/>
+              <circle cx="0" cy="0" r="9" fill="#BF5AF2"/>
+              <polygon points="-2,-3 -2,3 4,0" fill="#FFF"/>
+              <polygon points="14,-5 14,5 24,0"/>
+            </g>
+          </svg>`;
+
+        default:
+          return `<svg viewBox="0 0 240 120" class="w-full h-full flex items-center justify-center">
+            <rect x="2" y="2" width="236" height="116" rx="18" fill="#18181E" stroke="#333" stroke-dasharray="4 4"/>
+            <text x="120" y="64" text-anchor="middle" fill="#71717A" font-size="12" font-weight="bold">${vid}</text>
+          </svg>`;
+      }
+    }
+
+    function renderFamilies() {
+      const container = document.getElementById('view-families');
+      if (!container) return;
+      container.innerHTML = '';
+
+      MODULE_CATALOG.forEach(parent => {
+        const card = document.createElement('div');
+        card.className = "family-card p-4 rounded-2xl bg-gradient-to-b from-[#202026] to-[#17171C] hover:from-[#262630] hover:to-[#1C1C22] border border-white/10 hover:border-[#FF5A52]/60 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl cursor-pointer flex flex-col justify-between h-36 group";
+        card.onclick = () => openFamilyVariants(parent.id);
+        card.innerHTML = `
+          <div class="flex items-start justify-between">
+            <div class="p-2.5 rounded-xl bg-white/5 group-hover:bg-[#FF5A52]/10 text-[#FF5A52] transition">
+              ${parent.icon}
+            </div>
+            <span class="text-[9px] font-bold text-zinc-400 uppercase tracking-wider px-2 py-0.5 rounded bg-white/5 border border-white/5">${parent.category}</span>
+          </div>
+          <div class="mt-2">
+            <p class="text-sm font-black text-white group-hover:text-[#FF5A52] transition leading-tight">${parent.name}</p>
+            <p class="text-[10px] text-zinc-400 mt-1 font-medium flex items-center gap-1"><span>3 format variants</span> <span class="text-zinc-600">•</span> <span class="text-[#FF5A52]">1x1 / 2x1</span></p>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function filterFamilies() {
+      const q = (document.getElementById('family-search') ? document.getElementById('family-search').value : '').toLowerCase().trim();
+      document.querySelectorAll('#view-families .family-card').forEach(c => {
+        const txt = c.innerText.toLowerCase();
+        c.style.display = (!q || txt.includes(q)) ? 'flex' : 'none';
+      });
+    }
+
+    function openFamilyVariants(familyId) {
+      const parent = MODULE_CATALOG.find(p => p.id === familyId);
+      if (!parent) return;
+
+      document.getElementById('modal-header-step1').classList.add('hidden');
+      document.getElementById('view-families').classList.add('hidden');
+
+      document.getElementById('modal-header-step2').classList.remove('hidden');
+      document.getElementById('view-variants').classList.remove('hidden');
+
+      document.getElementById('step2-icon').innerHTML = parent.icon;
+      document.getElementById('step2-title').innerText = parent.name;
+      document.getElementById('step2-category').innerText = parent.category;
+      document.getElementById('target-slot-badge-step2').innerText = currentSelectedSlot;
+      document.getElementById('modal-footer-hint').innerText = `Click a variant to place it into slot ${currentSelectedSlot}.`;
+
+      const container = document.getElementById('view-variants');
+      container.innerHTML = parent.variants.map(v => {
+        const is2 = (v.size === '2x1');
+        const badgeClass = is2 
+          ? 'bg-purple-500/15 text-purple-300 border-purple-500/30' 
+          : (v.id.includes('DET') ? 'bg-blue-500/15 text-blue-300 border-blue-500/30' : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30');
+        
+        return `
+          <div onclick="selectModule('${v.id}')" class="variant-card p-4 rounded-2xl bg-gradient-to-b from-[#202026] to-[#17171C] hover:from-[#262630] hover:to-[#1C1C22] border border-white/10 hover:border-[#FF5A52] transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl cursor-pointer flex flex-col justify-between h-72 group">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-md border ${badgeClass}">${v.name}</span>
+                <span class="text-[10px] font-bold text-zinc-500 uppercase">${v.size}</span>
+              </div>
+              <h4 class="text-sm font-black text-white mt-2 group-hover:text-[#FF5A52] transition truncate">${v.title}</h4>
+              
+              <!-- Large Live SVG Preview -->
+              <div class="my-2.5 h-28 rounded-xl overflow-hidden flex items-center justify-center shadow-inner">
+                ${getVariantPreviewSVG(v.id)}
+              </div>
+
+              <!-- Description -->
+              <p class="text-[11px] text-zinc-400 leading-snug line-clamp-2">${v.desc}</p>
+            </div>
+
+            <!-- Select Action Button -->
+            <div class="mt-2.5 py-2 rounded-xl bg-white/5 group-hover:bg-[#FF5A52] text-xs font-bold text-zinc-300 group-hover:text-white transition flex items-center justify-center gap-1.5 shadow-sm">
+              <span>Select Variant</span>
+              <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function goToStep1() {
+      document.getElementById('modal-header-step2').classList.add('hidden');
+      document.getElementById('view-variants').classList.add('hidden');
+
+      document.getElementById('modal-header-step1').classList.remove('hidden');
+      document.getElementById('view-families').classList.remove('hidden');
+      document.getElementById('modal-footer-hint').innerText = "Click any module family to view its 3 format variants.";
+      renderFamilies();
+      filterFamilies();
+    }
+
+    function openAddModuleModal(slot) {
+      currentSelectedSlot = slot || "B1";
+      const badge = document.getElementById('target-slot-badge');
+      if (badge) badge.innerText = currentSelectedSlot;
+      const search = document.getElementById('family-search');
+      if (search) search.value = '';
+      goToStep1();
+      document.getElementById('modal-add-module').classList.remove('hidden');
+    }
+
+    function closeAddModuleModal() {
+      document.getElementById('modal-add-module').classList.add('hidden');
+    }
+
+    async function selectModule(modId) {
+      if (!state.slots) state.slots = {};
+
+      if (is2x1(modId)) {
+        if (currentSelectedSlot === 'B1' || currentSelectedSlot === 'B2') {
+          currentSelectedSlot = 'B1';
+          state.slots.B2 = "EMPTY";
+        } else if (currentSelectedSlot === 'C1' || currentSelectedSlot === 'C2') {
+          currentSelectedSlot = 'C1';
+          state.slots.C2 = "EMPTY";
+        } else if (currentSelectedSlot === 'D1' || currentSelectedSlot === 'D2') {
+          currentSelectedSlot = 'D1';
+          state.slots.D2 = "EMPTY";
+        }
+      }
+
+      state.slots[currentSelectedSlot] = modId;
+      closeAddModuleModal();
+      renderUI();
+      showToast(`Slot ${currentSelectedSlot} updated to ${formatModuleName(modId)}`);
+
+      try {
+        await fetch('/api/slots', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slots: state.slots })
+        });
+      } catch (e) {}
+    }
+
+    async function clearSlot(slotId) {
+      if (!state.slots) state.slots = {};
+      state.slots[slotId] = "EMPTY";
+      renderUI();
+      showToast(`Slot ${slotId} cleared`);
+
+      try {
+        await fetch('/api/slots', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slots: state.slots })
+        });
+      } catch (e) {}
+    }
+
+    async function resetLayout() {
+      try {
+        const res = await fetch('/api/reset', { method: 'POST' });
+        if (res.ok) {
+          state = await res.json();
+          renderUI();
+          closeAddModuleModal();
+          showToast(`Layout reset to defaults`);
+        }
+      } catch (e) {}
+    }
+
+
+    async function saveState() {
+      try {
+        await fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(state)
+        });
+        showToast("Settings saved");
+      } catch (e) {}
+    }
+
+    function setColorMode(mode) {
+      state.color_mode = mode;
+      renderUI();
+      saveState();
+    }
+
+    function toggleBorder() {
+      state.widget_border = document.getElementById('chk-border').checked;
+      saveState();
+    }
+
+    function setScale(sc) {
+      state.scale = sc;
+      renderUI();
+      saveState();
+    }
+
+    function toggleDropdown(type) {
+      const menu = document.getElementById(`menu-dropdown-${type}`);
+      const arrow = document.getElementById(`arrow-${type}`);
+      const isHidden = menu.classList.contains('hidden');
+      closeAllDropdowns();
+      if (isHidden) {
+        menu.classList.remove('hidden');
+        if (arrow) arrow.classList.add('rotate-180');
+      }
+    }
+
+    function closeAllDropdowns() {
+      ['time', 'units'].forEach(type => {
+        const menu = document.getElementById(`menu-dropdown-${type}`);
+        const arrow = document.getElementById(`arrow-${type}`);
+        if (menu) menu.classList.add('hidden');
+        if (arrow) arrow.classList.remove('rotate-180');
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#dropdown-time-container') && !e.target.closest('#dropdown-units-container')) {
+        closeAllDropdowns();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeAllDropdowns();
+    });
+
+    function selectTimeFormat(fmt) {
+      state.time_format = fmt;
+      saveState();
+      renderUI();
+      closeAllDropdowns();
+    }
+
+    function setTimeFormat(fmt) {
+      selectTimeFormat(fmt || (document.getElementById('sel-time') ? document.getElementById('sel-time').value : '24h'));
+    }
+
+    function selectMeasurementSystem(sys) {
+      state.measurement_system = sys;
+      saveState();
+      renderUI();
+      closeAllDropdowns();
+    }
+
+    function setMeasurementSystem(sys) {
+      selectMeasurementSystem(sys || (document.getElementById('sel-units') ? document.getElementById('sel-units').value : 'metric'));
+    }
+
+    function saveLocation() {
+      state.location = document.getElementById('input-location').value;
+      saveState();
+      showToast(`Location saved to ${state.location}`);
+    }
+
+    async function triggerDaemon(action) {
+      await fetch(`/api/daemon/${action}`, { method: 'POST' });
+      showToast(`Conky daemon ${action} dispatched`);
+      setTimeout(loadStatus, 600);
+    }
+
+    // Initialize
+    loadData();
+    setInterval(loadStatus, 2500);
+  </script>
+</body>
+</html>
