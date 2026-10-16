@@ -58,6 +58,18 @@ end
 -- Click Zones
 local CLICK_ZONES = {}
 
+-- Dynamic Hardware Sensor Detection
+local HWMON_TEMP_VAR = (function()
+    for i = 0, 8 do
+        local f = io.open("/sys/class/hwmon/hwmon" .. i .. "/temp1_input", "r")
+        if f then
+            f:close()
+            return string.format("${hwmon %d temp 1}", i)
+        end
+    end
+    return "${acpitemp}"
+end)()
+
 -- Watcher
 local last_settings_str = ""
 local settings_path = os.getenv("HOME") .. "/.config/conky/macwidget/settings/settings.json"
@@ -1379,7 +1391,7 @@ local function draw_rings_1x1_minimal(cr, card_x, card_y, card_w, card_h)
     local ram_frac = read_pct("${memperc}")
     local bat_val = tonumber(conky_parse("${battery_percent BAT1}")) or 100
     local bat_frac = bat_val / 100
-    local temp_c = tonumber(conky_parse("${hwmon 0 temp 1}")) or 52
+    local temp_c = tonumber(conky_parse(HWMON_TEMP_VAR)) or 52
     local temp_frac = math.min(1.0, temp_c / 100.0)
 
     local r = 18.0
@@ -1423,7 +1435,7 @@ local function draw_rings_1x1_detailed(cr, card_x, card_y, card_w, card_h)
     local bat_val = conky_parse("${battery_percent BAT1}")
     if bat_val == "" or bat_val == nil then bat_val = "100" end
     local bat_frac = (tonumber(bat_val) or 100) / 100
-    local temp_val = conky_parse("${hwmon 0 temp 1}")
+    local temp_val = conky_parse(HWMON_TEMP_VAR)
     if temp_val == "" or temp_val == nil then temp_val = "52" end
     local temp_frac = math.min(1.0, (tonumber(temp_val) or 52) / 100.0)
 
@@ -1462,12 +1474,12 @@ local function draw_rings_2x1_wide(cr, card_x, card_y, card_w, card_h)
     local cpu_str = conky_parse("${cpu cpu0}") .. "%"
     local ram_str = conky_parse("${memperc}") .. "%"
     local bat_str = (conky_parse("${battery_percent BAT1}") or "100") .. "%"
-    local temp_str = (conky_parse("${hwmon 0 temp 1}") or "52") .. "°C"
+    local temp_str = (conky_parse(HWMON_TEMP_VAR) or "52") .. "°C"
 
     local cpu_frac = read_pct("${cpu cpu0}")
     local ram_frac = read_pct("${memperc}")
     local bat_frac = (tonumber(conky_parse("${battery_percent BAT1}")) or 100) / 100
-    local temp_frac = math.min(1.0, (tonumber(conky_parse("${hwmon 0 temp 1}")) or 52) / 100.0)
+    local temp_frac = math.min(1.0, (tonumber(conky_parse(HWMON_TEMP_VAR)) or 52) / 100.0)
 
     local sensors = {
         { pct = cpu_str, frac = cpu_frac, color = CORAL_RED, type = "chip" },
@@ -1930,7 +1942,7 @@ end
 -- -----------------------------------------------------------------------
 function conky_draw_widgets()
     if conky_window == nil then return end
-    if tonumber(conky_parse('${updates}')) < 2 then return end
+    if (tonumber(conky_parse('${updates}')) or 0) < 1 then return end
 
     check_hot_reload()
     update_telemetry()
@@ -1962,6 +1974,7 @@ function conky_draw_widgets()
     -- Row D (D1 & D2)
     cur_y = cur_y + render_row_pair(cr, slots.D1, slots.D2, cur_y)
 
+    cairo_surface_flush(cs)
     cairo_destroy(cr)
     cairo_surface_destroy(cs)
 end

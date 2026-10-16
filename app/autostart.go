@@ -20,20 +20,22 @@ func getAutostartFilePath() string {
 }
 
 func GetAutostartExecPath() string {
-	home := os.Getenv("HOME")
-	localBin := filepath.Join(home, ".local/bin/weget")
-	if _, err := os.Stat(localBin); err == nil {
-		return localBin + " start"
+	if _, err := os.Stat("/usr/bin/weget-widget"); err == nil {
+		return "/usr/bin/weget-widget"
 	}
-	if _, err := os.Stat("/usr/bin/weget"); err == nil {
-		return "/usr/bin/weget start"
+	home := os.Getenv("HOME")
+	localWidget := filepath.Join(home, ".local/bin/weget-widget")
+	if _, err := os.Stat(localWidget); err == nil {
+		return localWidget
 	}
 	if exe, err := os.Executable(); err == nil {
-		if abs, err := filepath.Abs(exe); err == nil {
-			return abs + " start"
+		dir := filepath.Dir(exe)
+		candidate := filepath.Join(dir, "weget-widget")
+		if _, err := os.Stat(candidate); err == nil {
+			return candidate
 		}
 	}
-	return "weget start"
+	return "weget-widget"
 }
 
 func IsAutostartEnabled() bool {
@@ -67,7 +69,7 @@ Terminal=false
 Categories=Utility;
 StartupNotify=false
 X-GNOME-Autostart-enabled=true
-X-GNOME-Autostart-Delay=3
+X-GNOME-Autostart-Delay=4
 `, execCmd)
 
 	filePath := getAutostartFilePath()
@@ -75,10 +77,10 @@ X-GNOME-Autostart-Delay=3
 		return err
 	}
 
-	// Clean up any legacy elysium.desktop that referenced start.sh
+	// Clean up any legacy elysium.desktop that referenced start.sh or elysium
 	legacyPath := filepath.Join(dir, "elysium.desktop")
 	if data, err := os.ReadFile(legacyPath); err == nil {
-		if strings.Contains(string(data), "start.sh") {
+		if strings.Contains(string(data), "start.sh") || strings.Contains(string(data), "elysium") {
 			_ = os.Remove(legacyPath)
 		}
 	}
@@ -94,10 +96,10 @@ func DisableAutostart() error {
 		}
 	}
 
-	// Also clean up any legacy elysium.desktop referencing start.sh
+	// Also clean up any legacy elysium.desktop referencing start.sh or elysium
 	legacyPath := filepath.Join(getAutostartDir(), "elysium.desktop")
 	if data, err := os.ReadFile(legacyPath); err == nil {
-		if strings.Contains(string(data), "start.sh") {
+		if strings.Contains(string(data), "start.sh") || strings.Contains(string(data), "elysium") {
 			_ = os.Remove(legacyPath)
 		}
 	}

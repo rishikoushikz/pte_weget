@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"strings"
@@ -24,13 +23,13 @@ var Version = "0.1"
 func printUsage() {
 	fmt.Printf(`Weget v%s
 Usage:
-  weget                Launch the Weget Settings UI and start widget
-  weget start          Start the desktop widget daemon natively
-  weget stop           Stop the desktop widget daemon natively
-  weget restart        Restart the desktop widget daemon
+  weget                Launch the Weget Settings UI
+  weget widget         Run desktop widget directly (standalone Conky process)
+  weget start          Start desktop widget in the background (standalone Conky)
+  weget stop           Stop the desktop widget
+  weget restart        Restart the desktop widget
   weget status         Show running status, PID, and engine mode
-  weget autostart      Check or configure autostart on login (no .sh required)
-  weget daemon         Run headless background telemetry and widget supervisor
+  weget autostart      Check or configure login autostart (starts pure Conky on login)
   weget version        Show version info
 `, Version)
 }
@@ -90,23 +89,25 @@ func main() {
 	if len(os.Args) > 1 {
 		cmd := os.Args[1]
 		switch cmd {
-		case "start":
-			fmt.Println("Starting Weget Desktop Widget...")
-			// Launch headless daemon in background if not already running
-			if out, err := exec.Command("pgrep", "-f", "weget daemon").Output(); err != nil || len(strings.TrimSpace(string(out))) == 0 {
-				exe, err := os.Executable()
-				if err == nil {
-					cmd := exec.Command(exe, "daemon")
-					cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-					_ = cmd.Start()
-				}
-			} else {
-				_ = GlobalDaemon.Start()
+		case "widget", "run-widget":
+			// Direct standalone Conky execution via syscall.Exec
+			// Replaces current process with Conky directly: zero Go background processes!
+			if err := GlobalDaemon.RunConkyStandalone(); err != nil {
+				fmt.Fprintf(os.Stderr, "Error launching standalone widget: %v\n", err)
+				os.Exit(1)
 			}
-			time.Sleep(500 * time.Millisecond)
+			return
+
+		case "start":
+			fmt.Println("Starting Weget Desktop Widget (standalone Conky)...")
+			if err := GlobalDaemon.StartConkyDirectBackground(); err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+				os.Exit(1)
+			}
+			time.Sleep(300 * time.Millisecond)
 			running, pid, _, engine := GlobalDaemon.Status()
 			if running {
-				fmt.Printf("✓ Weget running (PID: %s, Engine: %s)\n", pid, engine)
+				fmt.Printf("✓ Conky running (PID: %s, Engine: %s)\n", pid, engine)
 			} else {
 				fmt.Println("Warning: process launched but not detected in pgrep yet.")
 			}
@@ -220,7 +221,9 @@ func main() {
 	// Automatically start widget if not already running
 	if running, _, _, _ := GlobalDaemon.Status(); !running {
 		go func() {
-			_ = GlobalDaemon.Start()
+			if err := GlobalDaemon.Start(); err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: unable to start widget engine: %v\n", err)
+			}
 		}()
 	}
 

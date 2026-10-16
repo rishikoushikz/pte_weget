@@ -489,6 +489,40 @@ func (dm *DaemonManager) pollBlurLoop() {
 // Engine & Daemon Process Management
 // -----------------------------------------------------------------------------
 
+func isPidAlive(pid int) bool {
+	if pid <= 0 {
+		return false
+	}
+	statusBytes, err := os.ReadFile(fmt.Sprintf("/proc/%d/status", pid))
+	if err != nil {
+		return false
+	}
+	for _, line := range strings.Split(string(statusBytes), "\n") {
+		if strings.HasPrefix(line, "State:") {
+			if strings.Contains(line, "Z (zombie)") || strings.Contains(line, "X (dead)") {
+				return false
+			}
+			return true
+		}
+	}
+	return true
+}
+
+func isBinaryRunnable(binPath string, libPath string) bool {
+	if binPath == "" {
+		return false
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 1500*time.Millisecond)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, binPath, "-v")
+	if libPath != "" {
+		oldLD := os.Getenv("LD_LIBRARY_PATH")
+		cmd.Env = append(os.Environ(), fmt.Sprintf("LD_LIBRARY_PATH=%s:%s", libPath, oldLD))
+	}
+	return cmd.Run() == nil
+}
+
 func (dm *DaemonManager) findConkyBinary() string {
 	candidates := []string{}
 
@@ -509,16 +543,23 @@ func (dm *DaemonManager) findConkyBinary() string {
 		"../engine/conky/bin/conky",
 	)
 
+	// 1. Try bundled engine candidates (verifying dynamic libraries can load)
 	for _, c := range candidates {
 		if abs, err := filepath.Abs(c); err == nil {
 			if info, err := os.Stat(abs); err == nil && !info.IsDir() && (info.Mode()&0111 != 0) {
-				return abs
+				libDir := dm.findConkyLibDir(abs)
+				if isBinaryRunnable(abs, libDir) {
+					return abs
+				}
 			}
 		}
 	}
 
+	// 2. Fall back to system conky
 	if sysConky, err := exec.LookPath("conky"); err == nil {
-		return sysConky
+		if isBinaryRunnable(sysConky, "") {
+			return sysConky
+		}
 	}
 
 	return ""
@@ -568,51 +609,114 @@ func (dm *DaemonManager) findConfigFile() string {
 	return ""
 }
 
-func (dm *DaemonManager) Start() error {
+func waitForDisplayReady(timeout time.Duration) bool {
+	deadline := time.Now().Add(timeout)
+	for {
+		disp := os.Getenv("DISPLAY")
+		wayland := os.Getenv("WAYLAND_DISPLAY")
+		if disp != "" || wayland != "" {
+			return true
+		}
+		if time.Now().After(deadline) {
+			break
+		}
+		time.Sleep(250 * time.Millisecond)
+	}
+	return false
+}
+
+func (dm *DaemonManager) getConkyLaunchParams() (binPath string, cfgPath string, env []string, err error) {
+	binPath = dm.findConkyBinary()
+	if binPath == "" {
+		return "", "", nil, fmt.Errorf("no runnable Conky engine found (bundled engine is missing runtime libraries or system conky is not installed).\nFix by installing dependencies: sudo apt install conky-all")
+	}
+	cfgPath = dm.findConfigFile()
+	if cfgPath == "" {
+		return "", "", nil, fmt.Errorf("conky.conf not found")
+	}
+	libPath := dm.findConkyLibDir(binPath)
+
+	env = os.Environ()
+	if libPath != "" {
+		oldLD := os.Getenv("LD_LIBRARY_PATH")
+		env = append(env, fmt.Sprintf("LD_LIBRARY_PATH=%s:%s", libPath, oldLD))
+		env = append(env, fmt.Sprintf("LUA_CPATH=%s/lib?.so;;", libPath))
+	}
+	return binPath, cfgPath, env, nil
+}
+
+// RunConkyStandalone replaces the current process with Conky directly via syscall.Exec.
+// Zero Go background processes remain in memory.
+func (dm *DaemonManager) RunConkyStandalone() error {
+	waitForDisplayReady(5 * time.Second)
+
+	binPath, cfgPath, env, err := dm.getConkyLaunchParams()
+	if err != nil {
+		return err
+	}
+
+	return syscall.Exec(binPath, []string{"conky", "-c", cfgPath}, env)
+}
+
+// StartConkyDirectBackground spawns Conky directly into the background without running any Go supervisor daemon.
+func (dm *DaemonManager) StartConkyDirectBackground() error {
 	dm.mu.Lock()
 	defer dm.mu.Unlock()
 
-	// 1. Ensure Telemetry Loop is running and primed
-	go dm.StartTelemetryLoop()
+	waitForDisplayReady(5 * time.Second)
 
-	// 2. Kill any stale conky instances
 	dm.killExistingConkyLocked()
 
-	// 3. Find bundled engine and config
-	binPath := dm.findConkyBinary()
-	if binPath == "" {
-		return fmt.Errorf("conky binary not found (neither bundled engine nor system conky)")
+	binPath, cfgPath, env, err := dm.getConkyLaunchParams()
+	if err != nil {
+		return err
 	}
+
 	dm.conkyBinPath = binPath
 	dm.conkyLibPath = dm.findConkyLibDir(binPath)
-
-	cfgPath := dm.findConfigFile()
-	if cfgPath == "" {
-		return fmt.Errorf("conky.conf not found")
-	}
 	dm.configPath = cfgPath
 
-	// 4. Set environment
-	env := os.Environ()
-	if dm.conkyLibPath != "" {
-		oldLD := os.Getenv("LD_LIBRARY_PATH")
-		env = append(env, fmt.Sprintf("LD_LIBRARY_PATH=%s:%s", dm.conkyLibPath, oldLD))
-		env = append(env, fmt.Sprintf("LUA_CPATH=%s/lib?.so;;", dm.conkyLibPath))
-	}
+	cacheDir := filepath.Join(os.Getenv("HOME"), ".cache/weget")
+	_ = os.MkdirAll(cacheDir, 0755)
+	logPath := filepath.Join(cacheDir, "conky.log")
+	logFile, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 
-	// 5. Spawn Conky in a separate process group
-	cmd := exec.Command(dm.conkyBinPath, "-c", dm.configPath)
-	cmd.Dir = filepath.Dir(dm.configPath)
+	cmd := exec.Command(binPath, "-c", cfgPath)
+	cmd.Dir = filepath.Dir(cfgPath)
 	cmd.Env = env
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	if err == nil {
+		cmd.Stdout = logFile
+		cmd.Stderr = logFile
+		defer logFile.Close()
+	}
 
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("failed to start conky engine: %w", err)
 	}
 
+	// Verify child didn't immediately crash (e.g. exit 127 missing dynamic libraries)
+	time.Sleep(150 * time.Millisecond)
+	if cmd.Process == nil || !isPidAlive(cmd.Process.Pid) {
+		dm.running = false
+		dm.conkyCmd = nil
+		errLog := ""
+		if data, rErr := os.ReadFile(logPath); rErr == nil {
+			errLog = strings.TrimSpace(string(data))
+		}
+		if errLog != "" {
+			return fmt.Errorf("conky engine terminated immediately on launch: %s", errLog)
+		}
+		return fmt.Errorf("conky engine terminated immediately (check %s)", logPath)
+	}
+
 	dm.conkyCmd = cmd
 	dm.running = true
 	return nil
+}
+
+func (dm *DaemonManager) Start() error {
+	return dm.StartConkyDirectBackground()
 }
 
 func (dm *DaemonManager) killExistingConkyLocked() {
@@ -666,15 +770,19 @@ func (dm *DaemonManager) Restart() error {
 
 func (dm *DaemonManager) findRunningConkyPID() (string, bool) {
 	if dm.conkyCmd != nil && dm.conkyCmd.Process != nil {
-		if err := dm.conkyCmd.Process.Signal(syscall.Signal(0)); err == nil {
-			return strconv.Itoa(dm.conkyCmd.Process.Pid), true
+		pid := dm.conkyCmd.Process.Pid
+		if dm.conkyCmd.ProcessState == nil && isPidAlive(pid) {
+			if err := dm.conkyCmd.Process.Signal(syscall.Signal(0)); err == nil {
+				return strconv.Itoa(pid), true
+			}
 		}
+		dm.conkyCmd = nil
 	}
 
 	out, err := exec.Command("pgrep", "-x", "conky").Output()
 	if err == nil {
 		for _, p := range strings.Fields(string(out)) {
-			if pid, err := strconv.Atoi(p); err == nil && pid != os.Getpid() {
+			if pid, err := strconv.Atoi(p); err == nil && pid != os.Getpid() && isPidAlive(pid) {
 				cmdline, err := os.ReadFile(fmt.Sprintf("/proc/%d/cmdline", pid))
 				if err == nil && (strings.Contains(string(cmdline), "macwidget") || strings.Contains(string(cmdline), "conky.conf")) {
 					return strconv.Itoa(pid), true

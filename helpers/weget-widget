@@ -1,0 +1,57 @@
+#!/bin/sh
+# Weget Standalone Widget Launcher
+# Zero Go runtime, direct Conky launch with desktop settling
+
+# 1. Wait for display environment (up to 10 seconds)
+for i in $(seq 1 20); do
+    if [ -n "$DISPLAY" ] || [ -n "$WAYLAND_DISPLAY" ]; then
+        break
+    fi
+    sleep 0.5
+done
+
+# 2. Wait for Window Manager (Mutter / GNOME Shell) to be ready
+if [ -n "$DISPLAY" ] && command -v xprop >/dev/null 2>&1; then
+    for i in $(seq 1 15); do
+        if xprop -root _NET_SUPPORTING_WM_CHECK >/dev/null 2>&1; then
+            break
+        fi
+        sleep 0.5
+    done
+fi
+
+# 3. Grace period (3 seconds) for desktop wallpaper & icons to finish loading
+sleep 3
+
+# 4. Resolve configuration file
+CONF=""
+for p in "$HOME/.config/conky/macwidget/conky.conf" \
+         "/usr/share/weget/conky.conf" \
+         "$HOME/.local/share/weget/conky.conf" \
+         "conky.conf"; do
+    if [ -f "$p" ]; then
+        CONF="$p"
+        break
+    fi
+done
+
+# 5. Resolve conky binary
+CONKY_BIN=""
+if command -v conky >/dev/null 2>&1; then
+    CONKY_BIN="$(command -v conky)"
+elif [ -x /usr/lib/weget/engine/bin/conky ]; then
+    CONKY_BIN="/usr/lib/weget/engine/bin/conky"
+elif [ -x "$HOME/.local/share/weget/engine/conky/bin/conky" ]; then
+    CONKY_BIN="$HOME/.local/share/weget/engine/conky/bin/conky"
+fi
+
+if [ -z "$CONKY_BIN" ] || [ -z "$CONF" ]; then
+    echo "Error: Conky engine or configuration not found." >&2
+    exit 1
+fi
+
+# 6. Terminate any previous instance to avoid duplicates
+pkill -x conky 2>/dev/null || true
+
+# 7. Direct process replacement — Conky takes over PID, zero shell/Go overhead
+exec "$CONKY_BIN" -c "$CONF"

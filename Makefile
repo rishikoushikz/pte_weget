@@ -1,6 +1,6 @@
-.PHONY: all build run start stop restart status autostart install uninstall deb rpm appimage flatpak flatpak-bundle tarball packages clean help
+.PHONY: all build run widget start stop restart status autostart install uninstall deb rpm appimage flatpak flatpak-bundle tarball packages clean help
 
-PYTHON ?= python3
+PYTHON := python3
 
 all: build
 
@@ -9,6 +9,7 @@ help:
 	@echo ""
 	@echo "Development & Lifecycle:"
 	@echo "  make run        - Build and launch the Weget UI manager"
+	@echo "  make widget     - Run standalone desktop widget directly"
 	@echo "  make build      - Compile the Weget binary"
 	@echo "  make start      - Start desktop widgets natively"
 	@echo "  make stop       - Stop desktop widgets"
@@ -31,52 +32,55 @@ help:
 	@echo "  make clean      - Clean build artifacts"
 
 build:
-	@$(PYTHON) package/builder.py build
+	@python3 package/builder.py build
 
 run:
-	@$(PYTHON) package/builder.py run
+	@python3 package/builder.py run
+
+widget:
+	@python3 package/builder.py widget
 
 start:
-	@$(PYTHON) package/builder.py start
+	@python3 package/builder.py start
 
 stop:
-	@$(PYTHON) package/builder.py stop
+	@python3 package/builder.py stop
 
 restart:
-	@$(PYTHON) package/builder.py restart
+	@python3 package/builder.py restart
 
 status:
-	@$(PYTHON) package/builder.py status
+	@python3 package/builder.py status
 
 autostart:
-	@$(PYTHON) package/builder.py autostart $(filter-out $@,$(MAKECMDGOALS))
+	@python3 package/builder.py autostart $(filter-out $@,$(MAKECMDGOALS))
 
 install:
-	@$(PYTHON) package/builder.py install
+	@python3 package/builder.py install
 
 uninstall:
-	@$(PYTHON) package/builder.py uninstall
+	@python3 package/builder.py uninstall
 
 deb:
-	@$(PYTHON) package/builder.py deb
+	@python3 package/builder.py deb
 
 rpm:
-	@$(PYTHON) package/builder.py rpm
+	@python3 package/builder.py rpm
 
 appimage:
-	@$(PYTHON) package/builder.py appimage
+	@python3 package/builder.py appimage
 
 flatpak:
-	@$(PYTHON) package/builder.py flatpak
+	@python3 package/builder.py flatpak
 
 flatpak-bundle:
-	@$(PYTHON) package/builder.py flatpak-bundle
+	@python3 package/builder.py flatpak-bundle
 
 tarball:
-	@$(PYTHON) package/builder.py tarball
+	@python3 package/builder.py tarball
 
 packages:
-	@$(PYTHON) package/builder.py packages
+	@python3 package/builder.py packages
 
 clean:
-	@$(PYTHON) package/builder.py clean
+	@python3 package/builder.py clean

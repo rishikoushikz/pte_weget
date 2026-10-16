@@ -51,7 +51,7 @@ def build_binary():
     log("Compiling Weget binary from app...")
     go_app_dir = ROOT_DIR / "app"
     tmp_bin = go_app_dir / "weget"
-    run_cmd(["go", "build", "-trimpath", "-ldflags", f"-s -w -X main.Version={VERSION}", "-o", str(tmp_bin), "."], cwd=go_app_dir)
+    run_cmd(["go", "build", "-trimpath", "-ldflags", f"-s -w -X main.Version={VERSION}", "-o", str(tmp_bin), "."], cwd=go_app_dir, env={"CGO_ENABLED": "0"})
     target_bin = ROOT_DIR / "weget"
     # Atomic replace to prevent "Text file busy"
     tmp_target = ROOT_DIR / "weget.tmp"
@@ -76,11 +76,15 @@ def stage_package_tree(target_root: Path):
     for d in [bin_dir, lib_engine_bin, lib_engine_lib, share_dir, apps_dir, icons_dir]:
         d.mkdir(parents=True, exist_ok=True)
 
-    # 1. Main Weget binary
+    # 1. Main Weget binary & Standalone widget runner
     if not (ROOT_DIR / "weget").exists():
         build_binary()
     shutil.copy2(ROOT_DIR / "weget", bin_dir / "weget")
     os.chmod(bin_dir / "weget", 0o755)
+
+    widget_runner = bin_dir / "weget-widget"
+    shutil.copy2(ROOT_DIR / "helpers" / "weget-widget", widget_runner)
+    os.chmod(widget_runner, 0o755)
 
     # 2. Bundled Conky engine & cairo libraries
     conky_bin = ENGINE_DIR / "bin" / "conky"
@@ -157,6 +161,7 @@ Keywords=widget;desktop;system;clock;calendar;weather;conky;
 
 def build_deb():
     log("Building Debian package (.deb)...")
+    build_binary()
     DIST_DIR.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="weget_deb_") as tmp_dir:
         stage_dir = Path(tmp_dir) / "weget"
@@ -172,6 +177,7 @@ Section: utils
 Priority: optional
 Architecture: amd64
 Maintainer: Weget Project <support@weget.org>
+Depends: conky-all (>= 1.10) | conky, python3, python3-gi, gir1.2-gtk-3.0, gir1.2-webkit2-4.1, python3-pil, python3-dbus, playerctl
 Description: Modern macOS-style interactive desktop widgets for Linux
  Weget provides modular Cairo desktop widgets (Clock, Calendar,
  Weather, Storage, Media, Rings, Quotes, Network) powered by an inbuilt
@@ -506,14 +512,19 @@ def install_local():
     config_dir = home / ".config" / "conky" / "macwidget"
 
     for d in [local_bin, local_share, local_apps, local_icons, config_dir]:
+        if d.is_symlink():
+            d.unlink()
         d.mkdir(parents=True, exist_ok=True)
 
-    if not (ROOT_DIR / "weget").exists():
-        build_binary()
+    build_binary()
 
-    # 1. Binary
+    # 1. Binary & Standalone widget runner
     safe_copy(ROOT_DIR / "weget", local_bin / "weget")
     os.chmod(local_bin / "weget", 0o755)
+
+    widget_runner = local_bin / "weget-widget"
+    safe_copy(ROOT_DIR / "helpers" / "weget-widget", widget_runner)
+    os.chmod(widget_runner, 0o755)
 
     # 2. Bundled Conky engine into ~/.local/share/weget/engine
     local_engine = local_share / "engine" / "conky"
@@ -622,6 +633,7 @@ def main():
         print("""Weget — Modern Desktop Widget Ecosystem
 Available targets:
   make run        - Build and launch the Weget UI manager
+  make widget     - Run standalone desktop widget directly
   make build      - Compile the Weget binary
   make start      - Start desktop widgets natively
   make stop       - Stop desktop widgets
@@ -642,7 +654,7 @@ Available targets:
         if not (ROOT_DIR / "weget").exists():
             build_binary()
         os.execv(str(ROOT_DIR / "weget"), [str(ROOT_DIR / "weget")])
-    elif target in ["start", "stop", "restart", "status", "autostart"]:
+    elif target in ["start", "stop", "restart", "status", "autostart", "widget"]:
         if not (ROOT_DIR / "weget").exists():
             build_binary()
         args = sys.argv[1:]
