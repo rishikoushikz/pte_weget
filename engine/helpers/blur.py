@@ -88,6 +88,44 @@ def get_blur_radius():
         pass
     return 30
 
+def get_settings_geometry(sw, sh):
+    settings_file = os.path.expanduser('~/.config/conky/macwidget/settings/settings.json')
+    scale = 1.0
+    row_count = 4
+    pos = 'top_right'
+    gx = 26
+    gy = 54
+    try:
+        import json
+        if os.path.exists(settings_file):
+            with open(settings_file, 'r') as f:
+                d = json.load(f)
+                scale = float(d.get('scale', 1.0))
+                rows = d.get('row_order', [])
+                if rows and isinstance(rows, list):
+                    row_count = len(rows)
+                pos = d.get('position', 'top_right')
+                gx = int(d.get('gap_x', 26))
+                gy = int(d.get('gap_y', 54))
+    except Exception:
+        pass
+
+    w = int(350 * scale)
+    h = int((row_count * 155 + 10) * scale)
+    x = sw - w - gx
+    y = gy
+    if 'left' in pos:
+        x = gx
+    elif 'middle' in pos and 'top' not in pos and 'bottom' not in pos:
+        x = (sw - w) // 2
+    if 'top' in pos:
+        y = 34 + gy
+    elif 'bottom' in pos:
+        y = sh - h - gy
+    elif 'middle' in pos and ('left' in pos or 'right' in pos or pos == 'middle_middle'):
+        y = (sh - h) // 2
+    return max(0, x), max(0, y), max(100, w), max(100, h)
+
 def generate_blur():
     wp = get_wallpaper_path()
     if not wp or not os.path.exists(wp):
@@ -98,9 +136,10 @@ def generate_blur():
     if geom:
         win_x, win_y, win_w, win_h = geom
     else:
-        win_w, win_h = 350, 820
-        win_x = sw - win_w - 26
-        win_y = 54
+        win_x, win_y, win_w, win_h = get_settings_geometry(sw, sh)
+
+    target_w = max(100, win_w)
+    target_h = max(100, win_h)
 
     try:
         img = Image.open(wp).convert('RGB')
@@ -108,16 +147,18 @@ def generate_blur():
 
         x1 = max(0, min(win_x, sw - 10))
         y1 = max(0, min(win_y, sh - 10))
-        x2 = min(sw, max(x1 + 10, win_x + win_w))
-        y2 = min(sh, max(y1 + 10, win_y + win_h))
+        x2 = min(sw, max(x1 + 10, win_x + target_w))
+        y2 = min(sh, max(y1 + 10, win_y + target_h))
         crop = img_scaled.crop((x1, y1, x2, y2))
 
         # Downscale for smooth Dual-Kawase / Gaussian blur
         radius = get_blur_radius()
         small_radius = max(2, radius // 4)
-        small = crop.resize((max(1, 350 // 4), max(1, 820 // 4)), Image.Resampling.BILINEAR)
+        small_w = max(1, target_w // 4)
+        small_h = max(1, target_h // 4)
+        small = crop.resize((small_w, small_h), Image.Resampling.BILINEAR)
         blurred_small = small.filter(ImageFilter.GaussianBlur(radius=small_radius))
-        blurred = blurred_small.resize((350, 820), Image.Resampling.BILINEAR)
+        blurred = blurred_small.resize((target_w, target_h), Image.Resampling.BILINEAR)
 
         cache_dir = os.path.expanduser('~/.cache/weget')
         os.makedirs(cache_dir, exist_ok=True)
@@ -132,3 +173,8 @@ def generate_blur():
 
 if __name__ == '__main__':
     generate_blur()
+    try:
+        from palette import save_wallpaper_palette
+        save_wallpaper_palette()
+    except Exception:
+        pass

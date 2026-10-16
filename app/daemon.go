@@ -461,6 +461,25 @@ func findBlurHelper() string {
 	return ""
 }
 
+func findPaletteHelper() string {
+	home := os.Getenv("HOME")
+	candidates := []string{
+		filepath.Join(home, ".config/conky/macwidget/helpers/palette.py"),
+		filepath.Join(home, ".local/share/weget/helpers/palette.py"),
+		"/usr/share/weget/helpers/palette.py",
+		"/app/share/weget/helpers/palette.py",
+		"engine/helpers/palette.py",
+		"helpers/palette.py",
+		"../helpers/palette.py",
+	}
+	for _, c := range candidates {
+		if fi, err := os.Stat(c); err == nil && !fi.IsDir() {
+			return c
+		}
+	}
+	return ""
+}
+
 func (dm *DaemonManager) updateBlur() {
 	helper := findBlurHelper()
 	if helper != "" {

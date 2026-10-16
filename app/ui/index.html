@@ -6,7 +6,6 @@
   <title>Weget — Conky Ecosystem</title>
   <script src="tailwind.min.js"></script>
   <link rel="icon" type="image/png" href="icon.png">
-  <link rel="stylesheet" href="apple-liquid-glass.css">
   <style>
     body {
       background-color: #131316;
@@ -23,37 +22,35 @@
       font-weight: 600;
     }
     .slot-card {
-      background-color: #222226;
+      background-color: #1C1C20;
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 16px;
-      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      border-radius: 12px;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
       position: relative;
     }
     .slot-card:hover {
-      background-color: #28282E;
-      border-color: rgba(255, 255, 255, 0.18);
-      transform: translateY(-1px);
+      background-color: #242429;
+      border-color: rgba(255, 255, 255, 0.15);
     }
     .slot-card.selected {
-      border-color: #FF5A52;
-      box-shadow: 0 0 0 1px #FF5A52, 0 4px 20px rgba(255, 90, 82, 0.2);
-      background-color: #26262B;
+      border: 1.5px solid #E10600;
+      background-color: #242429;
+      box-shadow: none;
     }
     .mod-card {
-      background-color: #1E1E22;
+      background-color: #1A1A1E;
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 18px;
-      transition: all 0.18s ease;
+      border-radius: 14px;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
       cursor: pointer;
     }
     .mod-card:hover {
-      background-color: #26262C;
-      border-color: #FF5A52;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      background-color: #24242A;
+      border-color: #E10600;
+      box-shadow: none;
     }
     .btn-press:active {
-      transform: scale(0.96);
+      transform: scale(0.97);
     }
     select {
       -webkit-appearance: none;
@@ -114,12 +111,12 @@
       bottom: 2px;
       background-color: #FFFFFF;
       border-radius: 50%;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
       transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     }
     input:checked + .toggle-slider {
-      background-color: #FF5A52;
-      border-color: #FF5A52;
+      background-color: #E10600;
+      border-color: #E10600;
     }
     input:checked + .toggle-slider:before {
       transform: translateX(20px);
@@ -138,31 +135,31 @@
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
-      background: #FF5A52;
+      background: #E10600;
       cursor: pointer;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      box-shadow: none;
+      transition: transform 0.1s ease;
     }
     input[type="range"]::-webkit-slider-thumb:hover {
-      transform: scale(1.15);
-      box-shadow: 0 0 0 4px rgba(255, 90, 82, 0.2);
+      transform: scale(1.1);
+      box-shadow: none;
     }
     input[type="range"]::-moz-range-thumb {
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
-      background: #FF5A52;
+      background: #E10600;
       cursor: pointer;
       border: none;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      box-shadow: none;
+      transition: transform 0.1s ease;
     }
     input[type="range"]::-moz-range-thumb:hover {
-      transform: scale(1.15);
-      box-shadow: 0 0 0 4px rgba(255, 90, 82, 0.2);
+      transform: scale(1.1);
+      box-shadow: none;
     }
   </style>
 </head>
@@ -176,7 +173,7 @@
       <div class="space-y-6">
         <!-- Logo / Title -->
         <div class="px-2 flex items-center gap-3">
-          <img src="icon.png" alt="Weget Logo" class="w-9 h-9 rounded-xl shadow-md shrink-0">
+          <img src="icon.png" alt="Weget Logo" class="w-9 h-9 rounded-xl shrink-0">
           <div>
             <h1 class="text-xl font-black text-white tracking-tight leading-none">Weget</h1>
             <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Conky Ecosystem</p>
@@ -214,7 +211,7 @@
             <svg class="w-4 h-4 shrink-0 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
             </svg>
-            Scale
+            Scale & Position
           </button>
           <button onclick="navTo('preferences')" id="nav-preferences" class="sidebar-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-zinc-400 hover:text-white hover:bg-white/5">
             <svg class="w-4 h-4 shrink-0 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -262,45 +259,60 @@
       <!-- PAGE: LAYOUT -->
       <!-- =================================================================== -->
       <section id="page-layout" class="space-y-6 max-w-xl mx-auto">
-        <div>
-          <h2 class="text-2xl font-black text-white tracking-tight">Layout</h2>
-          <p class="text-xs text-zinc-400 mt-1">Manage active slots and module arrangement.</p>
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-2xl font-black text-white tracking-tight">Layout</h2>
+          </div>
+          <!-- Quick Preset Templates Pill -->
+          <div class="flex items-center gap-1.5 bg-[#18181D] p-1 rounded-xl border border-white/5">
+            <button onclick="applyRowTemplate(2)" title="2 Rows" class="px-2.5 py-1 text-[11px] font-bold text-zinc-400 hover:text-white rounded-lg hover:bg-white/5 transition">2 Rows</button>
+            <button onclick="applyRowTemplate(3)" title="3 Rows" class="px-2.5 py-1 text-[11px] font-bold text-zinc-400 hover:text-white rounded-lg hover:bg-white/5 transition">3 Rows</button>
+            <button onclick="applyRowTemplate(4)" title="4 Rows (Default)" class="px-2.5 py-1 text-[11px] font-bold text-[#E10600] bg-[#E10600]/10 rounded-lg border border-[#E10600]/20 transition">4 Rows</button>
+            <button onclick="cleanEmptyRows()" title="Remove empty and duplicate rows" class="px-2.5 py-1 text-[11px] font-bold text-emerald-400 hover:text-white rounded-lg hover:bg-emerald-500/20 transition flex items-center gap-1">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Clean</span>
+            </button>
+          </div>
         </div>
 
         <!-- Dynamic Slot Matrix -->
-        <div id="slots-container" class="space-y-3.5">
-          <!-- Rendered dynamically by renderSlots() to reflect exact 1x1 vs 2x1 geometry -->
+        <div id="slots-container" class="space-y-3">
+          <!-- Rendered dynamically by renderSlots() to reflect dynamic rows and exact 1x1 vs 2x1 geometry -->
         </div>
 
-        <!-- Action Buttons -->
-        <div class="flex items-center justify-between pt-6 border-t border-white/5">
-          <button onclick="resetLayout()" class="btn-press px-6 py-2.5 rounded-xl bg-[#FF5A52] hover:bg-[#ff4238] text-white text-xs font-bold shadow-lg shadow-[#FF5A52]/20 transition flex items-center gap-2">
-            Reset Layout
+        <!-- Add Row Button & Bottom Actions -->
+        <div class="space-y-3 pt-2">
+          <button onclick="addNewRow()" class="btn-press w-full py-3 rounded-xl bg-[#18181D] hover:bg-[#202026] text-white text-xs font-bold border border-dashed border-white/10 hover:border-[#E10600]/40 transition flex items-center justify-center gap-2 group">
+            <svg class="w-4 h-4 text-[#E10600] group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>+ Add Row to Layout</span>
           </button>
-          <button onclick="openAddModuleModal(currentSelectedSlot)" class="btn-press px-6 py-2.5 rounded-xl bg-[#28282D] hover:bg-[#34343A] text-white text-xs font-bold border border-white/10 transition flex items-center gap-2">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Add Module
-          </button>
+
+          <div class="flex items-center justify-between pt-3 border-t border-white/5">
+            <button onclick="resetLayout()" class="btn-press px-4 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-bold border border-red-500/20 transition flex items-center gap-2">
+              Reset Layout
+            </button>
+            <span class="text-[11px] text-zinc-500 font-medium" id="layout-row-counter">4 Active Rows (8 Slots)</span>
+          </div>
         </div>
       </section>
 
       <!-- =================================================================== -->
       <!-- PAGE: DASHBOARD -->
       <!-- =================================================================== -->
-      <section id="page-dashboard" class="hidden space-y-6 max-w-xl mx-auto">
+      <section id="page-dashboard" class="hidden space-y-5 max-w-xl mx-auto">
         <div>
           <h2 class="text-2xl font-black text-white tracking-tight">Dashboard</h2>
           <p class="text-xs text-zinc-400 mt-1">Conky background service status and diagnostics.</p>
         </div>
 
-        <div class="p-6 rounded-2xl bg-[#1A1A1E] border border-white/10 space-y-4">
-          <div class="flex items-center justify-between">
+        <div class="rounded-xl bg-[#18181D] border border-white/5 divide-y divide-white/5">
+          <div class="p-4 flex items-center justify-between">
             <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Service Status</span>
-            <span id="daemon-badge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span> Running
+            <span id="daemon-badge" class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2"></span> Running
             </span>
           </div>
-          <div class="grid grid-cols-3 gap-2 text-xs pt-3 border-t border-white/5">
+          <div class="grid grid-cols-3 gap-2 p-4 text-xs">
             <div>
               <p class="text-zinc-500 font-medium">Process PID</p>
               <p id="daemon-pid" class="font-mono font-bold text-white text-sm mt-0.5">--</p>
@@ -317,13 +329,13 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <button onclick="triggerDaemon('restart')" class="btn-press flex-1 py-3 rounded-xl bg-[#0A84FF] hover:bg-[#0071e3] text-white text-xs font-bold shadow-md transition">
+          <button onclick="triggerDaemon('restart')" class="btn-press flex-1 py-2.5 rounded-xl bg-[#0A84FF] hover:bg-[#0071e3] text-white text-xs font-bold transition">
             Restart Widgets
           </button>
-          <button onclick="triggerDaemon('start')" class="btn-press flex-1 py-3 rounded-xl bg-[#28282D] hover:bg-[#34343A] text-white text-xs font-bold border border-white/10 transition">
+          <button onclick="triggerDaemon('start')" class="btn-press flex-1 py-2.5 rounded-xl bg-[#242429] hover:bg-[#2C2C32] text-white text-xs font-bold border border-white/10 transition">
             Start
           </button>
-          <button onclick="triggerDaemon('stop')" class="btn-press flex-1 py-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 text-xs font-bold border border-red-500/25 transition">
+          <button onclick="triggerDaemon('stop')" class="btn-press flex-1 py-2.5 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 text-xs font-bold border border-red-500/25 transition">
             Stop
           </button>
         </div>
@@ -338,35 +350,62 @@
           <p class="text-xs text-zinc-400 mt-1">Configure theme mode, borders, and accents.</p>
         </div>
 
-        <div class="p-6 rounded-2xl bg-[#1A1A1E] border border-white/10 space-y-5">
-          <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Theme Mode</span>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-            <button onclick="setColorMode('dark')" id="theme-btn-dark" class="btn-press p-5 rounded-2xl bg-[#131316] border-2 border-[#FF5A52] text-left transition">
-              <svg class="w-5 h-5 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-              </svg>
-              <p class="text-sm font-bold text-white mt-2.5">Dark Mode</p>
-              <p class="text-[11px] text-zinc-400 mt-0.5">Charcoal squircle surface (#16161A)</p>
+        <!-- Wallpaper Adaptive Hero Card -->
+        <div id="wallpaper-theme-card" onclick="setColorMode('wallpaper')" class="btn-press p-3.5 rounded-xl bg-[#18181D] border border-white/5 hover:border-[#38BDF8]/40 transition flex items-center justify-between cursor-pointer group">
+          <div class="flex items-center gap-3">
+            <div class="p-2 rounded-lg bg-[#38BDF8]/10 text-[#38BDF8] border border-[#38BDF8]/20 flex items-center justify-center">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h4 class="text-xs font-bold text-white group-hover:text-[#38BDF8] transition tracking-tight">Adaptive from Wallpaper</h4>
+                <span class="text-[9px] font-bold text-[#38BDF8] px-1.5 py-0.5 rounded bg-[#38BDF8]/10 border border-[#38BDF8]/20 uppercase">Material You</span>
+              </div>
+              <div id="wallpaper-swatches" class="flex items-center gap-1.5 mt-1.5">
+                <span class="w-3.5 h-3.5 rounded-full border border-black/20" style="background:#131619;"></span>
+                <span class="w-3.5 h-3.5 rounded-full border border-black/20" style="background:#EF0014;"></span>
+                <span class="w-3.5 h-3.5 rounded-full border border-black/20" style="background:#0070EF;"></span>
+                <span class="w-3.5 h-3.5 rounded-full border border-black/20" style="background:#2BEF73;"></span>
+                <span class="w-3.5 h-3.5 rounded-full border border-black/20" style="background:#EF44E0;"></span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="event.stopPropagation(); refreshWallpaperPalette()" title="Re-sample wallpaper colors" class="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
             </button>
-            <button onclick="setColorMode('light')" id="theme-btn-light" class="btn-press p-5 rounded-2xl bg-white border border-zinc-300 text-left transition">
-              <svg class="w-5 h-5 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="5"></circle>
-                <line x1="12" y1="1" x2="12" y2="3"></line>
-                <line x1="12" y1="21" x2="12" y2="23"></line>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                <line x1="1" y1="12" x2="3" y2="12"></line>
-                <line x1="21" y1="12" x2="23" y2="12"></line>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-              </svg>
-              <p class="text-sm font-bold text-zinc-900 mt-2.5">Light Mode</p>
-              <p class="text-[11px] text-zinc-600 mt-0.5">Crisp paper squircle surface (#FFFFFF)</p>
-            </button>
+            <div id="wallpaper-active-badge" class="hidden text-[10px] text-[#38BDF8] font-bold flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#38BDF8]/10 border border-[#38BDF8]/20">
+              Active
+            </div>
+          </div>
+        </div>
+
+        <!-- Terminal & Editor Themes Section -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Terminal & Editor Themes</span>
+            <span id="theme-count-badge" class="text-[10px] font-mono text-zinc-400 bg-white/5 px-2 py-0.5 rounded-full border border-white/10">25 Themes</span>
           </div>
 
+          <!-- Category Filter Tabs -->
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] no-scrollbar">
+            <button onclick="filterThemes('all')" id="theme-tab-all" class="theme-tab-btn px-3 py-1.5 rounded-lg bg-[#E10600] text-white font-bold transition">All (25)</button>
+            <button onclick="filterThemes('dark')" id="theme-tab-dark" class="theme-tab-btn px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 font-medium transition">Dark (7)</button>
+            <button onclick="filterThemes('light')" id="theme-tab-light" class="theme-tab-btn px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 font-medium transition">Light (6)</button>
+            <button onclick="filterThemes('retro')" id="theme-tab-retro" class="theme-tab-btn px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 font-medium transition">Retro & Zen (7)</button>
+            <button onclick="filterThemes('neon')" id="theme-tab-neon" class="theme-tab-btn px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 font-medium transition">Neon (5)</button>
+          </div>
+
+          <!-- Theme Card Grid -->
+          <div id="themes-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[340px] overflow-y-auto pr-1">
+            <!-- Rendered dynamically by renderThemeGallery() -->
+          </div>
+        </div>
+
+        <!-- Visual Effects (Blur & Borders) -->
+        <div class="rounded-xl bg-[#18181D] border border-white/5 divide-y divide-white/5 p-4 space-y-3">
           <!-- Background Blur Toggle -->
-          <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+          <div class="flex items-center justify-between pb-3">
             <div class="pr-4">
               <p class="text-xs font-bold text-white">Background Blur</p>
               <p class="text-[11px] text-zinc-400 mt-0.5">Frosted backdrop blur behind widget cards</p>
@@ -378,15 +417,15 @@
           </div>
 
           <!-- Blur Control Options (Visible when enabled) -->
-          <div id="blur-controls" class="space-y-4 pt-4 border-t border-white/5 hidden">
+          <div id="blur-controls" class="space-y-3 pt-3 hidden">
             <!-- Blur Intensity Slider -->
-            <div class="space-y-2">
+            <div class="space-y-1.5">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-xs font-bold text-white">Blur Intensity</p>
                   <p class="text-[11px] text-zinc-400">Gaussian blur spread (radius)</p>
                 </div>
-                <span id="label-blur-radius" class="text-xs font-mono font-bold text-[#FF5A52] px-2.5 py-0.5 bg-[#FF5A52]/10 rounded-md border border-[#FF5A52]/20">30px</span>
+                <span id="label-blur-radius" class="text-xs font-mono font-bold text-[#E10600] px-2 py-0.5 bg-[#E10600]/10 rounded border border-[#E10600]/20">30px</span>
               </div>
               <input type="range" id="range-blur-radius" min="10" max="60" step="5" value="30" oninput="setBlurRadius(this.value)" class="w-full">
               <div class="flex justify-between text-[10px] text-zinc-500 font-medium">
@@ -397,13 +436,13 @@
             </div>
 
             <!-- Surface Opacity Slider -->
-            <div class="space-y-2 pt-2 border-t border-white/5">
+            <div class="space-y-1.5 pt-2 border-t border-white/5">
               <div class="flex items-center justify-between">
                 <div>
                   <p class="text-xs font-bold text-white">Surface Opacity</p>
                   <p class="text-[11px] text-zinc-400">Acrylic smoke tint density</p>
                 </div>
-                <span id="label-blur-opacity" class="text-xs font-mono font-bold text-[#FF5A52] px-2.5 py-0.5 bg-[#FF5A52]/10 rounded-md border border-[#FF5A52]/20">60%</span>
+                <span id="label-blur-opacity" class="text-xs font-mono font-bold text-[#E10600] px-2 py-0.5 bg-[#E10600]/10 rounded border border-[#E10600]/20">60%</span>
               </div>
               <input type="range" id="range-blur-opacity" min="30" max="90" step="5" value="60" oninput="setBlurOpacity(this.value)" class="w-full">
               <div class="flex justify-between text-[10px] text-zinc-500 font-medium">
@@ -414,7 +453,7 @@
             </div>
           </div>
 
-          <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+          <div class="pt-3 flex items-center justify-between">
             <div>
               <p class="text-xs font-bold text-white">1px Widget Border</p>
               <p class="text-[11px] text-zinc-400">Subtle hairline boundary around cards</p>
@@ -428,22 +467,94 @@
       </section>
 
       <!-- =================================================================== -->
-      <!-- PAGE: SCALE -->
+      <!-- PAGE: SCALE & POSITION -->
       <!-- =================================================================== -->
-      <section id="page-scale" class="hidden space-y-6 max-w-xl mx-auto">
+      <section id="page-scale" class="hidden space-y-5 max-w-xl mx-auto">
         <div>
-          <h2 class="text-2xl font-black text-white tracking-tight">Scale</h2>
-          <p class="text-xs text-zinc-400 mt-1">Display scaling multiplier for Retina / 4K screens.</p>
+          <h2 class="text-2xl font-black text-white tracking-tight">Scale & Position</h2>
+          <p class="text-xs text-zinc-400 mt-1">Adjust widget scaling, placement, and desktop margins.</p>
         </div>
 
-        <div class="p-6 rounded-2xl bg-[#1A1A1E] border border-white/10 space-y-3">
-          <p class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Multiplier</p>
-          <div class="grid grid-cols-5 gap-2.5" id="scale-options">
-            <button onclick="setScale(0.8)" data-scale="0.8" class="scale-btn py-3 rounded-xl bg-[#242429] text-xs font-bold text-white hover:bg-white/10">80%</button>
-            <button onclick="setScale(1.0)" data-scale="1.0" class="scale-btn py-3 rounded-xl bg-[#242429] border border-[#FF5A52] text-xs font-bold text-white">100%</button>
-            <button onclick="setScale(1.25)" data-scale="1.25" class="scale-btn py-3 rounded-xl bg-[#242429] text-xs font-bold text-white hover:bg-white/10">125%</button>
-            <button onclick="setScale(1.5)" data-scale="1.5" class="scale-btn py-3 rounded-xl bg-[#242429] text-xs font-bold text-white hover:bg-white/10">150%</button>
-            <button onclick="setScale(2.0)" data-scale="2.0" class="scale-btn py-3 rounded-xl bg-[#242429] text-xs font-bold text-white hover:bg-white/10">200%</button>
+        <!-- Section 1: Display Scale -->
+        <div class="rounded-xl bg-[#18181D] border border-white/5 p-4 space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Display Scale</span>
+            <span id="label-scale" class="text-xs font-mono font-bold text-[#E10600] px-2 py-0.5 bg-[#E10600]/10 rounded border border-[#E10600]/20">100%</span>
+          </div>
+
+          <!-- Quick Presets -->
+          <div class="grid grid-cols-5 gap-2" id="scale-options">
+            <button onclick="setScale(0.8)" data-scale="0.8" class="scale-btn py-2 rounded-lg bg-[#242429] text-xs font-bold text-zinc-300 hover:text-white hover:bg-white/10 transition">80%</button>
+            <button onclick="setScale(1.0)" data-scale="1.0" class="scale-btn py-2 rounded-lg bg-[#242429] border border-[#E10600] text-xs font-bold text-white transition">100%</button>
+            <button onclick="setScale(1.25)" data-scale="1.25" class="scale-btn py-2 rounded-lg bg-[#242429] text-xs font-bold text-zinc-300 hover:text-white hover:bg-white/10 transition">125%</button>
+            <button onclick="setScale(1.5)" data-scale="1.5" class="scale-btn py-2 rounded-lg bg-[#242429] text-xs font-bold text-zinc-300 hover:text-white hover:bg-white/10 transition">150%</button>
+            <button onclick="setScale(2.0)" data-scale="2.0" class="scale-btn py-2 rounded-lg bg-[#242429] text-xs font-bold text-zinc-300 hover:text-white hover:bg-white/10 transition">200%</button>
+          </div>
+
+          <!-- Fine-grained Slider -->
+          <div class="space-y-1.5 pt-2 border-t border-white/5">
+            <input type="range" id="range-scale" min="60" max="250" step="5" value="100" oninput="onScaleSliderInput(this.value)" class="w-full">
+            <div class="flex justify-between text-[10px] text-zinc-500 font-medium">
+              <span>Compact (60%)</span>
+              <span>Default (100%)</span>
+              <span>Ultra-Large (250%)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: On-Screen Placement & Margins -->
+        <div class="rounded-xl bg-[#18181D] border border-white/5 p-4 space-y-4">
+          <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider block">Screen Placement</span>
+
+          <!-- Simulated Screen Frame -->
+          <div class="w-full max-w-[340px] aspect-[16/10] bg-[#141418] rounded-xl border border-white/10 p-3 flex flex-col justify-between mx-auto">
+            <!-- Top Row -->
+            <div class="flex justify-between">
+              <button onclick="setPosition('top_left')" id="pos-top_left" title="Top Left" class="pos-btn w-8 h-8 rounded-lg bg-[#242429] hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center transition border border-white/5 text-[10px] font-bold">TL</button>
+              <button onclick="setPosition('top_middle')" id="pos-top_middle" title="Top Center" class="pos-btn w-8 h-8 rounded-lg bg-[#242429] hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center transition border border-white/5 text-[10px] font-bold">TC</button>
+              <button onclick="setPosition('top_right')" id="pos-top_right" title="Top Right" class="pos-btn w-8 h-8 rounded-lg bg-[#242429] hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center transition border border-white/5 text-[10px] font-bold">TR</button>
+            </div>
+            <!-- Middle Row -->
+            <div class="flex justify-between">
+              <button onclick="setPosition('middle_left')" id="pos-middle_left" title="Middle Left" class="pos-btn w-8 h-8 rounded-lg bg-[#242429] hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center transition border border-white/5 text-[10px] font-bold">ML</button>
+              <button onclick="setPosition('middle_middle')" id="pos-middle_middle" title="Center" class="pos-btn w-8 h-8 rounded-lg bg-[#242429] hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center transition border border-white/5 text-[10px] font-bold">C</button>
+              <button onclick="setPosition('middle_right')" id="pos-middle_right" title="Middle Right" class="pos-btn w-8 h-8 rounded-lg bg-[#242429] hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center transition border border-white/5 text-[10px] font-bold">MR</button>
+            </div>
+            <!-- Bottom Row -->
+            <div class="flex justify-between">
+              <button onclick="setPosition('bottom_left')" id="pos-bottom_left" title="Bottom Left" class="pos-btn w-8 h-8 rounded-lg bg-[#242429] hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center transition border border-white/5 text-[10px] font-bold">BL</button>
+              <button onclick="setPosition('bottom_middle')" id="pos-bottom_middle" title="Bottom Center" class="pos-btn w-8 h-8 rounded-lg bg-[#242429] hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center transition border border-white/5 text-[10px] font-bold">BC</button>
+              <button onclick="setPosition('bottom_right')" id="pos-bottom_right" title="Bottom Right" class="pos-btn w-8 h-8 rounded-lg bg-[#242429] hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center transition border border-white/5 text-[10px] font-bold">BR</button>
+            </div>
+          </div>
+
+          <!-- Margin Offsets -->
+          <div class="space-y-3 pt-3 border-t border-white/5">
+            <!-- Horizontal Gap -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-zinc-300">Horizontal Offset</span>
+                <span id="label-gap-x" class="text-xs font-mono font-bold text-[#E10600]">26px</span>
+              </div>
+              <input type="range" id="range-gap-x" min="0" max="300" step="2" value="26" oninput="setGapX(this.value)" class="w-full">
+              <div class="flex justify-between text-[10px] text-zinc-500">
+                <span>Flush (0px)</span>
+                <span>Margin (300px)</span>
+              </div>
+            </div>
+
+            <!-- Vertical Gap -->
+            <div class="space-y-1.5 pt-2 border-t border-white/5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-zinc-300">Vertical Offset</span>
+                <span id="label-gap-y" class="text-xs font-mono font-bold text-[#E10600]">54px</span>
+              </div>
+              <input type="range" id="range-gap-y" min="0" max="300" step="2" value="54" oninput="setGapY(this.value)" class="w-full">
+              <div class="flex justify-between text-[10px] text-zinc-500">
+                <span>Top Edge (0px)</span>
+                <span>Margin (300px)</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -451,13 +562,13 @@
       <!-- =================================================================== -->
       <!-- PAGE: PREFERENCES -->
       <!-- =================================================================== -->
-      <section id="page-preferences" class="hidden space-y-6 max-w-xl mx-auto">
+      <section id="page-preferences" class="hidden space-y-5 max-w-xl mx-auto">
         <div>
           <h2 class="text-2xl font-black text-white tracking-tight">Preferences</h2>
           <p class="text-xs text-zinc-400 mt-1">Clock format, units, and system metrics.</p>
         </div>
 
-        <div class="p-6 rounded-2xl bg-[#1A1A1E] border border-white/10 space-y-5">
+        <div class="rounded-xl bg-[#18181D] border border-white/5 divide-y divide-white/5 p-4 space-y-4">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-xs font-bold text-white">Clock Format</p>
@@ -465,54 +576,54 @@
             </div>
             <!-- Custom Sleek Dropdown (Clock Format) -->
             <div class="relative" id="dropdown-time-container">
-              <button type="button" onclick="toggleDropdown('time')" id="btn-dropdown-time" class="h-9 min-w-[175px] px-3.5 bg-[#242429] hover:bg-[#2C2C32] text-xs text-white border border-white/10 rounded-xl flex items-center justify-between gap-3 cursor-pointer outline-none focus:border-[#FF5A52] transition">
+              <button type="button" onclick="toggleDropdown('time')" id="btn-dropdown-time" class="h-9 min-w-[175px] px-3.5 bg-[#242429] hover:bg-[#2C2C32] text-xs text-white border border-white/10 rounded-xl flex items-center justify-between gap-3 cursor-pointer outline-none focus:border-[#E10600] transition">
                 <span id="label-time">24-Hour (13:45)</span>
                 <svg id="arrow-time" class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
               </button>
-              <div id="menu-dropdown-time" class="hidden absolute right-0 top-full mt-1.5 w-full min-w-[185px] bg-[#1E1E22] border border-white/10 rounded-xl shadow-2xl py-1 z-50">
+              <div id="menu-dropdown-time" class="hidden absolute right-0 top-full mt-1.5 w-full min-w-[185px] bg-[#1E1E22] border border-white/10 rounded-xl py-1 z-50">
                 <div onclick="selectTimeFormat('24h')" id="opt-time-24h" class="px-3 py-2 text-xs text-zinc-300 hover:text-white hover:bg-white/10 cursor-pointer flex items-center justify-between transition rounded-lg mx-1 my-0.5">
                   <span>24-Hour (13:45)</span>
-                  <svg class="check-icon w-3.5 h-3.5 text-[#FF5A52] hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  <svg class="check-icon w-3.5 h-3.5 text-[#E10600] hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 </div>
                 <div onclick="selectTimeFormat('12h')" id="opt-time-12h" class="px-3 py-2 text-xs text-zinc-300 hover:text-white hover:bg-white/10 cursor-pointer flex items-center justify-between transition rounded-lg mx-1 my-0.5">
                   <span>12-Hour (01:45 PM)</span>
-                  <svg class="check-icon w-3.5 h-3.5 text-[#FF5A52] hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  <svg class="check-icon w-3.5 h-3.5 text-[#E10600] hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 </div>
               </div>
               <input type="hidden" id="sel-time" value="24h">
             </div>
           </div>
 
-          <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+          <div class="pt-4 flex items-center justify-between">
             <div>
               <p class="text-xs font-bold text-white">Measurement System</p>
               <p class="text-[11px] text-zinc-400">Celsius (°C, km/h) vs Fahrenheit (°F, mph)</p>
             </div>
             <!-- Custom Sleek Dropdown (Measurement System) -->
             <div class="relative" id="dropdown-units-container">
-              <button type="button" onclick="toggleDropdown('units')" id="btn-dropdown-units" class="h-9 min-w-[175px] px-3.5 bg-[#242429] hover:bg-[#2C2C32] text-xs text-white border border-white/10 rounded-xl flex items-center justify-between gap-3 cursor-pointer outline-none focus:border-[#FF5A52] transition">
+              <button type="button" onclick="toggleDropdown('units')" id="btn-dropdown-units" class="h-9 min-w-[175px] px-3.5 bg-[#242429] hover:bg-[#2C2C32] text-xs text-white border border-white/10 rounded-xl flex items-center justify-between gap-3 cursor-pointer outline-none focus:border-[#E10600] transition">
                 <span id="label-units">Metric (°C, km/h)</span>
                 <svg id="arrow-units" class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
               </button>
-              <div id="menu-dropdown-units" class="hidden absolute right-0 top-full mt-1.5 w-full min-w-[185px] bg-[#1E1E22] border border-white/10 rounded-xl shadow-2xl py-1 z-50">
+              <div id="menu-dropdown-units" class="hidden absolute right-0 top-full mt-1.5 w-full min-w-[185px] bg-[#1E1E22] border border-white/10 rounded-xl py-1 z-50">
                 <div onclick="selectMeasurementSystem('metric')" id="opt-units-metric" class="px-3 py-2 text-xs text-zinc-300 hover:text-white hover:bg-white/10 cursor-pointer flex items-center justify-between transition rounded-lg mx-1 my-0.5">
                   <span>Metric (°C, km/h)</span>
-                  <svg class="check-icon w-3.5 h-3.5 text-[#FF5A52] hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  <svg class="check-icon w-3.5 h-3.5 text-[#E10600] hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 </div>
                 <div onclick="selectMeasurementSystem('imperial')" id="opt-units-imperial" class="px-3 py-2 text-xs text-zinc-300 hover:text-white hover:bg-white/10 cursor-pointer flex items-center justify-between transition rounded-lg mx-1 my-0.5">
                   <span>Imperial (°F, mph)</span>
-                  <svg class="check-icon w-3.5 h-3.5 text-[#FF5A52] hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  <svg class="check-icon w-3.5 h-3.5 text-[#E10600] hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 </div>
               </div>
               <input type="hidden" id="sel-units" value="metric">
             </div>
           </div>
 
-          <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+          <div class="pt-4 flex items-center justify-between">
             <div>
               <p class="text-xs font-bold text-white">Launch at Login</p>
               <p class="text-[11px] text-zinc-400">Automatically start widgets when signing into desktop (XDG autostart)</p>
@@ -528,18 +639,18 @@
       <!-- =================================================================== -->
       <!-- PAGE: LOCATION -->
       <!-- =================================================================== -->
-      <section id="page-location" class="hidden space-y-6 max-w-xl mx-auto">
+      <section id="page-location" class="hidden space-y-5 max-w-xl mx-auto">
         <div>
           <h2 class="text-2xl font-black text-white tracking-tight">Location</h2>
           <p class="text-xs text-zinc-400 mt-1">Configure weather forecast city.</p>
         </div>
 
-        <div class="p-6 rounded-2xl bg-[#1A1A1E] border border-white/10 space-y-4">
+        <div class="rounded-xl bg-[#18181D] border border-white/5 p-4 space-y-4">
           <div>
             <label class="text-xs font-bold text-white">City / Location</label>
-            <input type="text" id="input-location" placeholder="e.g. Mumbai, London, Surabaya" class="w-full mt-2 px-4 py-2.5 rounded-xl bg-[#242429] border border-white/10 text-xs text-white outline-none focus:border-[#FF5A52]">
+            <input type="text" id="input-location" placeholder="e.g. Mumbai, London, Surabaya" class="w-full mt-2 px-3.5 py-2 rounded-xl bg-[#242429] border border-white/10 text-xs text-white outline-none focus:border-[#E10600]">
           </div>
-          <button onclick="saveLocation()" class="btn-press px-5 py-2.5 rounded-xl bg-[#FF5A52] hover:bg-[#ff4238] text-white text-xs font-bold transition">
+          <button onclick="saveLocation()" class="btn-press px-4 py-2 rounded-xl bg-[#E10600] hover:bg-[#c90500] text-white text-xs font-bold transition">
             Save & Update Weather
           </button>
         </div>
@@ -562,15 +673,12 @@
   <!-- MODAL DIALOG: ADD MODULE (Clean Two-Step Picker) -->
   <!-- =================================================================== -->
   <div id="modal-add-module" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="bg-[#1C1C20] border border-white/15 rounded-3xl w-full max-w-3xl max-h-[88vh] flex flex-col shadow-2xl overflow-hidden">
+    <div class="bg-[#1C1C20] border border-white/10 rounded-2xl w-full max-w-3xl max-h-[88vh] flex flex-col overflow-hidden">
       
       <!-- Step 1 Header: Choose Module Family -->
       <div id="modal-header-step1" class="p-6 pb-4 border-b border-white/5 space-y-3">
         <div class="flex items-center justify-between">
-          <div>
-            <h3 class="text-lg font-black text-white tracking-tight">Add Module</h3>
-            <p class="text-xs text-zinc-400 mt-0.5">Select a module category for slot <span id="target-slot-badge" class="font-bold text-[#FF5A52]">B1</span>.</p>
-          </div>
+          <h3 id="modal-title-step1" class="text-lg font-black text-white tracking-tight">Select Module</h3>
           <button onclick="selectModule('EMPTY')" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-red-500/10 text-xs font-bold text-zinc-400 hover:text-red-400 border border-white/5 transition flex items-center gap-1.5">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
             Clear Slot
@@ -579,7 +687,7 @@
 
         <!-- Search Bar with clean SVG icon -->
         <div class="relative">
-          <input type="text" id="family-search" oninput="filterFamilies()" placeholder="Search modules..." class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#28282E] border border-white/10 focus:border-[#FF5A52] text-xs text-white placeholder-zinc-500 outline-none transition">
+          <input type="text" id="family-search" oninput="filterFamilies()" placeholder="Search modules..." class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#28282E] border border-white/10 focus:border-[#E10600] text-xs text-white placeholder-zinc-500 outline-none transition">
           <span class="absolute left-3.5 top-3 text-xs text-zinc-500">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"></circle>
@@ -601,7 +709,7 @@
                 <span id="step2-icon" class="text-sm"></span>
                 <h3 id="step2-title" class="text-lg font-black text-white tracking-tight">Module</h3>
               </div>
-              <p class="text-xs text-zinc-400 mt-0.5">Select a format variant for slot <span id="target-slot-badge-step2" class="font-bold text-[#FF5A52]">B1</span>.</p>
+              <p class="text-xs text-zinc-400 mt-0.5">Select a format variant for slot <span id="target-slot-badge-step2" class="font-bold text-[#E10600]">B1</span>.</p>
             </div>
           </div>
           <span id="step2-category" class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider px-2.5 py-1 rounded-lg bg-white/5 border border-white/5">Category</span>
@@ -619,8 +727,7 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="p-4 px-6 border-t border-white/5 bg-[#17171B] flex items-center justify-between">
-        <span class="text-xs text-zinc-500 font-medium" id="modal-footer-hint">Click any module family to view its 3 format variants.</span>
+      <div class="p-4 px-6 border-t border-white/5 bg-[#17171B] flex items-center justify-end">
         <button onclick="closeAddModuleModal()" class="btn-press px-6 py-2 rounded-xl bg-[#28282D] hover:bg-[#34343A] text-white text-xs font-bold transition">
           Close
         </button>
@@ -631,7 +738,7 @@
 
   <!-- Toast Notification Container -->
   <div id="toast-box" class="fixed bottom-6 right-6 z-50 pointer-events-none transition-all duration-300 opacity-0 translate-y-3">
-    <div id="toast-msg" class="bg-[#1C1C20] border border-white/15 px-4 py-3 rounded-2xl shadow-2xl text-xs font-bold text-white flex items-center gap-2.5">
+    <div id="toast-msg" class="bg-[#1C1C20] border border-white/15 px-4 py-3 rounded-2xl text-xs font-bold text-white flex items-center gap-2.5">
       <svg class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <polyline points="20 6 9 17 4 12"></polyline>
       </svg>
@@ -664,7 +771,7 @@
         id: "network",
         name: "Network Monitor",
         category: "Connectivity",
-        icon: `<svg class="w-4 h-4 text-[#FF5A52]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>`,
+        icon: `<svg class="w-4 h-4 text-[#E10600]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>`,
         variants: [
           { id: "NETW_1x1_MIN", name: "1x1 Minimal", title: "Network Pulse", size: "1x1", desc: "Mirrored bidirectional traffic waveform with live transfer rates" },
           { id: "NETW_1x1_DET", name: "1x1 Detailed", title: "Dual Bandwidth Track", size: "1x1", desc: "Stacked upload & download trendlines with session totals" },
@@ -675,7 +782,7 @@
         id: "calendar",
         name: "Calendar & Agenda",
         category: "Schedule",
-        icon: `<svg class="w-4 h-4 text-[#FF5A52]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+        icon: `<svg class="w-4 h-4 text-[#E10600]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
         variants: [
           { id: "CALN_1x1_MIN", name: "1x1 Minimal", title: "Monthly Matrix", size: "1x1", desc: "7-day calendar matrix with active day coral badge" },
           { id: "CALN_1x1_DET", name: "1x1 Detailed", title: "Day & Agenda", size: "1x1", desc: "Bold date typography with weekday and event pill" },
@@ -741,7 +848,7 @@
         id: "daily_inspiration",
         name: "Daily Inspiration",
         category: "Lifestyle",
-        icon: `<svg class="w-4 h-4 text-[#FF5A52]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.75-2-2-2H4c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 3-2 5-2 6z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.75-2-2-2h-4c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 3-2 5-2 6z"/></svg>`,
+        icon: `<svg class="w-4 h-4 text-[#E10600]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.75-2-2-2H4c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 3-2 5-2 6z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.75-2-2-2h-4c-1.25 0-2 .75-2 2v6c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 3-2 5-2 6z"/></svg>`,
         variants: [
           { id: "QUOT_1x1_MIN", name: "1x1 Minimal", title: "Inspiration Spark", size: "1x1", desc: "Compact daily wisdom card" },
           { id: "QUOT_1x1_DET", name: "1x1 Detailed", title: "Philosophical Insight", size: "1x1", desc: "Curated quote with category & author" },
@@ -823,120 +930,267 @@
         const isEmp = info.isEmp;
 
         const card = document.createElement('div');
-        card.className = `slot-card p-5 ${fullWidth ? 'w-full' : ''} ${isSelected ? 'selected' : ''}`;
-        card.onclick = () => selectSlot(slotId);
-        card.ondblclick = () => openAddModuleModal(slotId);
-
-        let bodyHtml = '';
         if (isEmp) {
-          bodyHtml = `
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">${slotId}</p>
-                <p class="text-sm font-bold text-zinc-500 mt-0.5">Empty Slot</p>
-              </div>
-              <button onclick="event.stopPropagation(); openAddModuleModal('${slotId}')" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-xs font-semibold border border-white/5 transition flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                Add Module
-              </button>
+          card.className = `slot-card p-3 rounded-xl border border-dashed border-white/10 hover:border-[#E10600]/40 bg-transparent hover:bg-white/[0.02] ${fullWidth ? 'w-full' : ''} ${isSelected ? 'selected' : ''} cursor-pointer group transition flex items-center justify-between`;
+          card.onclick = () => openAddModuleModal(slotId);
+          card.innerHTML = `
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-mono text-zinc-500 font-semibold px-1.5 py-0.5 rounded bg-white/5">${slotId}</span>
+              <span class="text-xs text-zinc-400 font-medium group-hover:text-zinc-200 transition">Empty Slot</span>
             </div>
+            <button onclick="event.stopPropagation(); openAddModuleModal('${slotId}')" class="btn-press px-2.5 py-1 rounded-lg bg-white/5 hover:bg-[#E10600]/15 text-zinc-400 hover:text-white text-xs font-semibold border border-white/10 transition flex items-center gap-1.5">
+              <svg class="w-3 h-3 text-[#E10600]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>Add</span>
+            </button>
           `;
-        } else {
-          bodyHtml = `
-            <div class="flex items-center justify-between">
-              <div class="min-w-0 pr-3">
-                <div class="flex items-center gap-2">
-                  <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-wider px-2 py-0.5 rounded bg-white/5 border border-white/5">${slotId}</span>
-                  <span class="text-[10px] font-semibold text-zinc-400 bg-white/5 px-2 py-0.5 rounded border border-white/5">${info.is2x1 ? '2x1 Wide' : '1x1'}</span>
-                  <span class="text-[10px] text-zinc-500 font-medium">${info.category || ''}</span>
-                </div>
-                <h4 class="text-sm font-black text-white mt-1.5 truncate">${info.parentName}</h4>
-                <p class="text-xs font-semibold text-[#FF5A52] mt-0.5 truncate">${info.variantTitle || ''}</p>
-              </div>
-
-              <!-- Clean Actions -->
-              <div class="flex items-center gap-1.5 opacity-80 shrink-0">
-                <button onclick="event.stopPropagation(); openAddModuleModal('${slotId}')" title="Change Module" class="p-2 rounded-xl hover:bg-white/10 text-zinc-400 hover:text-white transition flex items-center justify-center border border-white/5">
-                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
-                </button>
-                <button onclick="event.stopPropagation(); clearSlot('${slotId}')" title="Clear Slot" class="p-2 rounded-xl hover:bg-red-500/20 text-zinc-400 hover:text-red-400 transition flex items-center justify-center border border-white/5">
-                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </button>
-              </div>
-            </div>
-          `;
+          return card;
         }
 
-        card.innerHTML = bodyHtml;
+        card.className = `slot-card p-3.5 rounded-xl bg-[#1C1C20] border border-white/8 hover:border-[#E10600]/40 ${fullWidth ? 'w-full' : ''} ${isSelected ? 'selected' : ''} cursor-pointer group transition`;
+        card.onclick = () => openAddModuleModal(slotId);
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="min-w-0 pr-3">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold text-[#E10600] uppercase tracking-wider px-2 py-0.5 rounded bg-[#E10600]/10 border border-[#E10600]/20">${slotId}</span>
+                <h4 class="text-sm font-bold text-white truncate">${info.parentName}</h4>
+              </div>
+              <p class="text-xs text-zinc-400 mt-1 truncate">${info.variantTitle || ''}</p>
+            </div>
+
+            <!-- Clean Actions -->
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="event.stopPropagation(); openAddModuleModal('${slotId}')" title="Edit / Change Module" class="btn-press px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-[#E10600]/15 text-zinc-300 hover:text-white text-xs font-semibold border border-white/10 transition flex items-center gap-1">
+                <svg class="w-3 h-3 text-[#E10600]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                <span>Edit</span>
+              </button>
+              <button onclick="event.stopPropagation(); clearSlot('${slotId}')" title="Clear Slot" class="p-1.5 rounded-lg hover:bg-red-500/20 text-zinc-400 hover:text-red-400 transition flex items-center justify-center border border-white/5">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+        `;
         return card;
       };
 
-      // Row A (Banner or 1x1 pair)
-      const modA1 = slots.A1 || "CALN_2x1_WID";
-      const modA2 = slots.A2 || "EMPTY";
-      if (is2x1(modA1)) {
-        container.appendChild(createCard('A1', modA1, true));
-      } else {
-        const rowA = document.createElement('div');
-        rowA.className = "grid grid-cols-2 gap-3.5";
-        rowA.appendChild(createCard('A1', modA1));
-        rowA.appendChild(createCard('A2', modA2));
-        container.appendChild(rowA);
+      let rowOrder = state.row_order;
+      if (!rowOrder || !Array.isArray(rowOrder) || rowOrder.length === 0) {
+        const keys = Object.keys(slots);
+        const set = new Set();
+        keys.forEach(k => {
+          if (k.length >= 2) set.add(k[0]);
+        });
+        rowOrder = Array.from(set).sort();
+        if (rowOrder.length === 0) {
+          rowOrder = ['A', 'B', 'C', 'D'];
+        }
+        state.row_order = rowOrder;
       }
 
-      // Row B
-      const modB1 = slots.B1 || "EMPTY";
-      const modB2 = slots.B2 || "EMPTY";
-      if (is2x1(modB1)) {
-        container.appendChild(createCard('B1', modB1, true));
-      } else {
-        const rowB = document.createElement('div');
-        rowB.className = "grid grid-cols-2 gap-3.5";
-        rowB.appendChild(createCard('B1', modB1));
-        rowB.appendChild(createCard('B2', modB2));
-        container.appendChild(rowB);
+      // Update active rows counter in UI
+      const counter = document.getElementById('layout-row-counter');
+      if (counter) {
+        counter.textContent = `${rowOrder.length} Active Rows (${rowOrder.length * 2} Slots)`;
       }
 
-      // Row C
-      const modC1 = slots.C1 || "EMPTY";
-      const modC2 = slots.C2 || "EMPTY";
-      if (is2x1(modC1)) {
-        container.appendChild(createCard('C1', modC1, true));
-      } else {
-        const rowC = document.createElement('div');
-        rowC.className = "grid grid-cols-2 gap-3.5";
-        rowC.appendChild(createCard('C1', modC1));
-        rowC.appendChild(createCard('C2', modC2));
-        container.appendChild(rowC);
+      rowOrder.forEach((rowLetter, index) => {
+        const s1 = rowLetter + '1';
+        const s2 = rowLetter + '2';
+        const mod1 = slots[s1] || "EMPTY";
+        const mod2 = slots[s2] || "EMPTY";
+        const isWide = is2x1(mod1);
+
+        // Row Container Box
+        const rowWrapper = document.createElement('div');
+        rowWrapper.className = "p-3 rounded-xl bg-[#18181D] border border-white/5 space-y-2 transition";
+
+        // Row Header (Label, Type, Move Up, Move Down, Split/Wide, Delete)
+        const header = document.createElement('div');
+        header.className = "flex items-center justify-between px-1 text-xs";
+        header.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-5 h-5 rounded-md bg-[#E10600]/10 text-[#E10600] font-black text-[11px] flex items-center justify-center border border-[#E10600]/20">${rowLetter}</span>
+            <span class="font-bold text-white text-xs">Row ${rowLetter}</span>
+            <span class="text-[10px] text-zinc-500 font-semibold px-2 py-0.5 rounded bg-white/5">${isWide ? '2x1 Banner' : 'Dual Split'}</span>
+          </div>
+          <div class="flex items-center gap-1.5 opacity-80 hover:opacity-100">
+            <button onclick="moveRow(${index}, -1)" title="Move Row Up" ${index === 0 ? 'disabled' : ''} class="p-1 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white disabled:opacity-20 disabled:hover:bg-transparent transition">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>
+            </button>
+            <button onclick="moveRow(${index}, 1)" title="Move Row Down" ${index === rowOrder.length - 1 ? 'disabled' : ''} class="p-1 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white disabled:opacity-20 disabled:hover:bg-transparent transition">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <button onclick="toggleRowWideSplit('${rowLetter}')" title="${isWide ? 'Split into Dual 1x1' : 'Convert to 2x1 Wide'}" class="px-2 py-1 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white text-[10px] font-bold border border-white/5 transition flex items-center gap-1">
+              ${isWide ? '⊞ Split' : '▭ Wide'}
+            </button>
+            ${rowOrder.length > 1 ? `
+              <button onclick="deleteRow('${rowLetter}')" title="Delete Row" class="px-2 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 text-[10px] font-bold border border-red-500/20 transition flex items-center gap-1">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span>Delete</span>
+              </button>
+            ` : ''}
+          </div>
+        `;
+        rowWrapper.appendChild(header);
+
+        // Row Content Cards
+        if (isWide) {
+          rowWrapper.appendChild(createCard(s1, mod1, true));
+        } else {
+          const grid = document.createElement('div');
+          grid.className = "grid grid-cols-2 gap-2.5";
+          grid.appendChild(createCard(s1, mod1));
+          grid.appendChild(createCard(s2, mod2));
+          rowWrapper.appendChild(grid);
+        }
+
+        container.appendChild(rowWrapper);
+      });
+    }
+
+    function addNewRow() {
+      if (!state.row_order) state.row_order = ['A', 'B', 'C', 'D'];
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      let nextLetter = null;
+      for (let i = 0; i < alphabet.length; i++) {
+        if (!state.row_order.includes(alphabet[i])) {
+          nextLetter = alphabet[i];
+          break;
+        }
+      }
+      if (!nextLetter) {
+        showToast("Maximum number of rows reached");
+        return;
       }
 
-      // Row D
-      const modD1 = slots.D1 || "EMPTY";
-      const modD2 = slots.D2 || "EMPTY";
-      if (is2x1(modD1)) {
-        container.appendChild(createCard('D1', modD1, true));
-      } else {
-        const rowD = document.createElement('div');
-        rowD.className = "grid grid-cols-2 gap-3.5";
-        rowD.appendChild(createCard('D1', modD1));
-        rowD.appendChild(createCard('D2', modD2));
-        container.appendChild(rowD);
+      state.row_order.push(nextLetter);
+      if (!state.slots) state.slots = {};
+      state.slots[nextLetter + '1'] = "EMPTY";
+      state.slots[nextLetter + '2'] = "EMPTY";
+
+      renderSlots();
+      saveState();
+      showToast(`Added Row ${nextLetter}`);
+    }
+
+    function deleteRow(rowLetter) {
+      if (!state.row_order || state.row_order.length <= 1) {
+        showToast("Cannot delete the last remaining row");
+        return;
       }
+      state.row_order = state.row_order.filter(r => r !== rowLetter);
+      if (state.slots) {
+        delete state.slots[rowLetter + '1'];
+        delete state.slots[rowLetter + '2'];
+      }
+      renderSlots();
+      saveState();
+      showToast(`Removed Row ${rowLetter}`);
+    }
+
+    function moveRow(index, delta) {
+      if (!state.row_order) return;
+      const target = index + delta;
+      if (target < 0 || target >= state.row_order.length) return;
+      const tmp = state.row_order[index];
+      state.row_order[index] = state.row_order[target];
+      state.row_order[target] = tmp;
+      renderSlots();
+      saveState();
+    }
+
+    function toggleRowWideSplit(rowLetter) {
+      if (!state.slots) state.slots = {};
+      const s1 = rowLetter + '1';
+      const s2 = rowLetter + '2';
+      const currentMod = state.slots[s1] || "EMPTY";
+
+      if (is2x1(currentMod)) {
+        state.slots[s1] = "EMPTY";
+        state.slots[s2] = "EMPTY";
+        showToast(`Row ${rowLetter} converted to Dual 1x1`);
+      } else {
+        state.slots[s1] = "CALN_2x1_WID";
+        state.slots[s2] = "EMPTY";
+        showToast(`Row ${rowLetter} converted to 2x1 Wide`);
+      }
+      renderSlots();
+      saveState();
+    }
+
+    function cleanEmptyRows() {
+      if (!state.row_order || !state.slots) return;
+      const initialCount = state.row_order.length;
+      const activeRows = state.row_order.filter(r => {
+        const s1 = state.slots[r + '1'];
+        const s2 = state.slots[r + '2'];
+        return (s1 && s1 !== 'EMPTY') || (s2 && s2 !== 'EMPTY');
+      });
+
+      state.row_order = activeRows.length > 0 ? activeRows : ['A'];
+
+      const validLetters = new Set(state.row_order);
+      Object.keys(state.slots).forEach(key => {
+        if (key.length >= 2 && !validLetters.has(key[0])) {
+          delete state.slots[key];
+        }
+      });
+
+      renderSlots();
+      saveState();
+      const removed = initialCount - state.row_order.length;
+      showToast(removed > 0 ? `Cleaned ${removed} empty row${removed > 1 ? 's' : ''}` : "Layout cleaned");
+    }
+
+    function applyRowTemplate(count) {
+      const alphabet = "ABCDEFGH";
+      const newOrder = [];
+      if (!state.slots) state.slots = {};
+
+      const validLetters = new Set();
+      for (let i = 0; i < count; i++) {
+        const letter = alphabet[i];
+        newOrder.push(letter);
+        validLetters.add(letter);
+        if (!state.slots[letter + '1']) state.slots[letter + '1'] = "EMPTY";
+        if (!state.slots[letter + '2']) state.slots[letter + '2'] = "EMPTY";
+      }
+
+      Object.keys(state.slots).forEach(k => {
+        if (k.length >= 2 && !validLetters.has(k[0])) {
+          delete state.slots[k];
+        }
+      });
+
+      state.row_order = newOrder;
+
+      if (count >= 1 && (!state.slots.A1 || state.slots.A1 === "EMPTY")) state.slots.A1 = "CALN_2x1_WID";
+      if (count >= 2 && (!state.slots.B1 || state.slots.B1 === "EMPTY")) {
+        state.slots.B1 = "WEAT_1x1_MIN";
+        state.slots.B2 = "RING_1x1_MIN";
+      }
+      if (count >= 3 && (!state.slots.C1 || state.slots.C1 === "EMPTY")) {
+        state.slots.C1 = "NETW_2x1_WID";
+      }
+      if (count >= 4 && (!state.slots.D1 || state.slots.D1 === "EMPTY")) {
+        state.slots.D1 = "MEDI_2x1_WID";
+      }
+      renderSlots();
+      saveState();
+      showToast(`Applied ${count}-Row Layout Template`);
     }
 
     async function changeSlotVariant(slotId, newVariantId) {
       if (!state.slots) state.slots = {};
       if (is2x1(newVariantId)) {
-        if (slotId === 'A1') state.slots.A2 = "EMPTY";
-        else if (slotId === 'B1') state.slots.B2 = "EMPTY";
-        else if (slotId === 'C1') state.slots.C2 = "EMPTY";
-        else if (slotId === 'D1') state.slots.D2 = "EMPTY";
+        const rowLetter = slotId[0];
+        state.slots[rowLetter + '2'] = "EMPTY";
       }
       state.slots[slotId] = newVariantId;
       renderSlots();
@@ -945,7 +1199,7 @@
         await fetch('/api/slots', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ slots: state.slots })
+          body: JSON.stringify({ slots: state.slots, row_order: state.row_order })
         });
       } catch (e) {}
     }
@@ -980,6 +1234,7 @@
         console.error("Error loading settings:", e);
       }
       loadStatus();
+      loadWallpaperPalette();
     }
 
     async function loadStatus() {
@@ -1078,30 +1333,26 @@
       const labelOpacity = document.getElementById('label-blur-opacity');
       if (labelOpacity) labelOpacity.textContent = `${opacityVal}%`;
 
-      // Theme Mode styling
-      const btnDark = document.getElementById('theme-btn-dark');
-      const btnLight = document.getElementById('theme-btn-light');
-
-      [btnDark, btnLight].forEach(b => {
-        if (b) b.classList.remove('border-2', 'border-[#FF5A52]');
-      });
-
-      if (state.color_mode === 'light' && btnLight) {
-        btnLight.classList.add('border-2', 'border-[#FF5A52]');
-      } else if (btnDark) {
-        btnDark.classList.add('border-2', 'border-[#FF5A52]');
-      }
+      // Theme Gallery sync
+      renderThemeGallery();
 
       document.body.classList.toggle('mode-glass', !!state.glass_effect);
-      document.body.classList.toggle('theme-light', state.color_mode === 'light');
+      const isLight = ['light', 'catppuccin_latte', 'one_light', 'gruvbox_light', 'solarized_light', 'rose_pine_dawn', 'everforest_light'].includes(state.color_mode);
+      document.body.classList.toggle('theme-light', isLight);
 
-      // Scale buttons styling
+      // Position & Scale UI sync
+      renderPositionUI();
       const sc = state.scale || 1.0;
+      const rangeScale = document.getElementById('range-scale');
+      const labelScale = document.getElementById('label-scale');
+      if (rangeScale) rangeScale.value = Math.round(sc * 100);
+      if (labelScale) labelScale.textContent = `${Math.round(sc * 100)}%`;
       document.querySelectorAll('.scale-btn').forEach(b => {
-        if (parseFloat(b.dataset.scale) === sc) {
-          b.className = "scale-btn py-3 rounded-xl bg-[#242429] border border-[#FF5A52] text-xs font-bold text-white shadow-sm";
+        const val = parseFloat(b.dataset.scale);
+        if (Math.abs(val - sc) < 0.02) {
+          b.className = "scale-btn py-2 rounded-lg bg-[#242429] border border-[#E10600] text-xs font-bold text-white transition";
         } else {
-          b.className = "scale-btn py-3 rounded-xl bg-[#242429] text-xs font-bold text-white hover:bg-white/10";
+          b.className = "scale-btn py-2 rounded-lg bg-[#242429] text-xs font-bold text-zinc-300 hover:text-white hover:bg-white/10 transition";
         }
       });
     }
@@ -1177,651 +1428,606 @@
     };
     let currentCatalogFilter = 'all';
 
-    function getVariantPreviewSVG(vid) {
+    let wallpaperPaletteData = null;
+
+    async function loadWallpaperPalette() {
+      try {
+        const res = await fetch('/api/wallpaper-palette');
+        if (res.ok) {
+          wallpaperPaletteData = await res.json();
+          renderWallpaperHeroSwatches();
+          if (state.color_mode === 'wallpaper') {
+            renderThemeGallery();
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load wallpaper palette", e);
+      }
+    }
+
+    async function refreshWallpaperPalette() {
+      showToast("Sampling wallpaper colors...");
+      try {
+        const res = await fetch('/api/wallpaper-palette/refresh', { method: 'POST' });
+        if (res.ok) {
+          wallpaperPaletteData = await res.json();
+          renderWallpaperHeroSwatches();
+          showToast("Wallpaper palette updated");
+          if (state.color_mode === 'wallpaper') {
+            saveState();
+          }
+        }
+      } catch (e) {
+        showToast("Failed to refresh wallpaper palette");
+      }
+    }
+
+    function renderWallpaperHeroSwatches() {
+      const container = document.getElementById('wallpaper-swatches');
+      if (!container || !wallpaperPaletteData) return;
+      const d = wallpaperPaletteData;
+      const swatches = [d.bg_solid || '#131619', d.red || '#EF0014', d.blue || '#0070EF', d.green || '#2BEF73', d.purple || '#EF44E0'];
+      container.innerHTML = swatches.map(col => `<span class="w-3.5 h-3.5 rounded-full border border-black/20 inline-block" style="background-color: ${col};"></span>`).join('');
+    }
+
+    function getPreviewColors() {
+      const mode = state.color_mode || 'dark';
+      if (mode === 'wallpaper' && wallpaperPaletteData) {
+        const d = wallpaperPaletteData;
+        return {
+          bg: d.bg_solid || '#131619',
+          card_bg: d.sub_card_solid || '#1A1E24',
+          sub_bg: d.sub_card_solid || '#0C0F11',
+          text: d.text_primary || '#F8FAFC',
+          subtext: d.text_muted || '#94A3B8',
+          accent: d.blue || '#0070EF',
+          red: d.red || '#EF0014',
+          green: d.green || '#2BEF73',
+          blue: d.blue || '#0070EF',
+          yellow: d.amber || '#EFA72B',
+          magenta: d.purple || '#EF44E0',
+          border: d.border ? (d.border + '40') : 'rgba(255,255,255,0.1)'
+        };
+      }
+      const th = (typeof THEMES !== 'undefined' ? THEMES.find(t => t.id === mode) : null) || {
+        bg: '#16161A', fg: '#F5F5F7', colors: ['#16161A', '#E10600', '#0A84FF', '#30D158', '#FF9F0A']
+      };
+      const isLight = ['light', 'catppuccin_latte', 'one_light', 'gruvbox_light', 'solarized_light', 'rose_pine_dawn', 'everforest_light'].includes(mode);
+      return {
+        bg: th.bg,
+        card_bg: isLight ? 'rgba(0,0,0,0.04)' : '#1B1C22',
+        sub_bg: isLight ? 'rgba(0,0,0,0.06)' : '#14151B',
+        text: th.fg,
+        subtext: isLight ? '#71717A' : '#A1A1AA',
+        accent: th.colors[1] || '#E10600',
+        red: th.colors[1] || '#E10600',
+        blue: th.colors[2] || '#0A84FF',
+        green: th.colors[3] || '#30D158',
+        yellow: th.colors[4] || '#FF9F0A',
+        magenta: th.colors[4] || '#BF5AF2',
+        border: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)'
+      };
+    }
+
+    function getVariantPreviewSVG(rawVid) {
+      const vid = (typeof LEGACY_MAP !== 'undefined' && LEGACY_MAP[rawVid]) ? LEGACY_MAP[rawVid] : rawVid;
+      const c = getPreviewColors();
+
       switch (vid) {
-        // --- 1. NETWORK MONITOR (Ref: media_1792052858600_fbb6f07f.png) ---
+        // --- 1. NETWORK MONITOR ---
         case 'NETW_1x1_MIN':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="netw1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#netw1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <text x="20" y="24" fill="#FFFFFF" font-size="11" font-weight="bold">Wi-Fi : Latisha_Ntwrk</text>
-            <rect x="16" y="32" width="208" height="74" rx="10" fill="#13141A" stroke="#22232C" stroke-width="1"/>
-            <text x="24" y="48" fill="#FFFFFF" font-size="9.5" font-weight="bold">22 KB/s</text>
-            <text x="24" y="96" fill="#FFFFFF" font-size="9.5" font-weight="bold">42 KB/s</text>
-            <line x1="20" y1="69" x2="220" y2="69" stroke="#FF5A52" stroke-width="1.2" stroke-opacity="0.8"/>
-            <path d="M 22 69 L 45 69 L 52 64 L 60 69 L 95 69 L 102 65 L 110 69 L 140 69 L 146 38 L 150 69 L 178 69 L 183 50 L 188 69 L 218 69" fill="none" stroke="#FF5A52" stroke-width="1.8" stroke-linejoin="round"/>
-            <path d="M 22 69 L 48 69 L 55 74 L 62 69 L 98 69 L 105 73 L 112 69 L 142 69 L 148 98 L 152 69 L 180 69 L 185 86 L 190 69 L 218 69" fill="none" stroke="#BF5AF2" stroke-width="1.8" stroke-linejoin="round"/>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="14" y="24" fill="${c.text}" font-size="10" font-weight="bold">Wi-Fi: Latisha</text>
+            <rect x="12" y="34" width="144" height="102" rx="12" fill="${c.sub_bg}"/>
+            <text x="20" y="52" fill="${c.red}" font-size="9" font-weight="bold">▲ 22 KB/s</text>
+            <text x="20" y="124" fill="${c.magenta}" font-size="9" font-weight="bold">▼ 42 KB/s</text>
+            <line x1="16" y1="85" x2="152" y2="85" stroke="${c.border}" stroke-width="1" stroke-dasharray="2 2"/>
+            <path d="M 16 85 L 35 85 L 42 75 L 50 85 L 80 85 L 88 62 L 94 85 L 120 85 L 125 70 L 130 85 L 152 85" fill="none" stroke="${c.red}" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M 16 85 L 40 85 L 46 94 L 54 85 L 84 85 L 90 108 L 96 85 L 122 85 L 127 96 L 132 85 L 152 85" fill="none" stroke="${c.magenta}" stroke-width="1.6" stroke-linejoin="round"/>
           </svg>`;
+
         case 'NETW_1x1_DET':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="netw2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#netw2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <text x="20" y="24" fill="#FFFFFF" font-size="11" font-weight="bold">Wi-Fi : Latisha_Ntwrk</text>
-            <rect x="16" y="32" width="208" height="34" rx="8" fill="#13141A" stroke="#22232C" stroke-width="1"/>
-            <path d="M 20 62 L 60 62 L 72 38 L 80 58 L 88 44 L 100 62 L 150 62 L 160 42 L 170 62 L 220 62" fill="none" stroke="#FF5A52" stroke-width="1.6" stroke-linejoin="round"/>
-            <text x="24" y="44" fill="#FFFFFF" font-size="9" font-weight="bold">38 KB/s</text>
-            <text x="216" y="44" text-anchor="end" fill="#FFFFFF" font-size="9" font-weight="bold">14,7MiB</text>
-            <rect x="16" y="72" width="208" height="34" rx="8" fill="#13141A" stroke="#22232C" stroke-width="1"/>
-            <path d="M 20 102 L 70 102 L 80 82 L 90 98 L 105 88 L 115 102 L 160 102 L 170 78 L 180 102 L 220 102" fill="none" stroke="#30D158" stroke-width="1.6" stroke-linejoin="round"/>
-            <text x="24" y="84" fill="#FFFFFF" font-size="9" font-weight="bold">1,5 MB/s</text>
-            <text x="216" y="84" text-anchor="end" fill="#FFFFFF" font-size="9" font-weight="bold">45,1MiB</text>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="14" y="22" fill="${c.text}" font-size="10" font-weight="bold">Wi-Fi Telemetry</text>
+            <text x="14" y="33" fill="${c.subtext}" font-size="8">192.168.1.105</text>
+            <rect x="12" y="42" width="144" height="46" rx="10" fill="${c.sub_bg}"/>
+            <text x="20" y="58" fill="${c.red}" font-size="8.5" font-weight="bold">UPLOAD</text>
+            <text x="148" y="58" text-anchor="end" fill="${c.text}" font-size="9" font-weight="bold">128 KB/s</text>
+            <rect x="20" y="68" width="128" height="4" rx="2" fill="${c.bg}"/>
+            <rect x="20" y="68" width="48" height="4" rx="2" fill="${c.red}"/>
+            <rect x="12" y="94" width="144" height="46" rx="10" fill="${c.sub_bg}"/>
+            <text x="20" y="110" fill="${c.blue}" font-size="8.5" font-weight="bold">DOWNLOAD</text>
+            <text x="148" y="110" text-anchor="end" fill="${c.text}" font-size="9" font-weight="bold">1.4 MB/s</text>
+            <rect x="20" y="120" width="128" height="4" rx="2" fill="${c.bg}"/>
+            <rect x="20" y="120" width="92" height="4" rx="2" fill="${c.blue}"/>
           </svg>`;
+
         case 'NETW_2x1_WID':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="netw3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#netw3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <text x="20" y="24" fill="#FFFFFF" font-size="11" font-weight="bold">Wi-Fi : Latisha_Ntwrk</text>
-            <rect x="16" y="32" width="130" height="74" rx="10" fill="#13141A" stroke="#22232C" stroke-width="1"/>
-            <line x1="20" y1="69" x2="142" y2="69" stroke="#FF5A52" stroke-width="1.2" stroke-opacity="0.8"/>
-            <path d="M 22 69 L 45 69 L 50 63 L 56 69 L 75 69 L 80 44 L 84 69 L 100 69 L 105 52 L 110 69 L 142 69" fill="none" stroke="#FF5A52" stroke-width="1.6" stroke-linejoin="round"/>
-            <path d="M 22 69 L 48 69 L 53 74 L 59 69 L 76 69 L 82 92 L 86 69 L 102 69 L 107 84 L 112 69 L 142 69" fill="none" stroke="#0A84FF" stroke-width="1.6" stroke-linejoin="round"/>
-            <text x="156" y="42" fill="#A1A1AA" font-size="8">Upload Speed</text>
-            <text x="156" y="53" fill="#FF5A52" font-size="9" font-weight="bold">0 KB/s</text>
-            <text x="156" y="65" fill="#A1A1AA" font-size="8">Total Upload</text>
-            <text x="156" y="76" fill="#FF5A52" font-size="9" font-weight="bold">6,91MiB</text>
-            <text x="156" y="88" fill="#A1A1AA" font-size="8">Download Speed</text>
-            <text x="156" y="99" fill="#0A84FF" font-size="9" font-weight="bold">0 KB/s</text>
-            <text x="156" y="108" fill="#0A84FF" font-size="7.8" font-weight="bold">Total Download 11,7MiB</text>
+          return `<svg viewBox="0 0 350 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="346" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="18" y="24" fill="${c.text}" font-size="11" font-weight="bold">Wi-Fi Seismograph</text>
+            <text x="18" y="36" fill="${c.subtext}" font-size="8.5">SSID: Latisha_5G • 192.168.1.105</text>
+            <rect x="16" y="44" width="180" height="94" rx="12" fill="${c.sub_bg}"/>
+            <line x1="22" y1="91" x2="190" y2="91" stroke="${c.border}" stroke-width="1" stroke-dasharray="2 2"/>
+            <path d="M 22 91 L 45 91 L 52 75 L 60 91 L 85 91 L 94 65 L 102 91 L 130 91 L 138 72 L 145 91 L 190 91" fill="none" stroke="${c.red}" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M 22 91 L 48 91 L 55 105 L 63 91 L 90 91 L 98 118 L 106 91 L 135 91 L 142 106 L 150 91 L 190 91" fill="none" stroke="${c.blue}" stroke-width="1.6" stroke-linejoin="round"/>
+            <text x="24" y="60" fill="${c.red}" font-size="8" font-weight="bold">▲ 240 KB/s</text>
+            <text x="24" y="128" fill="${c.blue}" font-size="8" font-weight="bold">▼ 2.8 MB/s</text>
+            <rect x="206" y="44" width="128" height="94" rx="12" fill="${c.sub_bg}"/>
+            <text x="218" y="64" fill="${c.subtext}" font-size="8">SESSION UP</text>
+            <text x="218" y="77" fill="${c.text}" font-size="10" font-weight="bold">4.2 GB</text>
+            <text x="218" y="99" fill="${c.subtext}" font-size="8">SESSION DOWN</text>
+            <text x="218" y="112" fill="${c.text}" font-size="10" font-weight="bold">28.6 GB</text>
+            <circle cx="318" cy="62" r="3" fill="${c.green}"/>
+            <text x="312" y="65" text-anchor="end" fill="${c.green}" font-size="8" font-weight="bold">92%</text>
           </svg>`;
 
-        // --- 2. CALENDAR & AGENDA (Ref: media_1792052873475_70ec0a1f.png) ---
+        // --- 2. CALENDAR & AGENDA ---
         case 'CALN_1x1_MIN':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="cal1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#cal1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <text x="26" y="25" fill="#FF5A52" font-size="12" font-weight="900" letter-spacing="1">JULY</text>
-            <g fill="#A1A1AA" font-size="8.5" font-weight="bold" text-anchor="middle">
-              <text x="36" y="40">M</text><text x="64" y="40">T</text><text x="92" y="40">W</text><text x="120" y="40">T</text><text x="148" y="40">F</text><text x="176" y="40">S</text><text x="204" y="40">S</text>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="14" y="24" fill="${c.text}" font-size="11" font-weight="900">OCTOBER</text>
+            <text x="154" y="24" text-anchor="end" fill="${c.accent}" font-size="9" font-weight="bold">2026</text>
+            <g fill="${c.subtext}" font-size="7.5" font-weight="bold" text-anchor="middle">
+              <text x="22" y="42">S</text><text x="43" y="42">M</text><text x="64" y="42">T</text><text x="84" y="42">W</text><text x="104" y="42">T</text><text x="125" y="42">F</text><text x="146" y="42">S</text>
             </g>
-            <g fill="#71717A" font-size="8.5" text-anchor="middle">
-              <text x="36" y="55" fill="#4B4D5A">29</text><text x="64" y="55" fill="#4B4D5A">30</text><text x="92" y="55" fill="#FFF">1</text><text x="120" y="55" fill="#FFF">2</text><text x="148" y="55" fill="#FFF">3</text><text x="176" y="55" fill="#FFF">4</text>
-              <circle cx="204" cy="52" r="7.5" fill="#FF5A52"/>
-              <text x="204" y="55" fill="#FFF" font-weight="bold">5</text>
-              <text x="36" y="70" fill="#FFF">6</text><text x="64" y="70" fill="#FFF">7</text><text x="92" y="70" fill="#FFF">8</text><text x="120" y="70" fill="#FFF">9</text><text x="148" y="70" fill="#FFF">10</text><text x="176" y="70" fill="#FFF">11</text><text x="204" y="70" fill="#FFF">12</text>
-              <text x="36" y="85" fill="#FFF">13</text><text x="64" y="85" fill="#FFF">14</text><text x="92" y="85" fill="#FFF">15</text><text x="120" y="85" fill="#FFF">16</text><text x="148" y="85" fill="#FFF">17</text><text x="176" y="85" fill="#FFF">18</text><text x="204" y="85" fill="#FFF">19</text>
-              <text x="36" y="100" fill="#FFF">20</text><text x="64" y="100" fill="#FFF">21</text><text x="92" y="100" fill="#FFF">22</text><text x="120" y="100" fill="#FFF">23</text><text x="148" y="100" fill="#FFF">24</text><text x="176" y="100" fill="#FFF">25</text><text x="204" y="100" fill="#FFF">26</text>
-            </g>
-          </svg>`;
-        case 'CALN_1x1_DET':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="cal2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#cal2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <text x="26" y="28" fill="#A1A1AA" font-size="10" font-weight="bold" letter-spacing="0.5">JULY</text>
-            <text x="26" y="44" fill="#FF5A52" font-size="12" font-weight="bold">Sunday</text>
-            <text x="24" y="86" fill="#FFFFFF" font-size="44" font-weight="900" letter-spacing="-1">05</text>
-            <rect x="122" y="60" width="3.5" height="26" rx="1.75" fill="#FF5A52"/>
-            <text x="132" y="71" fill="#FFFFFF" font-size="11" font-weight="bold">Caricom Day</text>
-            <text x="132" y="83" fill="#A1A1AA" font-size="9">Tomorrow</text>
-          </svg>`;
-        case 'CALN_2x1_WID':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="cal3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#cal3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <text x="22" y="26" fill="#A1A1AA" font-size="9" font-weight="bold">JULY</text>
-            <text x="22" y="40" fill="#FF5A52" font-size="11" font-weight="bold">Sunday</text>
-            <text x="20" y="78" fill="#FFFFFF" font-size="38" font-weight="900">05</text>
-            <rect x="22" y="88" width="3" height="18" rx="1.5" fill="#FF5A52"/>
-            <text x="30" y="96" fill="#FFFFFF" font-size="9" font-weight="bold">Caricom Day</text>
-            <text x="30" y="105" fill="#A1A1AA" font-size="7.5">Tomorrow</text>
-            <line x1="108" y1="18" x2="108" y2="102" stroke="#2B2D38" stroke-width="1"/>
-            <g fill="#A1A1AA" font-size="7.5" font-weight="bold" text-anchor="middle">
-              <text x="122" y="30">M</text><text x="138" y="30">T</text><text x="154" y="30">W</text><text x="170" y="30">T</text><text x="186" y="30">F</text><text x="202" y="30">S</text><text x="218" y="30">S</text>
-            </g>
-            <g fill="#71717A" font-size="7.5" text-anchor="middle">
-              <text x="122" y="44" fill="#4B4D5A">29</text><text x="138" y="44" fill="#4B4D5A">30</text><text x="154" y="44" fill="#FFF">1</text><text x="170" y="44" fill="#FFF">2</text><text x="186" y="44" fill="#FFF">3</text><text x="202" y="44" fill="#FFF">4</text>
-              <circle cx="218" cy="41.5" r="6" fill="#FF5A52"/>
-              <text x="218" y="44" fill="#FFF" font-weight="bold">5</text>
-              <text x="122" y="58" fill="#FFF">6</text><text x="138" y="58" fill="#FFF">7</text><text x="154" y="58" fill="#FFF">8</text><text x="170" y="58" fill="#FFF">9</text><text x="186" y="58" fill="#FFF">10</text><text x="202" y="58" fill="#FFF">11</text><text x="218" y="58" fill="#FFF">12</text>
-              <text x="122" y="72" fill="#FFF">13</text><text x="138" y="72" fill="#FFF">14</text><text x="154" y="72" fill="#FFF">15</text><text x="170" y="72" fill="#FFF">16</text><text x="186" y="72" fill="#FFF">17</text><text x="202" y="72" fill="#FFF">18</text><text x="218" y="72" fill="#FFF">19</text>
-              <text x="122" y="86" fill="#FFF">20</text><text x="138" y="86" fill="#FFF">21</text><text x="154" y="86" fill="#FFF">22</text><text x="170" y="86" fill="#FFF">23</text><text x="186" y="86" fill="#FFF">24</text><text x="202" y="86" fill="#FFF">25</text><text x="218" y="86" fill="#FFF">26</text>
-              <text x="122" y="100" fill="#FFF">27</text><text x="138" y="100" fill="#FFF">28</text><text x="154" y="100" fill="#FFF">29</text><text x="170" y="100" fill="#FFF">30</text><text x="186" y="100" fill="#FFF">31</text>
+            <g fill="${c.text}" font-size="8" font-weight="500" text-anchor="middle">
+              <text x="22" y="60" fill="${c.subtext}">28</text><text x="43" y="60" fill="${c.subtext}">29</text><text x="64" y="60" fill="${c.subtext}">30</text><text x="84" y="60">1</text><text x="104" y="60">2</text><text x="125" y="60">3</text><text x="146" y="60">4</text>
+              <text x="22" y="78">5</text><text x="43" y="78">6</text><text x="64" y="78">7</text><text x="84" y="78">8</text><text x="104" y="78">9</text><text x="125" y="78">10</text><text x="146" y="78">11</text>
+              <text x="22" y="96">12</text><text x="43" y="96">13</text><text x="64" y="96">14</text><text x="84" y="96">15</text>
+              <circle cx="125" cy="94" r="8" fill="${c.accent}"/>
+              <text x="125" y="97" fill="#FFF" font-weight="900">16</text>
+              <text x="146" y="96">17</text>
+              <text x="22" y="114">18</text><text x="43" y="114">19</text><text x="64" y="114">20</text><text x="84" y="114">21</text><text x="104" y="114">22</text><text x="125" y="114">23</text><text x="146" y="114">24</text>
+              <text x="22" y="132">25</text><text x="43" y="132">26</text><text x="64" y="132">27</text><text x="84" y="132">28</text><text x="104" y="132">29</text><text x="125" y="132">30</text><text x="146" y="132">31</text>
             </g>
           </svg>`;
 
-        // --- 3. ANALOG CLOCK (Ref: media_1792052879301_4eb1fe3f.png) ---
+        case 'CALN_1x1_DET':
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="16" y="26" fill="${c.accent}" font-size="11" font-weight="900" letter-spacing="1">FRIDAY</text>
+            <text x="84" y="84" text-anchor="middle" fill="${c.text}" font-size="52" font-weight="900">16</text>
+            <rect x="14" y="102" width="140" height="36" rx="10" fill="${c.sub_bg}"/>
+            <circle cx="28" cy="120" r="4" fill="${c.green}"/>
+            <text x="38" y="117" fill="${c.text}" font-size="8.5" font-weight="bold">Design Review</text>
+            <text x="38" y="129" fill="${c.subtext}" font-size="7.5">10:30 AM – 11:30 AM</text>
+          </svg>`;
+
+        case 'CALN_2x1_WID':
+          return `<svg viewBox="0 0 350 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="346" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="20" y="26" fill="${c.accent}" font-size="11" font-weight="900" letter-spacing="1">FRIDAY</text>
+            <text x="20" y="78" fill="${c.text}" font-size="50" font-weight="900">16</text>
+            <text x="20" y="96" fill="${c.subtext}" font-size="10" font-weight="bold">October 2026</text>
+            <rect x="20" y="108" width="134" height="28" rx="8" fill="${c.sub_bg}"/>
+            <circle cx="32" cy="122" r="3.5" fill="${c.green}"/>
+            <text x="42" y="125" fill="${c.text}" font-size="8.5" font-weight="bold">10:30 AM Team Sync</text>
+            <line x1="168" y1="18" x2="168" y2="134" stroke="${c.border}" stroke-width="1"/>
+            <text x="180" y="26" fill="${c.text}" font-size="10" font-weight="bold">OCTOBER 2026</text>
+            <g fill="${c.subtext}" font-size="7.5" font-weight="bold" text-anchor="middle">
+              <text x="188" y="44">S</text><text x="210" y="44">M</text><text x="232" y="44">T</text><text x="254" y="44">W</text><text x="276" y="44">T</text><text x="298" y="44">F</text><text x="320" y="44">S</text>
+            </g>
+            <g fill="${c.text}" font-size="8" font-weight="500" text-anchor="middle">
+              <text x="188" y="62" fill="${c.subtext}">28</text><text x="210" y="62" fill="${c.subtext}">29</text><text x="232" y="62" fill="${c.subtext}">30</text><text x="254" y="62">1</text><text x="276" y="62">2</text><text x="298" y="62">3</text><text x="320" y="62">4</text>
+              <text x="188" y="80">5</text><text x="210" y="80">6</text><text x="232" y="80">7</text><text x="254" y="80">8</text><text x="276" y="80">9</text><text x="298" y="80">10</text><text x="320" y="80">11</text>
+              <text x="188" y="98">12</text><text x="210" y="98">13</text><text x="232" y="98">14</text><text x="254" y="98">15</text>
+              <circle cx="298" cy="95" r="7.5" fill="${c.accent}"/>
+              <text x="298" y="98" fill="#FFF" font-weight="900">16</text>
+              <text x="320" y="98">17</text>
+              <text x="188" y="116">18</text><text x="210" y="116">19</text><text x="232" y="116">20</text><text x="254" y="116">21</text><text x="276" y="116">22</text><text x="298" y="116">23</text><text x="320" y="116">24</text>
+              <text x="188" y="134">25</text><text x="210" y="134">26</text><text x="232" y="134">27</text><text x="254" y="134">28</text><text x="276" y="134">29</text><text x="298" y="134">30</text><text x="320" y="134">31</text>
+            </g>
+          </svg>`;
+
+        // --- 3. ANALOG CLOCK ---
         case 'CLKA_1x1_MIN':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="clka1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#clka1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <circle cx="120" cy="60" r="46" fill="#14151B" stroke="#2B2D38" stroke-width="1.5"/>
-            <g fill="#A1A1AA" font-size="7.5" font-weight="bold" text-anchor="middle">
-              <text x="120" y="24">12</text><text x="140" y="29">1</text><text x="153" y="43">2</text><text x="158" y="62">3</text>
-              <text x="153" y="81">4</text><text x="140" y="95">5</text><text x="120" y="100">6</text><text x="100" y="95">7</text>
-              <text x="87" y="81">8</text><text x="82" y="62">9</text><text x="87" y="43">10</text><text x="100" y="29">11</text>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <circle cx="84" cy="76" r="54" fill="${c.sub_bg}" stroke="${c.border}" stroke-width="1.5"/>
+            <g fill="${c.subtext}" font-size="8.5" font-weight="bold" text-anchor="middle">
+              <text x="84" y="36">12</text>
+              <text x="126" y="79">3</text>
+              <text x="84" y="121">6</text>
+              <text x="42" y="79">9</text>
             </g>
-            <line x1="120" y1="60" x2="98" y2="44" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
-            <line x1="120" y1="60" x2="148" y2="60" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
-            <line x1="120" y1="60" x2="152" y2="62" stroke="#FF9F0A" stroke-width="1.2" stroke-linecap="round"/>
-            <circle cx="120" cy="60" r="3" fill="#FF9F0A"/>
+            <line x1="84" y1="76" x2="98" y2="58" stroke="${c.text}" stroke-width="3" stroke-linecap="round"/>
+            <line x1="84" y1="76" x2="68" y2="44" stroke="${c.text}" stroke-width="2" stroke-linecap="round"/>
+            <line x1="84" y1="76" x2="108" y2="92" stroke="${c.accent}" stroke-width="1.2" stroke-linecap="round"/>
+            <circle cx="84" cy="76" r="3.5" fill="${c.accent}"/>
           </svg>`;
+
         case 'CLKA_1x1_DET':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="clka2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#clka2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <rect x="66" y="8" width="108" height="104" rx="20" fill="#14151B" stroke="#2B2D38" stroke-width="1.5"/>
-            <g stroke="#FFF" stroke-width="1" opacity="0.4">
-              <line x1="120" y1="12" x2="120" y2="18"/>
-              <line x1="120" y1="108" x2="120" y2="102"/>
-              <line x1="70" y1="60" x2="76" y2="60"/>
-              <line x1="170" y1="60" x2="164" y2="60"/>
-            </g>
-            <text x="120" y="30" text-anchor="middle" fill="#FFFFFF" font-size="12" font-weight="900">12</text>
-            <text x="160" y="64" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="bold">3</text>
-            <text x="120" y="98" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="bold">6</text>
-            <text x="80" y="64" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="bold">9</text>
-            <line x1="120" y1="60" x2="102" y2="48" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
-            <line x1="120" y1="60" x2="124" y2="28" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
-            <line x1="120" y1="60" x2="140" y2="92" stroke="#FF9F0A" stroke-width="1.4" stroke-linecap="round"/>
-            <circle cx="120" cy="60" r="3" fill="#FF9F0A"/>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <rect x="14" y="14" width="140" height="124" rx="16" fill="${c.sub_bg}" stroke="${c.border}" stroke-width="1"/>
+            <circle cx="84" cy="76" r="46" fill="none" stroke="${c.border}" stroke-width="1" stroke-dasharray="2 6"/>
+            <rect x="98" y="70" width="28" height="14" rx="3" fill="${c.bg}"/>
+            <text x="112" y="80" text-anchor="middle" fill="${c.accent}" font-size="7" font-weight="bold">16</text>
+            <line x1="84" y1="76" x2="96" y2="52" stroke="${c.text}" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="84" y1="76" x2="62" y2="64" stroke="${c.text}" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="84" y1="76" x2="84" y2="40" stroke="${c.red}" stroke-width="1"/>
+            <circle cx="84" cy="76" r="3" fill="${c.text}"/>
           </svg>`;
+
         case 'CLKA_2x1_WID':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="clka3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#clka3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <g transform="translate(36, 44)">
-              <circle r="22" fill="#14151B" stroke="#2B2D38" stroke-width="1.2"/>
-              <line x1="0" y1="0" x2="-8" y2="-8" stroke="#FFF" stroke-width="1.6" stroke-linecap="round"/>
-              <line x1="0" y1="0" x2="11" y2="0" stroke="#FFF" stroke-width="1.4" stroke-linecap="round"/>
-              <line x1="0" y1="0" x2="0" y2="14" stroke="#FF9F0A" stroke-width="1"/>
-              <circle r="1.8" fill="#FF9F0A"/>
-              <text y="36" text-anchor="middle" fill="#FFFFFF" font-size="9" font-weight="bold">Local</text>
-              <text y="48" text-anchor="middle" fill="#A1A1AA" font-size="7.5">Current</text>
-            </g>
-            <g transform="translate(92, 44)">
-              <circle r="22" fill="#14151B" stroke="#2B2D38" stroke-width="1.2"/>
-              <line x1="0" y1="0" x2="-9" y2="-5" stroke="#FFF" stroke-width="1.6" stroke-linecap="round"/>
-              <line x1="0" y1="0" x2="8" y2="9" stroke="#FFF" stroke-width="1.4" stroke-linecap="round"/>
-              <line x1="0" y1="0" x2="0" y2="14" stroke="#0A84FF" stroke-width="1"/>
-              <circle r="1.8" fill="#0A84FF"/>
-              <text y="36" text-anchor="middle" fill="#FFFFFF" font-size="9" font-weight="bold">Tokyo</text>
-              <text y="48" text-anchor="middle" fill="#A1A1AA" font-size="7.5">+2 HRS</text>
-            </g>
-            <g transform="translate(148, 44)">
-              <circle r="22" fill="#E6E6EA" stroke="#D1D1D8" stroke-width="1.2"/>
-              <line x1="0" y1="0" x2="-8" y2="7" stroke="#111" stroke-width="1.6" stroke-linecap="round"/>
-              <line x1="0" y1="0" x2="11" y2="-3" stroke="#111" stroke-width="1.4" stroke-linecap="round"/>
-              <line x1="0" y1="0" x2="-5" y2="-12" stroke="#30D158" stroke-width="1"/>
-              <circle r="1.8" fill="#30D158"/>
-              <text y="36" text-anchor="middle" fill="#FFFFFF" font-size="9" font-weight="bold">London</text>
-              <text y="48" text-anchor="middle" fill="#A1A1AA" font-size="7.5">-6 HRS</text>
-            </g>
-            <g transform="translate(204, 44)">
-              <circle r="22" fill="#E6E6EA" stroke="#D1D1D8" stroke-width="1.2"/>
-              <line x1="0" y1="0" x2="0" y2="-11" stroke="#111" stroke-width="1.6" stroke-linecap="round"/>
-              <line x1="0" y1="0" x2="9" y2="5" stroke="#111" stroke-width="1.4" stroke-linecap="round"/>
-              <line x1="0" y1="0" x2="1" y2="13" stroke="#BF5AF2" stroke-width="1"/>
-              <circle r="1.8" fill="#BF5AF2"/>
-              <text y="36" text-anchor="middle" fill="#FFFFFF" font-size="9" font-weight="bold">Los Angeles</text>
-              <text y="48" text-anchor="middle" fill="#A1A1AA" font-size="7.5">+10 HRS</text>
-            </g>
+          return `<svg viewBox="0 0 350 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="346" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="20" y="24" fill="${c.text}" font-size="11" font-weight="bold">World Chronometer</text>
+            <circle cx="55" cy="65" r="26" fill="${c.sub_bg}" stroke="${c.border}" stroke-width="1"/>
+            <line x1="55" y1="65" x2="62" y2="58" stroke="${c.text}" stroke-width="2" stroke-linecap="round"/>
+            <line x1="55" y1="65" x2="48" y2="48" stroke="${c.accent}" stroke-width="1.4" stroke-linecap="round"/>
+            <circle cx="55" cy="65" r="2" fill="${c.accent}"/>
+            <text x="55" y="108" text-anchor="middle" fill="${c.text}" font-size="9" font-weight="bold">MUMBAI</text>
+            <text x="55" y="122" text-anchor="middle" fill="${c.subtext}" font-size="8.5">17:45</text>
+
+            <circle cx="135" cy="65" r="26" fill="${c.sub_bg}" stroke="${c.border}" stroke-width="1"/>
+            <line x1="135" y1="65" x2="135" y2="52" stroke="${c.text}" stroke-width="2" stroke-linecap="round"/>
+            <line x1="135" y1="65" x2="145" y2="62" stroke="${c.accent}" stroke-width="1.4" stroke-linecap="round"/>
+            <circle cx="135" cy="65" r="2" fill="${c.accent}"/>
+            <text x="135" y="108" text-anchor="middle" fill="${c.text}" font-size="9" font-weight="bold">LONDON</text>
+            <text x="135" y="122" text-anchor="middle" fill="${c.subtext}" font-size="8.5">12:15</text>
+
+            <circle cx="215" cy="65" r="26" fill="${c.sub_bg}" stroke="${c.border}" stroke-width="1"/>
+            <line x1="215" y1="65" x2="210" y2="60" stroke="${c.text}" stroke-width="2" stroke-linecap="round"/>
+            <line x1="215" y1="65" x2="225" y2="64" stroke="${c.accent}" stroke-width="1.4" stroke-linecap="round"/>
+            <circle cx="215" cy="65" r="2" fill="${c.accent}"/>
+            <text x="215" y="108" text-anchor="middle" fill="${c.text}" font-size="9" font-weight="bold">NEW YORK</text>
+            <text x="215" y="122" text-anchor="middle" fill="${c.subtext}" font-size="8.5">07:15</text>
+
+            <circle cx="295" cy="65" r="26" fill="${c.sub_bg}" stroke="${c.border}" stroke-width="1"/>
+            <line x1="295" y1="65" x2="304" y2="62" stroke="${c.text}" stroke-width="2" stroke-linecap="round"/>
+            <line x1="295" y1="65" x2="300" y2="50" stroke="${c.accent}" stroke-width="1.4" stroke-linecap="round"/>
+            <circle cx="295" cy="65" r="2" fill="${c.accent}"/>
+            <text x="295" y="108" text-anchor="middle" fill="${c.text}" font-size="9" font-weight="bold">TOKYO</text>
+            <text x="295" y="122" text-anchor="middle" fill="${c.subtext}" font-size="8.5">21:15</text>
           </svg>`;
 
         // --- 4. DIGITAL CLOCK ---
         case 'CLKD_1x1_MIN':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="clkd1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#clkd1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <text x="120" y="66" text-anchor="middle" fill="#FFFFFF" font-size="44" font-weight="900" letter-spacing="1">14<tspan fill="#FF5A52">:</tspan>28</text>
-            <text x="120" y="92" text-anchor="middle" fill="#71717A" font-size="11" font-weight="bold" letter-spacing="0.5">WEDNESDAY, OCT 15</text>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="16" y="26" fill="${c.accent}" font-size="10" font-weight="900" letter-spacing="1">MUMBAI</text>
+            <text x="84" y="82" text-anchor="middle" fill="${c.text}" font-size="36" font-weight="900">17:45</text>
+            <rect x="14" y="100" width="140" height="36" rx="10" fill="${c.sub_bg}"/>
+            <text x="84" y="117" text-anchor="middle" fill="${c.text}" font-size="9" font-weight="bold">Friday, Oct 16</text>
+            <text x="84" y="128" text-anchor="middle" fill="${c.subtext}" font-size="7.5">28 Seconds</text>
           </svg>`;
+
         case 'CLKD_1x1_DET':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="clkd2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#clkd2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <text x="120" y="52" text-anchor="middle" fill="#FFFFFF" font-size="36" font-weight="900">14:28<tspan fill="#FF5A52" font-size="20"> 45</tspan></text>
-            <text x="120" y="72" text-anchor="middle" fill="#A1A1AA" font-size="11" font-weight="bold">OCTOBER 15, 2026</text>
-            <rect x="68" y="82" width="104" height="20" rx="6" fill="#242B3A" stroke="#364058" stroke-width="1"/>
-            <circle cx="82" cy="92" r="3" fill="#30D158"/>
-            <text x="124" y="95.5" text-anchor="middle" fill="#30D158" font-size="9.5" font-weight="bold">UPTIME 4D 12H</text>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="16" y="24" fill="${c.subtext}" font-size="8" font-weight="bold">CHRONO TELEMETRY</text>
+            <text x="16" y="60" fill="${c.text}" font-size="30" font-weight="900">17:45<tspan fill="${c.accent}" font-size="16">:28</tspan></text>
+            <rect x="12" y="74" width="144" height="30" rx="8" fill="${c.sub_bg}"/>
+            <text x="20" y="88" fill="${c.subtext}" font-size="7.5">UPTIME</text>
+            <text x="20" y="98" fill="${c.text}" font-size="8.5" font-weight="bold">3 days, 14 hours</text>
+            <rect x="12" y="108" width="144" height="30" rx="8" fill="${c.sub_bg}"/>
+            <text x="20" y="122" fill="${c.subtext}" font-size="7.5">ZONE</text>
+            <text x="20" y="132" fill="${c.text}" font-size="8.5" font-weight="bold">IST (UTC +05:30)</text>
           </svg>`;
+
         case 'CLKD_2x1_WID':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="clkd3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#clkd3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <text x="22" y="58" fill="#FFFFFF" font-size="32" font-weight="900" letter-spacing="-0.5">14:28<tspan fill="#FF5A52" font-size="18"> 45</tspan></text>
-            <text x="22" y="80" fill="#FF5A52" font-size="10" font-weight="bold" letter-spacing="0.5">LOCAL TIME</text>
-            <text x="22" y="96" fill="#71717A" font-size="9" font-weight="bold">WEDNESDAY • 15 OCT 2026</text>
-            <line x1="152" y1="20" x2="152" y2="100" stroke="#2B2D38" stroke-width="1.5"/>
-            <text x="166" y="38" fill="#71717A" font-size="9" font-weight="bold" letter-spacing="0.5">UTC / GMT</text>
-            <text x="166" y="58" fill="#FFFFFF" font-size="14" font-weight="extrabold">08:58:45</text>
-            <rect x="166" y="74" width="56" height="18" rx="5" fill="#30D158" fill-opacity="0.15"/>
-            <text x="194" y="86.5" text-anchor="middle" fill="#30D158" font-size="8.5" font-weight="extrabold">WEEK 42</text>
+          return `<svg viewBox="0 0 350 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="346" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="24" y="32" fill="${c.accent}" font-size="10" font-weight="900" letter-spacing="1">LOCAL CHRONO</text>
+            <text x="24" y="86" fill="${c.text}" font-size="48" font-weight="900">17:45<tspan fill="${c.accent}" font-size="24">:28</tspan></text>
+            <text x="24" y="112" fill="${c.subtext}" font-size="11" font-weight="bold">Friday, 16 October 2026</text>
+            <rect x="220" y="20" width="116" height="34" rx="8" fill="${c.sub_bg}"/>
+            <text x="230" y="34" fill="${c.subtext}" font-size="7.5">UTC TIME</text>
+            <text x="230" y="46" fill="${c.text}" font-size="9" font-weight="bold">12:15:28 UTC</text>
+            <rect x="220" y="58" width="116" height="34" rx="8" fill="${c.sub_bg}"/>
+            <text x="230" y="72" fill="${c.subtext}" font-size="7.5">CALENDAR WEEK</text>
+            <text x="230" y="84" fill="${c.text}" font-size="9" font-weight="bold">Week 42 • Q4</text>
+            <rect x="220" y="96" width="116" height="34" rx="8" fill="${c.sub_bg}"/>
+            <text x="230" y="110" fill="${c.subtext}" font-size="7.5">SYSTEM UPTIME</text>
+            <text x="230" y="122" fill="${c.green}" font-size="9" font-weight="bold">3d 14h 22m</text>
           </svg>`;
 
-        // --- 5. DISK STORAGE (Ref: media_1792052885543_32152b30.png) ---
+        // --- 5. DISK STORAGE ---
         case 'STOR_1x1_MIN':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="stor1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#stor1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <text x="22" y="28" fill="#FFFFFF" font-size="12" font-weight="bold">Storage +1</text>
-            <text x="22" y="48" fill="#A1A1AA" font-size="9.5">Root: 26% (25,9 GB)</text>
-            <rect x="22" y="55" width="196" height="14" rx="7" fill="#1C1E26"/>
-            <rect x="22" y="55" width="51" height="14" rx="7" fill="#0A84FF"/>
-            <text x="22" y="86" fill="#A1A1AA" font-size="9.5">Home: 26% (25,9 GB)</text>
-            <rect x="22" y="93" width="196" height="14" rx="7" fill="#1C1E26"/>
-            <rect x="22" y="93" width="51" height="14" rx="7" fill="#30D158"/>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="16" y="24" fill="${c.text}" font-size="10" font-weight="bold">Storage Drives</text>
+            <rect x="12" y="36" width="144" height="48" rx="10" fill="${c.sub_bg}"/>
+            <text x="20" y="52" fill="${c.text}" font-size="9" font-weight="bold">Root (/)</text>
+            <text x="148" y="52" text-anchor="end" fill="${c.blue}" font-size="8.5" font-weight="bold">42%</text>
+            <rect x="20" y="62" width="128" height="6" rx="3" fill="${c.bg}"/>
+            <rect x="20" y="62" width="54" height="6" rx="3" fill="${c.blue}"/>
+            <rect x="12" y="90" width="144" height="48" rx="10" fill="${c.sub_bg}"/>
+            <text x="20" y="106" fill="${c.text}" font-size="9" font-weight="bold">Home (~)</text>
+            <text x="148" y="106" text-anchor="end" fill="${c.yellow}" font-size="8.5" font-weight="bold">68%</text>
+            <rect x="20" y="116" width="128" height="6" rx="3" fill="${c.bg}"/>
+            <rect x="20" y="116" width="87" height="6" rx="3" fill="${c.yellow}"/>
           </svg>`;
+
         case 'STOR_1x1_DET':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="stor2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#stor2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <g transform="translate(68, 60)">
-              <circle r="36" fill="none" stroke="#1D202A" stroke-width="6"/>
-              <circle r="36" fill="none" stroke="#0A84FF" stroke-width="6" stroke-dasharray="60 230" stroke-linecap="round"/>
-              <circle r="25" fill="none" stroke="#1D202A" stroke-width="5"/>
-              <circle r="25" fill="none" stroke="#30D158" stroke-width="5" stroke-dasharray="45 160" stroke-linecap="round"/>
-              <circle r="14" fill="none" stroke="#1D202A" stroke-width="4"/>
-              <circle r="14" fill="none" stroke="#FF9F0A" stroke-width="4" stroke-dasharray="5 90" stroke-linecap="round"/>
-            </g>
-            <text x="136" y="50" fill="#0A84FF" font-size="11" font-weight="bold">R 26/109 GB</text>
-            <text x="136" y="70" fill="#30D158" font-size="11" font-weight="bold">H 26/109 GB</text>
-            <text x="136" y="90" fill="#FF9F0A" font-size="11" font-weight="bold">U 0,0/15 GB</text>
-          </svg>`;
-        case 'STOR_2x1_WID':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="stor3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#stor3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <g transform="translate(36, 44)">
-              <circle r="22" fill="#161820" stroke="#222530" stroke-width="4"/>
-              <circle r="22" fill="none" stroke="#0A84FF" stroke-width="4" stroke-dasharray="36 140" stroke-linecap="round"/>
-              <rect x="-6" y="-5" width="12" height="10" rx="2" fill="none" stroke="#FFF" stroke-width="1.2"/>
-              <circle cx="-1" cy="0" r="2.5" fill="none" stroke="#FFF" stroke-width="1"/>
-              <circle cx="3" cy="2.5" r="0.8" fill="#FFF"/>
-              <text y="38" text-anchor="middle" fill="#FFFFFF" font-size="10.5" font-weight="bold">26%</text>
-              <text y="50" text-anchor="middle" fill="#A1A1AA" font-size="8">109G</text>
-            </g>
-            <g transform="translate(92, 44)">
-              <circle r="22" fill="#161820" stroke="#222530" stroke-width="4"/>
-              <circle r="22" fill="none" stroke="#30D158" stroke-width="4" stroke-dasharray="36 140" stroke-linecap="round"/>
-              <polygon points="0,-6 7,0 4,0 4,6 -4,6 -4,0 -7,0" fill="#FFF"/>
-              <text y="38" text-anchor="middle" fill="#FFFFFF" font-size="10.5" font-weight="bold">26%</text>
-              <text y="50" text-anchor="middle" fill="#A1A1AA" font-size="8">109G</text>
-            </g>
-            <g transform="translate(148, 44)">
-              <circle r="22" fill="#161820" stroke="#222530" stroke-width="4"/>
-              <circle r="22" fill="none" stroke="#BF5AF2" stroke-width="4" stroke-dasharray="5 140" stroke-linecap="round"/>
-              <rect x="-4" y="-5" width="8" height="10" rx="1.5" fill="none" stroke="#FFF" stroke-width="1.2"/>
-              <rect x="-2" y="-7" width="4" height="2" fill="#FFF"/>
-              <text y="38" text-anchor="middle" fill="#FFFFFF" font-size="10.5" font-weight="bold">1%</text>
-              <text y="50" text-anchor="middle" fill="#A1A1AA" font-size="8">15G</text>
-            </g>
-            <g transform="translate(204, 44)">
-              <circle r="22" fill="#161820" stroke="#222530" stroke-width="4"/>
-              <circle cx="0" cy="0" r="6" fill="none" stroke="#555" stroke-width="1.2"/>
-              <line x1="-4" y1="4" x2="4" y2="-4" stroke="#555" stroke-width="1.2"/>
-              <text y="38" text-anchor="middle" fill="#A1A1AA" font-size="10.5" font-weight="bold">--</text>
-              <text y="50" text-anchor="middle" fill="#71717A" font-size="8">--</text>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="16" y="24" fill="${c.text}" font-size="10" font-weight="bold">Disk Concentric</text>
+            <circle cx="84" cy="74" r="42" fill="none" stroke="${c.sub_bg}" stroke-width="6"/>
+            <circle cx="84" cy="74" r="42" fill="none" stroke="${c.blue}" stroke-width="6" stroke-dasharray="140 264" transform="rotate(-90 84 74)"/>
+            <circle cx="84" cy="74" r="30" fill="none" stroke="${c.sub_bg}" stroke-width="6"/>
+            <circle cx="84" cy="74" r="30" fill="none" stroke="${c.green}" stroke-width="6" stroke-dasharray="120 188" transform="rotate(-90 84 74)"/>
+            <circle cx="84" cy="74" r="18" fill="none" stroke="${c.sub_bg}" stroke-width="6"/>
+            <circle cx="84" cy="74" r="18" fill="none" stroke="${c.magenta}" stroke-width="6" stroke-dasharray="50 113" transform="rotate(-90 84 74)"/>
+            <g font-size="7.5" font-weight="bold">
+              <circle cx="30" cy="132" r="3" fill="${c.blue}"/><text x="36" y="135" fill="${c.subtext}">Root</text>
+              <circle cx="75" cy="132" r="3" fill="${c.green}"/><text x="81" y="135" fill="${c.subtext}">Home</text>
+              <circle cx="120" cy="132" r="3" fill="${c.magenta}"/><text x="126" y="135" fill="${c.subtext}">Data</text>
             </g>
           </svg>`;
 
-        // --- 6. SYSTEM SENSORS (Ref: media_1792052899435_a5862063.png) ---
+        case 'STOR_2x1_WID':
+          return `<svg viewBox="0 0 350 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="346" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="20" y="24" fill="${c.text}" font-size="11" font-weight="bold">Drive Array Telemetry</text>
+            <circle cx="55" cy="65" r="26" fill="none" stroke="${c.sub_bg}" stroke-width="5"/>
+            <circle cx="55" cy="65" r="26" fill="none" stroke="${c.blue}" stroke-width="5" stroke-dasharray="100 163" transform="rotate(-90 55 65)"/>
+            <text x="55" y="69" text-anchor="middle" fill="${c.text}" font-size="9" font-weight="900">42%</text>
+            <text x="55" y="106" text-anchor="middle" fill="${c.text}" font-size="8.5" font-weight="bold">Root (/)</text>
+            <text x="55" y="120" text-anchor="middle" fill="${c.subtext}" font-size="7.5">42 / 100 GB</text>
+
+            <circle cx="135" cy="65" r="26" fill="none" stroke="${c.sub_bg}" stroke-width="5"/>
+            <circle cx="135" cy="65" r="26" fill="none" stroke="${c.yellow}" stroke-width="5" stroke-dasharray="110 163" transform="rotate(-90 135 65)"/>
+            <text x="135" y="69" text-anchor="middle" fill="${c.text}" font-size="9" font-weight="900">68%</text>
+            <text x="135" y="106" text-anchor="middle" fill="${c.text}" font-size="8.5" font-weight="bold">Home (~)</text>
+            <text x="135" y="120" text-anchor="middle" fill="${c.subtext}" font-size="7.5">320 / 480 GB</text>
+
+            <circle cx="215" cy="65" r="26" fill="none" stroke="${c.sub_bg}" stroke-width="5"/>
+            <circle cx="215" cy="65" r="26" fill="none" stroke="${c.green}" stroke-width="5" stroke-dasharray="85 163" transform="rotate(-90 215 65)"/>
+            <text x="215" y="69" text-anchor="middle" fill="${c.text}" font-size="9" font-weight="900">51%</text>
+            <text x="215" y="106" text-anchor="middle" fill="${c.text}" font-size="8.5" font-weight="bold">NVMe M.2</text>
+            <text x="215" y="120" text-anchor="middle" fill="${c.subtext}" font-size="7.5">512 GB / 1 TB</text>
+
+            <circle cx="295" cy="65" r="26" fill="none" stroke="${c.sub_bg}" stroke-width="5"/>
+            <circle cx="295" cy="65" r="26" fill="none" stroke="${c.magenta}" stroke-width="5" stroke-dasharray="115 163" transform="rotate(-90 295 65)"/>
+            <text x="295" y="69" text-anchor="middle" fill="${c.text}" font-size="9" font-weight="900">70%</text>
+            <text x="295" y="106" text-anchor="middle" fill="${c.text}" font-size="8.5" font-weight="bold">Backup</text>
+            <text x="295" y="120" text-anchor="middle" fill="${c.subtext}" font-size="7.5">1.4 / 2.0 TB</text>
+          </svg>`;
+
+        // --- 6. SYSTEM SENSORS ---
         case 'RING_1x1_MIN':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="ring1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#ring1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <g transform="translate(70, 38)">
-              <circle r="18" fill="#161820" stroke="#222530" stroke-width="4"/>
-              <circle r="18" fill="none" stroke="#FF5A52" stroke-width="4" stroke-dasharray="10 115" stroke-linecap="round"/>
-              <rect x="-4" y="-4" width="8" height="8" rx="1" fill="none" stroke="#FFF" stroke-width="1.2"/>
-              <circle cx="0" cy="0" r="1.5" fill="#FFF"/>
-            </g>
-            <g transform="translate(170, 38)">
-              <circle r="18" fill="#161820" stroke="#222530" stroke-width="4"/>
-              <circle r="18" fill="none" stroke="#30D158" stroke-width="4" stroke-dasharray="70 115" stroke-linecap="round"/>
-              <rect x="-6" y="-3.5" width="12" height="7" rx="1" fill="none" stroke="#FFF" stroke-width="1.2"/>
-              <line x1="-3" y1="-1" x2="-3" y2="1" stroke="#FFF" stroke-width="1"/>
-              <line x1="1" y1="-1" x2="1" y2="1" stroke="#FFF" stroke-width="1"/>
-            </g>
-            <g transform="translate(70, 84)">
-              <circle r="18" fill="#161820" stroke="#222530" stroke-width="4"/>
-              <circle r="18" fill="none" stroke="#0A84FF" stroke-width="4" stroke-dasharray="98 115" stroke-linecap="round"/>
-              <rect x="-5" y="-3" width="9" height="6" rx="1.5" fill="none" stroke="#FFF" stroke-width="1.2"/>
-              <rect x="4" y="-1.5" width="1.5" height="3" rx="0.5" fill="#FFF"/>
-              <rect x="-3.5" y="-1.8" width="5" height="3.6" fill="#FFF"/>
-            </g>
-            <g transform="translate(170, 84)">
-              <circle r="18" fill="#161820" stroke="#222530" stroke-width="4"/>
-              <circle r="18" fill="none" stroke="#FF9F0A" stroke-width="4" stroke-dasharray="60 115" stroke-linecap="round"/>
-              <circle cx="0" cy="2.5" r="2.5" fill="#FFF"/>
-              <rect x="-1" y="-5.5" width="2" height="6" rx="1" fill="#FFF"/>
-            </g>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="14" y="22" fill="${c.text}" font-size="10" font-weight="bold">Activity Rings</text>
+            <circle cx="50" cy="56" r="20" fill="none" stroke="${c.sub_bg}" stroke-width="4.5"/>
+            <circle cx="50" cy="56" r="20" fill="none" stroke="${c.red}" stroke-width="4.5" stroke-dasharray="75 125" transform="rotate(-90 50 56)"/>
+            <text x="50" y="55" text-anchor="middle" fill="${c.text}" font-size="7.5" font-weight="bold">CPU</text>
+            <text x="50" y="65" text-anchor="middle" fill="${c.red}" font-size="7" font-weight="bold">34%</text>
+
+            <circle cx="118" cy="56" r="20" fill="none" stroke="${c.sub_bg}" stroke-width="4.5"/>
+            <circle cx="118" cy="56" r="20" fill="none" stroke="${c.blue}" stroke-width="4.5" stroke-dasharray="90 125" transform="rotate(-90 118 56)"/>
+            <text x="118" y="55" text-anchor="middle" fill="${c.text}" font-size="7.5" font-weight="bold">RAM</text>
+            <text x="118" y="65" text-anchor="middle" fill="${c.blue}" font-size="7" font-weight="bold">58%</text>
+
+            <circle cx="50" cy="112" r="20" fill="none" stroke="${c.sub_bg}" stroke-width="4.5"/>
+            <circle cx="50" cy="112" r="20" fill="none" stroke="${c.yellow}" stroke-width="4.5" stroke-dasharray="35 125" transform="rotate(-90 50 112)"/>
+            <text x="50" y="111" text-anchor="middle" fill="${c.text}" font-size="7.5" font-weight="bold">SWAP</text>
+            <text x="50" y="121" text-anchor="middle" fill="${c.yellow}" font-size="7" font-weight="bold">12%</text>
+
+            <circle cx="118" cy="112" r="20" fill="none" stroke="${c.sub_bg}" stroke-width="4.5"/>
+            <circle cx="118" cy="112" r="20" fill="none" stroke="${c.green}" stroke-width="4.5" stroke-dasharray="60 125" transform="rotate(-90 118 112)"/>
+            <text x="118" y="111" text-anchor="middle" fill="${c.text}" font-size="7.5" font-weight="bold">DISK</text>
+            <text x="118" y="121" text-anchor="middle" fill="${c.green}" font-size="7" font-weight="bold">44%</text>
           </svg>`;
+
         case 'RING_1x1_DET':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="ring2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#ring2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <g transform="translate(70, 38)">
-              <circle r="18" fill="#161820" stroke="#222530" stroke-width="4"/>
-              <circle r="18" fill="none" stroke="#FF5A52" stroke-width="4" stroke-dasharray="10 115" stroke-linecap="round"/>
-              <text y="0" text-anchor="middle" fill="#FFF" font-size="11" font-weight="900">4</text>
-              <text y="9" text-anchor="middle" fill="#A1A1AA" font-size="7" font-weight="bold">CPU</text>
-            </g>
-            <g transform="translate(170, 38)">
-              <circle r="18" fill="#161820" stroke="#222530" stroke-width="4"/>
-              <circle r="18" fill="none" stroke="#30D158" stroke-width="4" stroke-dasharray="70 115" stroke-linecap="round"/>
-              <text y="0" text-anchor="middle" fill="#FFF" font-size="11" font-weight="900">60</text>
-              <text y="9" text-anchor="middle" fill="#A1A1AA" font-size="7" font-weight="bold">RAM</text>
-            </g>
-            <g transform="translate(70, 84)">
-              <circle r="18" fill="#161820" stroke="#222530" stroke-width="4"/>
-              <circle r="18" fill="none" stroke="#0A84FF" stroke-width="4" stroke-dasharray="98 115" stroke-linecap="round"/>
-              <text y="0" text-anchor="middle" fill="#FFF" font-size="11" font-weight="900">89</text>
-              <text y="9" text-anchor="middle" fill="#A1A1AA" font-size="7" font-weight="bold">BAT</text>
-            </g>
-            <g transform="translate(170, 84)">
-              <circle r="18" fill="#161820" stroke="#222530" stroke-width="4"/>
-              <circle r="18" fill="none" stroke="#FF9F0A" stroke-width="4" stroke-dasharray="60 115" stroke-linecap="round"/>
-              <text y="0" text-anchor="middle" fill="#FFF" font-size="11" font-weight="900">52°</text>
-              <text y="9" text-anchor="middle" fill="#A1A1AA" font-size="7" font-weight="bold">TEMP</text>
-            </g>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="14" y="22" fill="${c.text}" font-size="10" font-weight="bold">Hardware Telemetry</text>
+            <rect x="12" y="32" width="68" height="52" rx="8" fill="${c.sub_bg}"/>
+            <text x="20" y="46" fill="${c.subtext}" font-size="7">CPU LOAD</text>
+            <text x="20" y="60" fill="${c.red}" font-size="12" font-weight="900">24%</text>
+            <text x="20" y="74" fill="${c.subtext}" font-size="7">4.2 GHz</text>
+
+            <rect x="88" y="32" width="68" height="52" rx="8" fill="${c.sub_bg}"/>
+            <text x="96" y="46" fill="${c.subtext}" font-size="7">MEMORY</text>
+            <text x="96" y="60" fill="${c.blue}" font-size="12" font-weight="900">58%</text>
+            <text x="96" y="74" fill="${c.subtext}" font-size="7">9.2 / 16 GB</text>
+
+            <rect x="12" y="88" width="68" height="52" rx="8" fill="${c.sub_bg}"/>
+            <text x="20" y="102" fill="${c.subtext}" font-size="7">TEMP</text>
+            <text x="20" y="116" fill="${c.yellow}" font-size="12" font-weight="900">48°C</text>
+            <text x="20" y="130" fill="${c.subtext}" font-size="7">Fan 1200rpm</text>
+
+            <rect x="88" y="88" width="68" height="52" rx="8" fill="${c.sub_bg}"/>
+            <text x="96" y="102" fill="${c.subtext}" font-size="7">POWER</text>
+            <text x="96" y="116" fill="${c.green}" font-size="12" font-weight="900">18 W</text>
+            <text x="96" y="130" fill="${c.subtext}" font-size="7">Battery 98%</text>
           </svg>`;
+
         case 'RING_2x1_WID':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="ring3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#ring3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <g transform="translate(36, 44)">
-              <circle r="22" fill="#161820" stroke="#222530" stroke-width="4"/>
-              <circle r="22" fill="none" stroke="#FF5A52" stroke-width="4" stroke-dasharray="10 140" stroke-linecap="round"/>
-              <rect x="-5" y="-5" width="10" height="10" rx="1.5" fill="none" stroke="#FFF" stroke-width="1.2"/>
-              <circle cx="0" cy="0" r="2" fill="#FFF"/>
-              <text y="40" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="bold">4%</text>
-            </g>
-            <g transform="translate(92, 44)">
-              <circle r="22" fill="#161820" stroke="#222530" stroke-width="4"/>
-              <circle r="22" fill="none" stroke="#30D158" stroke-width="4" stroke-dasharray="84 140" stroke-linecap="round"/>
-              <rect x="-7" y="-4" width="14" height="8" rx="1.5" fill="none" stroke="#FFF" stroke-width="1.2"/>
-              <line x1="-3" y1="-1" x2="-3" y2="1" stroke="#FFF" stroke-width="1"/>
-              <line x1="2" y1="-1" x2="2" y2="1" stroke="#FFF" stroke-width="1"/>
-              <text y="40" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="bold">60%</text>
-            </g>
-            <g transform="translate(148, 44)">
-              <circle r="22" fill="#161820" stroke="#222530" stroke-width="4"/>
-              <circle r="22" fill="none" stroke="#0A84FF" stroke-width="4" stroke-dasharray="124 140" stroke-linecap="round"/>
-              <rect x="-6" y="-3.5" width="10" height="7" rx="1.5" fill="none" stroke="#FFF" stroke-width="1.2"/>
-              <rect x="4.5" y="-1.8" width="1.8" height="3.6" rx="0.5" fill="#FFF"/>
-              <rect x="-4.5" y="-2" width="6" height="4" fill="#FFF"/>
-              <text y="40" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="bold">89%</text>
-            </g>
-            <g transform="translate(204, 44)">
-              <circle r="22" fill="#161820" stroke="#222530" stroke-width="4"/>
-              <circle r="22" fill="none" stroke="#FF9F0A" stroke-width="4" stroke-dasharray="72 140" stroke-linecap="round"/>
-              <circle cx="0" cy="3" r="3" fill="#FFF"/>
-              <rect x="-1.2" y="-6.5" width="2.4" height="7" rx="1.2" fill="#FFF"/>
-              <text y="40" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="bold">49°C</text>
-            </g>
+          return `<svg viewBox="0 0 350 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="346" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="20" y="24" fill="${c.text}" font-size="11" font-weight="bold">Hardware Horizon Gauges</text>
+            <circle cx="55" cy="65" r="26" fill="none" stroke="${c.sub_bg}" stroke-width="5"/>
+            <circle cx="55" cy="65" r="26" fill="none" stroke="${c.red}" stroke-width="5" stroke-dasharray="60 163" transform="rotate(-90 55 65)"/>
+            <text x="55" y="69" text-anchor="middle" fill="${c.text}" font-size="9" font-weight="900">24%</text>
+            <text x="55" y="106" text-anchor="middle" fill="${c.text}" font-size="8.5" font-weight="bold">CPU</text>
+            <text x="55" y="120" text-anchor="middle" fill="${c.subtext}" font-size="7.5">4.2 GHz</text>
+
+            <circle cx="135" cy="65" r="26" fill="none" stroke="${c.sub_bg}" stroke-width="5"/>
+            <circle cx="135" cy="65" r="26" fill="none" stroke="${c.blue}" stroke-width="5" stroke-dasharray="100 163" transform="rotate(-90 135 65)"/>
+            <text x="135" y="69" text-anchor="middle" fill="${c.text}" font-size="9" font-weight="900">58%</text>
+            <text x="135" y="106" text-anchor="middle" fill="${c.text}" font-size="8.5" font-weight="bold">RAM</text>
+            <text x="135" y="120" text-anchor="middle" fill="${c.subtext}" font-size="7.5">9.2 GB</text>
+
+            <circle cx="215" cy="65" r="26" fill="none" stroke="${c.sub_bg}" stroke-width="5"/>
+            <circle cx="215" cy="65" r="26" fill="none" stroke="${c.green}" stroke-width="5" stroke-dasharray="80 163" transform="rotate(-90 215 65)"/>
+            <text x="215" y="69" text-anchor="middle" fill="${c.text}" font-size="9" font-weight="900">42%</text>
+            <text x="215" y="106" text-anchor="middle" fill="${c.text}" font-size="8.5" font-weight="bold">DISK</text>
+            <text x="215" y="120" text-anchor="middle" fill="${c.subtext}" font-size="7.5">Root SSD</text>
+
+            <circle cx="295" cy="65" r="26" fill="none" stroke="${c.sub_bg}" stroke-width="5"/>
+            <circle cx="295" cy="65" r="26" fill="none" stroke="${c.yellow}" stroke-width="5" stroke-dasharray="90 163" transform="rotate(-90 295 65)"/>
+            <text x="295" y="69" text-anchor="middle" fill="${c.text}" font-size="9" font-weight="900">48°C</text>
+            <text x="295" y="106" text-anchor="middle" fill="${c.text}" font-size="8.5" font-weight="bold">TEMP</text>
+            <text x="295" y="120" text-anchor="middle" fill="${c.subtext}" font-size="7.5">Optimal</text>
           </svg>`;
 
         // --- 7. WEATHER FORECAST ---
         case 'WEAT_1x1_MIN':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="weat1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#weat1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <circle cx="56" cy="60" r="22" fill="#FF9F0A" fill-opacity="0.2"/>
-            <circle cx="56" cy="60" r="14" fill="#FF9F0A"/>
-            <text x="104" y="58" fill="#FFFFFF" font-size="34" font-weight="900">22°</text>
-            <text x="104" y="78" fill="#FF9F0A" font-size="12" font-weight="bold">Clear Sky</text>
-            <text x="104" y="94" fill="#71717A" font-size="10" font-weight="bold">Goa</text>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="16" y="24" fill="${c.text}" font-size="10" font-weight="bold">Mumbai</text>
+            <circle cx="124" cy="48" r="14" fill="${c.yellow}"/>
+            <circle cx="108" cy="54" r="12" fill="${c.sub_bg}"/>
+            <circle cx="122" cy="54" r="10" fill="${c.sub_bg}"/>
+            <rect x="104" y="54" width="26" height="10" rx="5" fill="${c.sub_bg}"/>
+            <text x="16" y="86" fill="${c.text}" font-size="44" font-weight="900">28°</text>
+            <rect x="14" y="104" width="140" height="34" rx="10" fill="${c.sub_bg}"/>
+            <text x="24" y="120" fill="${c.text}" font-size="9" font-weight="bold">Partly Cloudy</text>
+            <text x="24" y="130" fill="${c.subtext}" font-size="7.5">H: 32°  L: 24°</text>
           </svg>`;
+
         case 'WEAT_1x1_DET':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="weat2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#weat2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <text x="24" y="32" fill="#FFFFFF" font-size="13" font-weight="bold">Panaji, Goa</text>
-            <text x="24" y="66" fill="#FFFFFF" font-size="32" font-weight="900">22°<tspan fill="#A1A1AA" font-size="12" font-weight="normal"> H:26° L:19°</tspan></text>
-            <text x="24" y="82" fill="#FF9F0A" font-size="11" font-weight="bold">Partly Cloudy</text>
-            <rect x="24" y="90" width="88" height="18" rx="5" fill="#222532"/>
-            <text x="68" y="102" text-anchor="middle" fill="#A1A1AA" font-size="8.5">💧 64% Humidity</text>
-            <rect x="120" y="90" width="94" height="18" rx="5" fill="#222532"/>
-            <text x="167" y="102" text-anchor="middle" fill="#A1A1AA" font-size="8.5">💨 12 km/h Wind</text>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="16" y="24" fill="${c.text}" font-size="10" font-weight="bold">Mumbai Forecast</text>
+            <text x="16" y="60" fill="${c.text}" font-size="32" font-weight="900">28°C</text>
+            <text x="148" y="60" text-anchor="end" fill="${c.yellow}" font-size="9" font-weight="bold">Partly Cloudy</text>
+            <rect x="12" y="74" width="45" height="60" rx="8" fill="${c.sub_bg}"/>
+            <text x="34" y="92" text-anchor="middle" fill="${c.subtext}" font-size="7">HUMID</text>
+            <text x="34" y="112" text-anchor="middle" fill="${c.blue}" font-size="10" font-weight="bold">65%</text>
+
+            <rect x="61" y="74" width="46" height="60" rx="8" fill="${c.sub_bg}"/>
+            <text x="84" y="92" text-anchor="middle" fill="${c.subtext}" font-size="7">WIND</text>
+            <text x="84" y="112" text-anchor="middle" fill="${c.green}" font-size="10" font-weight="bold">14 km</text>
+
+            <rect x="111" y="74" width="45" height="60" rx="8" fill="${c.sub_bg}"/>
+            <text x="133" y="92" text-anchor="middle" fill="${c.subtext}" font-size="7">FEELS</text>
+            <text x="133" y="112" text-anchor="middle" fill="${c.yellow}" font-size="10" font-weight="bold">31°</text>
           </svg>`;
+
         case 'WEAT_2x1_WID':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="weat3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#weat3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <circle cx="38" cy="50" r="14" fill="#FF9F0A"/>
-            <text x="62" y="48" fill="#FFFFFF" font-size="24" font-weight="900">22°</text>
-            <text x="22" y="76" fill="#FFFFFF" font-size="11" font-weight="bold">Goa</text>
-            <text x="22" y="90" fill="#FF9F0A" font-size="9.5" font-weight="bold">Clear Sky</text>
-            <line x1="110" y1="20" x2="110" y2="100" stroke="#2B2D38" stroke-width="1.2"/>
-            <g transform="translate(132, 54)">
-              <text y="-20" text-anchor="middle" fill="#A1A1AA" font-size="8.5" font-weight="bold">TODAY</text>
-              <circle r="7" fill="#FF9F0A"/>
-              <text y="24" text-anchor="middle" fill="#FFF" font-size="9.5" font-weight="bold">24°</text>
-            </g>
-            <g transform="translate(172, 54)">
-              <text y="-20" text-anchor="middle" fill="#A1A1AA" font-size="8.5" font-weight="bold">THU</text>
-              <circle r="7" fill="#FF9F0A"/>
-              <text y="24" text-anchor="middle" fill="#FFF" font-size="9.5" font-weight="bold">26°</text>
-            </g>
-            <g transform="translate(212, 54)">
-              <text y="-20" text-anchor="middle" fill="#A1A1AA" font-size="8.5" font-weight="bold">FRI</text>
-              <circle r="7" fill="#30D158"/>
-              <text y="24" text-anchor="middle" fill="#FFF" font-size="9.5" font-weight="bold">23°</text>
-            </g>
+          return `<svg viewBox="0 0 350 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="346" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="20" y="26" fill="${c.text}" font-size="11" font-weight="bold">Mumbai</text>
+            <text x="20" y="76" fill="${c.text}" font-size="46" font-weight="900">28°</text>
+            <text x="20" y="96" fill="${c.subtext}" font-size="10" font-weight="bold">Partly Cloudy • H: 32° L: 24°</text>
+            <rect x="20" y="108" width="134" height="26" rx="6" fill="${c.sub_bg}"/>
+            <text x="87" y="125" text-anchor="middle" fill="${c.subtext}" font-size="8">Humidity 65% • Wind 14 km/h</text>
+            <line x1="168" y1="20" x2="168" y2="132" stroke="${c.border}" stroke-width="1"/>
+            <text x="180" y="26" fill="${c.text}" font-size="10" font-weight="bold">4-DAY FORECAST</text>
+            <rect x="180" y="38" width="38" height="96" rx="8" fill="${c.sub_bg}"/>
+            <text x="199" y="56" text-anchor="middle" fill="${c.subtext}" font-size="8" font-weight="bold">SAT</text>
+            <circle cx="199" cy="80" r="8" fill="${c.yellow}"/>
+            <text x="199" y="116" text-anchor="middle" fill="${c.text}" font-size="9" font-weight="bold">29°</text>
+
+            <rect x="222" y="38" width="38" height="96" rx="8" fill="${c.sub_bg}"/>
+            <text x="241" y="56" text-anchor="middle" fill="${c.subtext}" font-size="8" font-weight="bold">SUN</text>
+            <circle cx="237" cy="80" r="7" fill="${c.yellow}"/>
+            <circle cx="245" cy="82" r="6" fill="${c.text}"/>
+            <text x="241" y="116" text-anchor="middle" fill="${c.text}" font-size="9" font-weight="bold">27°</text>
+
+            <rect x="264" y="38" width="38" height="96" rx="8" fill="${c.sub_bg}"/>
+            <text x="283" y="56" text-anchor="middle" fill="${c.subtext}" font-size="8" font-weight="bold">MON</text>
+            <circle cx="283" cy="78" r="7" fill="${c.blue}"/>
+            <text x="283" y="116" text-anchor="middle" fill="${c.text}" font-size="9" font-weight="bold">26°</text>
+
+            <rect x="306" y="38" width="38" height="96" rx="8" fill="${c.sub_bg}"/>
+            <text x="325" y="56" text-anchor="middle" fill="${c.subtext}" font-size="8" font-weight="bold">TUE</text>
+            <circle cx="325" cy="80" r="8" fill="${c.yellow}"/>
+            <text x="325" y="116" text-anchor="middle" fill="${c.text}" font-size="9" font-weight="bold">30°</text>
           </svg>`;
 
         // --- 8. DAILY INSPIRATION ---
         case 'QUOT_1x1_MIN':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="quot1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#quot1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <text x="24" y="44" fill="#FF5A52" font-size="36" font-weight="900" font-family="Georgia, serif">“</text>
-            <text x="48" y="36" fill="#FFFFFF" font-size="11" font-style="italic">Act as if what you do</text>
-            <text x="24" y="56" fill="#FFFFFF" font-size="11" font-style="italic">makes a difference.</text>
-            <text x="216" y="88" text-anchor="end" fill="#FF5A52" font-size="9.5" font-weight="bold">— William James</text>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="18" y="34" fill="${c.accent}" font-size="28" font-family="serif">“</text>
+            <text x="18" y="58" fill="${c.text}" font-size="9.5" font-weight="bold">Simplicity is the</text>
+            <text x="18" y="72" fill="${c.text}" font-size="9.5" font-weight="bold">soul of efficiency.</text>
+            <rect x="14" y="106" width="140" height="30" rx="8" fill="${c.sub_bg}"/>
+            <text x="84" y="125" text-anchor="middle" fill="${c.subtext}" font-size="8" font-weight="bold">— Austin Freeman</text>
           </svg>`;
+
         case 'QUOT_1x1_DET':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="quot2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#quot2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <rect x="22" y="18" width="68" height="18" rx="5" fill="#FF5A52" fill-opacity="0.2"/>
-            <text x="56" y="30.5" text-anchor="middle" fill="#FF5A52" font-size="8.5" font-weight="extrabold">STOICISM</text>
-            <text x="22" y="56" fill="#FFFFFF" font-size="11" font-style="italic">“Waste no more time arguing</text>
-            <text x="22" y="74" fill="#FFFFFF" font-size="11" font-style="italic">about what a good man is.”</text>
-            <text x="218" y="98" text-anchor="end" fill="#A1A1AA" font-size="9" font-weight="bold">— Marcus Aurelius</text>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="16" y="24" fill="${c.accent}" font-size="8" font-weight="bold" letter-spacing="1">DAILY PHILOSOPHY</text>
+            <text x="16" y="54" fill="${c.text}" font-size="10.5" font-weight="bold">“Stay hungry,</text>
+            <text x="16" y="70" fill="${c.text}" font-size="10.5" font-weight="bold">stay foolish.”</text>
+            <rect x="14" y="96" width="140" height="40" rx="10" fill="${c.sub_bg}"/>
+            <text x="24" y="112" fill="${c.text}" font-size="9" font-weight="bold">Steve Jobs</text>
+            <text x="24" y="124" fill="${c.subtext}" font-size="7.5">Stanford Commencement, 2005</text>
           </svg>`;
+
         case 'QUOT_2x1_WID':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="quot3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#quot3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <rect x="22" y="24" width="4" height="68" rx="2" fill="#FF5A52"/>
-            <text x="36" y="48" fill="#FFFFFF" font-size="12" font-style="italic">“He who has a why to live can bear</text>
-            <text x="36" y="68" fill="#FFFFFF" font-size="12" font-style="italic">almost any how.”</text>
-            <text x="216" y="94" text-anchor="end" fill="#FF5A52" font-size="10" font-weight="bold">— Friedrich Nietzsche</text>
+          return `<svg viewBox="0 0 350 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="346" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="24" y="38" fill="${c.accent}" font-size="36" font-family="serif">“</text>
+            <text x="50" y="56" fill="${c.text}" font-size="12" font-weight="bold">The only way to do great work</text>
+            <text x="50" y="74" fill="${c.text}" font-size="12" font-weight="bold">is to love what you do.</text>
+            <line x1="50" y1="92" x2="300" y2="92" stroke="${c.border}" stroke-width="1"/>
+            <text x="50" y="114" fill="${c.accent}" font-size="10" font-weight="bold">— Steve Jobs</text>
+            <text x="50" y="128" fill="${c.subtext}" font-size="8.5">Apple Inc. Founder & Visionary</text>
           </svg>`;
 
         // --- 9. NOW PLAYING ---
         case 'MEDI_1x1_MIN':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="medi1_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-              <linearGradient id="art_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#BF5AF2"/>
-                <stop offset="100%" stop-color="#5E5CE6"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#medi1_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <rect x="24" y="26" width="68" height="68" rx="14" fill="url(#art_bg)"/>
-            <polygon points="54,50 54,70 70,60" fill="#FFFFFF"/>
-            <text x="106" y="52" fill="#FFFFFF" font-size="14" font-weight="900">Starboy</text>
-            <text x="106" y="70" fill="#A1A1AA" font-size="11" font-weight="bold">The Weeknd</text>
-            <text x="106" y="86" fill="#BF5AF2" font-size="9" font-weight="extrabold">PLAYING • 02:45</text>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <circle cx="84" cy="58" r="34" fill="${c.sub_bg}" stroke="${c.border}" stroke-width="1.5"/>
+            <circle cx="84" cy="58" r="26" fill="none" stroke="${c.border}" stroke-width="0.8"/>
+            <circle cx="84" cy="58" r="16" fill="none" stroke="${c.border}" stroke-width="0.8"/>
+            <circle cx="84" cy="58" r="10" fill="${c.accent}"/>
+            <circle cx="84" cy="58" r="3" fill="${c.bg}"/>
+            <text x="84" y="112" text-anchor="middle" fill="${c.text}" font-size="10" font-weight="bold">Starboy</text>
+            <text x="84" y="126" text-anchor="middle" fill="${c.subtext}" font-size="8.5">The Weeknd</text>
           </svg>`;
+
         case 'MEDI_1x1_DET':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="medi2_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#medi2_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <text x="24" y="32" fill="#FFFFFF" font-size="13" font-weight="900">Blinding Lights</text>
-            <text x="24" y="48" fill="#A1A1AA" font-size="10">The Weeknd — After Hours</text>
-            <rect x="24" y="62" width="192" height="5" rx="2.5" fill="#222530"/>
-            <rect x="24" y="62" width="118" height="5" rx="2.5" fill="#BF5AF2"/>
-            <circle cx="142" cy="64.5" r="5" fill="#FFFFFF"/>
-            <g fill="#FFF" transform="translate(120, 92)">
-              <polygon points="-36,-6 -36,6 -24,0"/>
-              <circle cx="0" cy="0" r="10" fill="#BF5AF2"/>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <text x="16" y="24" fill="${c.subtext}" font-size="7.5" font-weight="bold">NOW PLAYING</text>
+            <text x="16" y="44" fill="${c.text}" font-size="11" font-weight="900">Blinding Lights</text>
+            <text x="16" y="58" fill="${c.subtext}" font-size="8.5">The Weeknd — After Hours</text>
+            <rect x="16" y="74" width="136" height="4" rx="2" fill="${c.sub_bg}"/>
+            <rect x="16" y="74" width="86" height="4" rx="2" fill="${c.accent}"/>
+            <circle cx="102" cy="76" r="4" fill="${c.text}"/>
+            <text x="16" y="90" fill="${c.subtext}" font-size="7">2:14</text>
+            <text x="152" y="90" text-anchor="end" fill="${c.subtext}" font-size="7">3:20</text>
+            <g fill="${c.text}" transform="translate(84, 116)">
+              <polygon points="-32,-5 -32,5 -22,0"/>
+              <circle cx="0" cy="0" r="12" fill="${c.accent}"/>
               <rect x="-3,-4" width="2" height="8" fill="#FFF"/>
               <rect x="1,-4" width="2" height="8" fill="#FFF"/>
-              <polygon points="24,-6 24,6 36,0"/>
+              <polygon points="22,-5 22,5 32,0"/>
             </g>
           </svg>`;
+
         case 'MEDI_2x1_WID':
-          return `<svg viewBox="0 0 240 120" class="w-full h-full">
-            <defs>
-              <linearGradient id="medi3_bg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#1B1C22"/>
-                <stop offset="100%" stop-color="#111216"/>
-              </linearGradient>
-            </defs>
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="url(#medi3_bg)" stroke="#2B2D38" stroke-width="1.2"/>
-            <circle cx="48" cy="60" r="34" fill="#14151B" stroke="#2B2D38" stroke-width="2"/>
-            <circle cx="48" cy="60" r="26" fill="none" stroke="#222530" stroke-width="1"/>
-            <circle cx="48" cy="60" r="18" fill="none" stroke="#222530" stroke-width="1"/>
-            <circle cx="48" cy="60" r="12" fill="#BF5AF2"/>
-            <circle cx="48" cy="60" r="3.5" fill="#14151B"/>
-            <text x="96" y="38" fill="#FFFFFF" font-size="13" font-weight="900">Midnight City</text>
-            <text x="96" y="54" fill="#A1A1AA" font-size="10">M83 • Hurry Up, We're Dreaming</text>
-            <rect x="96" y="66" width="124" height="4.5" rx="2.25" fill="#222530"/>
-            <rect x="96" y="66" width="76" height="4.5" rx="2.25" fill="#BF5AF2"/>
-            <g fill="#A1A1AA" transform="translate(160, 92)">
-              <polygon points="-24,-5 -24,5 -14,0"/>
-              <circle cx="0" cy="0" r="9" fill="#BF5AF2"/>
-              <polygon points="-2,-3 -2,3 4,0" fill="#FFF"/>
-              <polygon points="14,-5 14,5 24,0"/>
+          return `<svg viewBox="0 0 350 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="346" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-width="1.2"/>
+            <circle cx="58" cy="76" r="44" fill="${c.sub_bg}" stroke="${c.border}" stroke-width="2"/>
+            <circle cx="58" cy="76" r="34" fill="none" stroke="${c.border}" stroke-width="1"/>
+            <circle cx="58" cy="76" r="22" fill="none" stroke="${c.border}" stroke-width="1"/>
+            <circle cx="58" cy="76" r="14" fill="${c.accent}"/>
+            <circle cx="58" cy="76" r="4" fill="${c.bg}"/>
+            <text x="120" y="38" fill="${c.text}" font-size="13" font-weight="900">Midnight City</text>
+            <text x="120" y="54" fill="${c.subtext}" font-size="9.5">M83 • Hurry Up, We're Dreaming</text>
+            <rect x="120" y="68" width="206" height="5" rx="2.5" fill="${c.sub_bg}"/>
+            <rect x="120" y="68" width="128" height="5" rx="2.5" fill="${c.accent}"/>
+            <circle cx="248" cy="70.5" r="4.5" fill="${c.text}"/>
+            <text x="120" y="86" fill="${c.subtext}" font-size="8">2:35</text>
+            <text x="326" y="86" text-anchor="end" fill="${c.subtext}" font-size="8">4:04</text>
+            <g fill="${c.subtext}" transform="translate(220, 114)">
+              <polygon points="-40,-5 -40,5 -30,0"/>
+              <circle cx="0" cy="0" r="13" fill="${c.accent}"/>
+              <polygon points="-3,-4 -3,4 5,0" fill="#FFF"/>
+              <polygon points="30,-5 30,5 40,0"/>
             </g>
           </svg>`;
 
         default:
-          return `<svg viewBox="0 0 240 120" class="w-full h-full flex items-center justify-center">
-            <rect x="2" y="2" width="236" height="116" rx="18" fill="#18181E" stroke="#333" stroke-dasharray="4 4"/>
-            <text x="120" y="64" text-anchor="middle" fill="#71717A" font-size="12" font-weight="bold">${vid}</text>
+          return `<svg viewBox="0 0 168 152" class="max-h-full max-w-full">
+            <rect x="2" y="2" width="164" height="148" rx="20" fill="${c.bg}" stroke="${c.border}" stroke-dasharray="4 4"/>
+            <text x="84" y="80" text-anchor="middle" fill="${c.subtext}" font-size="10" font-weight="bold">${vid}</text>
           </svg>`;
       }
     }
@@ -1833,18 +2039,18 @@
 
       MODULE_CATALOG.forEach(parent => {
         const card = document.createElement('div');
-        card.className = "family-card p-4 rounded-2xl bg-gradient-to-b from-[#202026] to-[#17171C] hover:from-[#262630] hover:to-[#1C1C22] border border-white/10 hover:border-[#FF5A52]/60 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl cursor-pointer flex flex-col justify-between h-36 group";
+        card.className = "family-card p-3.5 rounded-xl bg-[#1A1A1E] hover:bg-[#222228] border border-white/8 hover:border-[#E10600]/50 transition cursor-pointer flex flex-col justify-between h-34 group";
         card.onclick = () => openFamilyVariants(parent.id);
         card.innerHTML = `
           <div class="flex items-start justify-between">
-            <div class="p-2.5 rounded-xl bg-white/5 group-hover:bg-[#FF5A52]/10 text-[#FF5A52] transition">
+            <div class="p-2 rounded-lg bg-white/5 group-hover:bg-[#E10600]/10 text-[#E10600] transition">
               ${parent.icon}
             </div>
             <span class="text-[9px] font-bold text-zinc-400 uppercase tracking-wider px-2 py-0.5 rounded bg-white/5 border border-white/5">${parent.category}</span>
           </div>
           <div class="mt-2">
-            <p class="text-sm font-black text-white group-hover:text-[#FF5A52] transition leading-tight">${parent.name}</p>
-            <p class="text-[10px] text-zinc-400 mt-1 font-medium flex items-center gap-1"><span>3 format variants</span> <span class="text-zinc-600">•</span> <span class="text-[#FF5A52]">1x1 / 2x1</span></p>
+            <p class="text-sm font-bold text-white group-hover:text-[#E10600] transition leading-tight">${parent.name}</p>
+            <p class="text-[10px] text-zinc-400 mt-1 font-medium flex items-center gap-1"><span>3 format variants</span> <span class="text-zinc-600">•</span> <span class="text-[#E10600]">1x1 / 2x1</span></p>
           </div>
         `;
         container.appendChild(card);
@@ -1873,7 +2079,6 @@
       document.getElementById('step2-title').innerText = parent.name;
       document.getElementById('step2-category').innerText = parent.category;
       document.getElementById('target-slot-badge-step2').innerText = currentSelectedSlot;
-      document.getElementById('modal-footer-hint').innerText = `Click a variant to place it into slot ${currentSelectedSlot}.`;
 
       const container = document.getElementById('view-variants');
       container.innerHTML = parent.variants.map(v => {
@@ -1883,16 +2088,16 @@
           : (v.id.includes('DET') ? 'bg-blue-500/15 text-blue-300 border-blue-500/30' : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30');
         
         return `
-          <div onclick="selectModule('${v.id}')" class="variant-card p-4 rounded-2xl bg-gradient-to-b from-[#202026] to-[#17171C] hover:from-[#262630] hover:to-[#1C1C22] border border-white/10 hover:border-[#FF5A52] transition-all duration-200 hover:-translate-y-1 hover:shadow-2xl cursor-pointer flex flex-col justify-between h-72 group">
+          <div onclick="selectModule('${v.id}')" class="variant-card p-3.5 rounded-xl bg-[#1A1A1E] hover:bg-[#222228] border border-white/8 hover:border-[#E10600] transition cursor-pointer flex flex-col justify-between h-72 group">
             <div>
               <div class="flex items-center justify-between">
                 <span class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-md border ${badgeClass}">${v.name}</span>
                 <span class="text-[10px] font-bold text-zinc-500 uppercase">${v.size}</span>
               </div>
-              <h4 class="text-sm font-black text-white mt-2 group-hover:text-[#FF5A52] transition truncate">${v.title}</h4>
+              <h4 class="text-sm font-bold text-white mt-2 group-hover:text-[#E10600] transition truncate">${v.title}</h4>
               
               <!-- Large Live SVG Preview -->
-              <div class="my-2.5 h-28 rounded-xl overflow-hidden flex items-center justify-center shadow-inner">
+              <div class="my-2 h-28 rounded-lg overflow-hidden flex items-center justify-center bg-[#141418] border border-white/5">
                 ${getVariantPreviewSVG(v.id)}
               </div>
 
@@ -1901,7 +2106,7 @@
             </div>
 
             <!-- Select Action Button -->
-            <div class="mt-2.5 py-2 rounded-xl bg-white/5 group-hover:bg-[#FF5A52] text-xs font-bold text-zinc-300 group-hover:text-white transition flex items-center justify-center gap-1.5 shadow-sm">
+            <div class="mt-2 py-2 rounded-lg bg-white/5 group-hover:bg-[#E10600] text-xs font-bold text-zinc-300 group-hover:text-white transition flex items-center justify-center gap-1.5">
               <span>Select Variant</span>
               <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </div>
@@ -1916,17 +2121,21 @@
 
       document.getElementById('modal-header-step1').classList.remove('hidden');
       document.getElementById('view-families').classList.remove('hidden');
-      document.getElementById('modal-footer-hint').innerText = "Click any module family to view its 3 format variants.";
       renderFamilies();
       filterFamilies();
     }
 
     function openAddModuleModal(slot) {
       currentSelectedSlot = slot || "B1";
-      const badge = document.getElementById('target-slot-badge');
-      if (badge) badge.innerText = currentSelectedSlot;
       const search = document.getElementById('family-search');
       if (search) search.value = '';
+
+      const isExisting = state.slots && state.slots[currentSelectedSlot] && state.slots[currentSelectedSlot] !== "EMPTY";
+      const titleEl = document.getElementById('modal-title-step1');
+      if (titleEl) {
+        titleEl.innerText = isExisting ? "Edit Module" : "Add Module";
+      }
+
       goToStep1();
       document.getElementById('modal-add-module').classList.remove('hidden');
     }
@@ -1939,16 +2148,9 @@
       if (!state.slots) state.slots = {};
 
       if (is2x1(modId)) {
-        if (currentSelectedSlot === 'B1' || currentSelectedSlot === 'B2') {
-          currentSelectedSlot = 'B1';
-          state.slots.B2 = "EMPTY";
-        } else if (currentSelectedSlot === 'C1' || currentSelectedSlot === 'C2') {
-          currentSelectedSlot = 'C1';
-          state.slots.C2 = "EMPTY";
-        } else if (currentSelectedSlot === 'D1' || currentSelectedSlot === 'D2') {
-          currentSelectedSlot = 'D1';
-          state.slots.D2 = "EMPTY";
-        }
+        const rowLetter = currentSelectedSlot ? currentSelectedSlot[0] : 'A';
+        currentSelectedSlot = rowLetter + '1';
+        state.slots[rowLetter + '2'] = "EMPTY";
       }
 
       state.slots[currentSelectedSlot] = modId;
@@ -1960,7 +2162,7 @@
         await fetch('/api/slots', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ slots: state.slots })
+          body: JSON.stringify({ slots: state.slots, row_order: state.row_order })
         });
       } catch (e) {}
     }
@@ -1975,7 +2177,7 @@
         await fetch('/api/slots', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ slots: state.slots })
+          body: JSON.stringify({ slots: state.slots, row_order: state.row_order })
         });
       } catch (e) {}
     }
@@ -1992,7 +2194,6 @@
       } catch (e) {}
     }
 
-
     async function saveState() {
       try {
         await fetch('/api/settings', {
@@ -2004,10 +2205,120 @@
       } catch (e) {}
     }
 
+    const THEMES = [
+      // Developer Classics & Modern Standards
+      { id: 'dark', name: 'Dark Charcoal', category: 'dark', tag: 'Default', bg: '#16161A', fg: '#F5F5F7', colors: ['#16161A', '#E10600', '#0A84FF', '#30D158', '#FF9F0A'] },
+      { id: 'catppuccin', name: 'Catppuccin Mocha', category: 'dark', tag: 'Pastel', bg: '#1E1E2E', fg: '#CDD6F4', colors: ['#1E1E2E', '#F38BA8', '#89B4FA', '#A6E3A1', '#CBA6F7'] },
+      { id: 'dracula', name: 'Dracula', category: 'dark', tag: 'Contrast', bg: '#282A36', fg: '#F8F8F2', colors: ['#282A36', '#FF5555', '#8BE9FD', '#50FA7B', '#BD93F9'] },
+      { id: 'nord', name: 'Nord', category: 'dark', tag: 'Arctic', bg: '#2E3440', fg: '#ECEFF4', colors: ['#2E3440', '#BF616A', '#88C0D0', '#A3BE8C', '#B48EAD'] },
+      { id: 'tokyo_night', name: 'Tokyo Night', category: 'dark', tag: 'Nocturnal', bg: '#1A1B26', fg: '#C0CAF5', colors: ['#1A1B26', '#F7768E', '#7AA2F7', '#9ECE6A', '#BB9AF7'] },
+      { id: 'one_dark', name: 'One Dark', category: 'dark', tag: 'Modern', bg: '#282C34', fg: '#ABB2BF', colors: ['#282C34', '#E06C75', '#61AFEF', '#98C379', '#C678DD'] },
+      { id: 'monokai', name: 'Monokai Pro', category: 'dark', tag: 'Editor', bg: '#2D2A2E', fg: '#FCFCFA', colors: ['#2D2A2E', '#FF6188', '#78DCE8', '#A9DC76', '#FC9867'] },
+
+      // Warm Retro & Earthy
+      { id: 'gruvbox', name: 'Gruvbox Dark', category: 'retro', tag: 'Retro', bg: '#282828', fg: '#EBDBB2', colors: ['#282828', '#FB4934', '#83A598', '#B8BB26', '#FABD2F'] },
+      { id: 'gruvbox_light', name: 'Gruvbox Light', category: 'light', tag: 'Sepia', bg: '#FBF1C7', fg: '#3C3836', colors: ['#FBF1C7', '#CC241D', '#458588', '#98711A', '#D79921'] },
+      { id: 'solarized_dark', name: 'Solarized Dark', category: 'retro', tag: 'Teal', bg: '#002B36', fg: '#93A1A1', colors: ['#002B36', '#DC322F', '#268BD2', '#859900', '#B58900'] },
+      { id: 'solarized_light', name: 'Solarized Light', category: 'light', tag: 'Cream', bg: '#FDF6E3', fg: '#657B83', colors: ['#FDF6E3', '#DC322F', '#268BD2', '#859900', '#B58900'] },
+
+      // Nature, Organic & Zen
+      { id: 'rose_pine', name: 'Rosé Pine', category: 'retro', tag: 'Pine', bg: '#191724', fg: '#E0DEF4', colors: ['#191724', '#EB6F92', '#9CCFD8', '#31748F', '#F6C177'] },
+      { id: 'rose_pine_moon', name: 'Rosé Pine Moon', category: 'retro', tag: 'Twilight', bg: '#232136', fg: '#E0DEF4', colors: ['#232136', '#EB6F92', '#9CCFD8', '#3E8FB0', '#C4A7E7'] },
+      { id: 'rose_pine_dawn', name: 'Rosé Pine Dawn', category: 'light', tag: 'Morning', bg: '#FAF4ED', fg: '#575279', colors: ['#FAF4ED', '#B4637A', '#56949F', '#286983', '#EA9D34'] },
+      { id: 'kanagawa', name: 'Kanagawa Wave', category: 'retro', tag: 'Zen', bg: '#1F1F28', fg: '#DCD7BA', colors: ['#1F1F28', '#C34043', '#7E9CD8', '#76946A', '#FFA066'] },
+      { id: 'everforest_dark', name: 'Everforest Dark', category: 'retro', tag: 'Forest', bg: '#2D353B', fg: '#D3C6AA', colors: ['#2D353B', '#E67E80', '#7FBBB3', '#A7C080', '#DBBC7F'] },
+      { id: 'everforest_light', name: 'Everforest Light', category: 'light', tag: 'Nature', bg: '#FDF6E3', fg: '#5C6A72', colors: ['#FDF6E3', '#F85552', '#3A94C5', '#8DA101', '#DFA000'] },
+
+      // Cyberpunk, Neon & Vivid
+      { id: 'synthwave', name: "Synthwave '84", category: 'neon', tag: 'Cyber', bg: '#262335', fg: '#F92AAD', colors: ['#262335', '#FE4450', '#36F9F6', '#72F1B8', '#B877DB'] },
+      { id: 'matrix', name: 'Matrix CRT', category: 'neon', tag: 'Phosphor', bg: '#0D1117', fg: '#00FF66', colors: ['#0D1117', '#33FF77', '#00EE55', '#00FF66', '#66FF99'] },
+      { id: 'night_owl', name: 'Night Owl', category: 'neon', tag: 'Navy', bg: '#011627', fg: '#D6DEEB', colors: ['#011627', '#EF5350', '#82AAFF', '#22DA6E', '#C792EA'] },
+      { id: 'ayu_dark', name: 'Ayu Dark', category: 'neon', tag: 'Amber', bg: '#0F1419', fg: '#E6E1CF', colors: ['#0F1419', '#F07178', '#36A3D9', '#B8CC52', '#FFB454'] },
+      { id: 'cobalt2', name: 'Cobalt2', category: 'neon', tag: 'Cobalt', bg: '#193549', fg: '#FFFFFF', colors: ['#193549', '#FF0055', '#0088FF', '#3AD900', '#FFC600'] },
+
+      // Clean Light Themes
+      { id: 'light', name: 'Light Paper', category: 'light', tag: 'Clean', bg: '#FFFFFF', fg: '#1C1C1E', colors: ['#FFFFFF', '#E04038', '#007AFF', '#28CD41', '#FF9500'] },
+      { id: 'catppuccin_latte', name: 'Catppuccin Latte', category: 'light', tag: 'Daylight', bg: '#EFF1F5', fg: '#4C4F69', colors: ['#EFF1F5', '#D20F39', '#1E66F5', '#40A02B', '#8839EF'] },
+      { id: 'one_light', name: 'One Light', category: 'light', tag: 'Paper', bg: '#FAFAFA', fg: '#383A42', colors: ['#FAFAFA', '#E45649', '#4078F2', '#50A14F', '#C18401'] }
+    ];
+
+    let activeThemeFilter = 'all';
+
+    function filterThemes(cat) {
+      activeThemeFilter = cat;
+      const tabs = ['all', 'dark', 'light', 'retro', 'neon'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`theme-tab-${t}`);
+        if (!btn) return;
+        if (t === cat) {
+          btn.className = 'theme-tab-btn px-3 py-1.5 rounded-lg bg-[#E10600] text-white font-bold transition';
+        } else {
+          btn.className = 'theme-tab-btn px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 font-medium transition';
+        }
+      });
+      renderThemeGallery();
+    }
+
+    function renderThemeGallery() {
+      const container = document.getElementById('themes-grid');
+      if (!container) return;
+      const currentMode = state.color_mode || 'dark';
+
+      // Wallpaper Hero Card Active State
+      const isWallpaper = (currentMode === 'wallpaper');
+      const heroCard = document.getElementById('wallpaper-theme-card');
+      const heroBadge = document.getElementById('wallpaper-active-badge');
+      if (heroCard) {
+        if (isWallpaper) {
+          heroCard.className = "btn-press p-3.5 rounded-xl bg-[#1A1E26] border border-[#38BDF8] transition flex items-center justify-between cursor-pointer group";
+          if (heroBadge) heroBadge.classList.remove('hidden');
+        } else {
+          heroCard.className = "btn-press p-3.5 rounded-xl bg-[#18181D] border border-white/5 hover:border-[#38BDF8]/40 transition flex items-center justify-between cursor-pointer group";
+          if (heroBadge) heroBadge.classList.add('hidden');
+        }
+      }
+
+      const filtered = activeThemeFilter === 'all'
+        ? THEMES
+        : THEMES.filter(t => t.category === activeThemeFilter);
+
+      const countBadge = document.getElementById('theme-count-badge');
+      if (countBadge) countBadge.textContent = `${filtered.length} Theme${filtered.length === 1 ? '' : 's'}`;
+
+      container.innerHTML = filtered.map(t => {
+        const isActive = (currentMode === t.id);
+        const borderClass = isActive
+          ? 'border border-[#E10600] bg-[#1E1E24]'
+          : 'border border-white/8 bg-[#18181D] hover:border-white/16';
+        const activeIndicator = isActive
+          ? '<span class="flex items-center gap-1 text-[10px] text-[#E10600] font-bold"><span class="w-1.5 h-1.5 rounded-full bg-[#E10600]"></span>Active</span>'
+          : `<span class="text-[9px] text-zinc-500 font-medium px-1.5 py-0.5 rounded bg-white/5 uppercase">${t.tag}</span>`;
+        const swatches = t.colors.map(c => `<span class="w-3.5 h-3.5 rounded-full border border-black/20 inline-block" style="background-color: ${c};"></span>`).join('');
+
+        return `
+          <button onclick="setColorMode('${t.id}')" class="btn-press p-3 rounded-xl bg-[#131316] ${borderClass} text-left transition flex flex-col justify-between h-[76px] relative overflow-hidden group">
+            <div class="flex items-center justify-between w-full">
+              <span class="text-xs font-bold text-white tracking-tight truncate">${t.name}</span>
+              ${activeIndicator}
+            </div>
+            <div class="flex items-center gap-1.5 mt-1.5">
+              ${swatches}
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
     function setColorMode(mode) {
       state.color_mode = mode;
       renderUI();
       saveState();
+      if (mode === 'wallpaper') {
+        showToast("Applied Wallpaper Adaptive theme");
+      } else {
+        const t = THEMES.find(x => x.id === mode);
+        showToast(`Applied ${t ? t.name : mode}`);
+      }
     }
 
     function toggleBorder() {
@@ -2015,10 +2326,110 @@
       saveState();
     }
 
+    // -------------------------------------------------------------------------
+    // Scale & Position Management
+    // -------------------------------------------------------------------------
+    function formatPositionName(pos) {
+      const map = {
+        top_left: "Top-Left",
+        top_middle: "Top-Center",
+        top_right: "Top-Right",
+        middle_left: "Middle-Left",
+        middle_middle: "Center",
+        middle_right: "Middle-Right",
+        bottom_left: "Bottom-Left",
+        bottom_middle: "Bottom-Center",
+        bottom_right: "Bottom-Right"
+      };
+      return map[pos] || pos;
+    }
+
+    function setPosition(pos) {
+      state.position = pos;
+      renderPositionUI();
+      saveState();
+      showToast(`Position set to ${formatPositionName(pos)}`);
+    }
+
+    function renderPositionUI() {
+      const current = state.position || "top_right";
+      document.querySelectorAll('.pos-btn').forEach(btn => {
+        const id = btn.id.replace('pos-', '');
+        if (id === current) {
+          btn.className = "pos-btn w-8 h-8 rounded-lg bg-[#E10600] text-white flex items-center justify-center transition border border-[#E10600] text-[10px] font-black";
+        } else {
+          btn.className = "pos-btn w-8 h-8 rounded-lg bg-[#242429] hover:bg-white/10 text-zinc-400 hover:text-white flex items-center justify-center transition border border-white/5 text-[10px] font-bold";
+        }
+      });
+
+      const gx = (state.gap_x !== undefined) ? state.gap_x : 26;
+      const gy = (state.gap_y !== undefined) ? state.gap_y : 54;
+      const rangeGx = document.getElementById('range-gap-x');
+      const rangeGy = document.getElementById('range-gap-y');
+      const lblGx = document.getElementById('label-gap-x');
+      const lblGy = document.getElementById('label-gap-y');
+      if (rangeGx) rangeGx.value = gx;
+      if (rangeGy) rangeGy.value = gy;
+      if (lblGx) lblGx.textContent = `${gx}px`;
+      if (lblGy) lblGy.textContent = `${gy}px`;
+    }
+
+    let gapDebounceTimer = null;
+    function setGapX(val) {
+      val = parseInt(val, 10);
+      state.gap_x = val;
+      const lbl = document.getElementById('label-gap-x');
+      if (lbl) lbl.textContent = `${val}px`;
+      clearTimeout(gapDebounceTimer);
+      gapDebounceTimer = setTimeout(() => {
+        saveState();
+      }, 300);
+    }
+
+    function setGapY(val) {
+      val = parseInt(val, 10);
+      state.gap_y = val;
+      const lbl = document.getElementById('label-gap-y');
+      if (lbl) lbl.textContent = `${val}px`;
+      clearTimeout(gapDebounceTimer);
+      gapDebounceTimer = setTimeout(() => {
+        saveState();
+      }, 300);
+    }
+
+    let scaleDebounceTimer = null;
+    function onScaleSliderInput(val) {
+      val = parseInt(val, 10);
+      const sc = val / 100.0;
+      state.scale = sc;
+      const lbl = document.getElementById('label-scale');
+      if (lbl) lbl.textContent = `${val}%`;
+      updateScaleButtonHighlight(sc);
+      clearTimeout(scaleDebounceTimer);
+      scaleDebounceTimer = setTimeout(() => {
+        saveState();
+      }, 300);
+    }
+
     function setScale(sc) {
       state.scale = sc;
-      renderUI();
+      const range = document.getElementById('range-scale');
+      const lbl = document.getElementById('label-scale');
+      if (range) range.value = Math.round(sc * 100);
+      if (lbl) lbl.textContent = `${Math.round(sc * 100)}%`;
+      updateScaleButtonHighlight(sc);
       saveState();
+    }
+
+    function updateScaleButtonHighlight(sc) {
+      document.querySelectorAll('.scale-btn').forEach(b => {
+        const val = parseFloat(b.getAttribute('data-scale'));
+        if (Math.abs(val - sc) < 0.02) {
+          b.className = "scale-btn py-2 rounded-lg bg-[#242429] border border-[#E10600] text-xs font-bold text-white transition";
+        } else {
+          b.className = "scale-btn py-2 rounded-lg bg-[#242429] text-xs font-bold text-zinc-300 hover:text-white hover:bg-white/10 transition";
+        }
+      });
     }
 
     function toggleDropdown(type) {

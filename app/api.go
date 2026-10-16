@@ -4,7 +4,11 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
+	"time"
 )
 
 func SetupAPIRoutes(mux *http.ServeMux) {
@@ -15,6 +19,8 @@ func SetupAPIRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/media/", handleMedia)
 	mux.HandleFunc("/api/status", handleStatus)
 	mux.HandleFunc("/api/reset", handleReset)
+	mux.HandleFunc("/api/wallpaper-palette", handleWallpaperPalette)
+	mux.HandleFunc("/api/wallpaper-palette/refresh", handleWallpaperPaletteRefresh)
 }
 
 func handleSettings(w http.ResponseWriter, r *http.Request) {
@@ -26,6 +32,7 @@ func handleSettings(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == http.MethodPost {
+		oldSettings, _ := LoadSettings()
 		var s Settings
 		if err := json.NewDecoder(r.Body).Decode(&s); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -35,6 +42,24 @@ func handleSettings(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		geometryChanged := oldSettings.Position != s.Position ||
+			oldSettings.GapX != s.GapX ||
+			oldSettings.GapY != s.GapY ||
+			oldSettings.Scale != s.Scale ||
+			len(oldSettings.RowOrder) != len(s.RowOrder)
+
+		if geometryChanged {
+			go func() {
+				time.Sleep(100 * time.Millisecond)
+				_ = GlobalDaemon.Restart()
+				time.Sleep(300 * time.Millisecond)
+				GlobalDaemon.updateBlur()
+			}()
+		} else if oldSettings.BlurRadius != s.BlurRadius || oldSettings.GlassEffect != s.GlassEffect {
+			go GlobalDaemon.updateBlur()
+		}
+
 		// If location or units changed, trigger background weather refresh
 		go GlobalDaemon.fetchWeather()
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
@@ -101,6 +126,7 @@ func handleSlots(w http.ResponseWriter, r *http.Request) {
 		s.Slots = make(map[string]string)
 	}
 
+	oldRowCount := len(s.RowOrder)
 	var reqSingle struct {
 		Slot   string `json:"slot"`
 		Module string `json:"module"`
@@ -110,16 +136,28 @@ func handleSlots(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var reqMulti struct {
-		Slots map[string]string `json:"slots"`
+		Slots    map[string]string `json:"slots"`
+		RowOrder []string          `json:"row_order"`
 	}
-	if err := json.Unmarshal(body, &reqMulti); err == nil && reqMulti.Slots != nil {
-		for k, v := range reqMulti.Slots {
-			s.Slots[k] = v
+	if err := json.Unmarshal(body, &reqMulti); err == nil {
+		if reqMulti.Slots != nil {
+			s.Slots = reqMulti.Slots
+		}
+		if reqMulti.RowOrder != nil {
+			s.RowOrder = reqMulti.RowOrder
 		}
 	}
 
 	SaveSettings(s)
-	json.NewEncoder(w).Encode(map[string]interface{}{"status": "ok", "slots": s.Slots})
+	if oldRowCount != len(s.RowOrder) {
+		go func() {
+			time.Sleep(100 * time.Millisecond)
+			_ = GlobalDaemon.Restart()
+			time.Sleep(300 * time.Millisecond)
+			GlobalDaemon.updateBlur()
+		}()
+	}
+	json.NewEncoder(w).Encode(map[string]interface{}{"status": "ok", "slots": s.Slots, "row_order": s.RowOrder})
 }
 
 func handleDaemon(w http.ResponseWriter, r *http.Request) {
@@ -198,4 +236,37 @@ func ServeStatic(mux *http.ServeMux, fs http.FileSystem) {
 		}
 		fileServer.ServeHTTP(w, r)
 	})
+}
+
+func handleWallpaperPalette(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	palPath := filepath.Join(os.Getenv("HOME"), ".config/conky/macwidget/settings/wallpaper_palette.json")
+	data, err := os.ReadFile(palPath)
+	if err != nil {
+		helper := findPaletteHelper()
+		if helper != "" {
+			if out, err := exec.Command("python3", helper).Output(); err == nil && len(out) > 0 {
+				w.Write(out)
+				return
+			}
+		}
+		http.Error(w, "Palette not found", http.StatusNotFound)
+		return
+	}
+	w.Write(data)
+}
+
+func handleWallpaperPaletteRefresh(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	helper := findPaletteHelper()
+	if helper == "" {
+		http.Error(w, "Palette helper not found", http.StatusInternalServerError)
+		return
+	}
+	out, err := exec.Command("python3", helper).Output()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write(out)
 }

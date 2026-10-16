@@ -15,10 +15,14 @@ type Settings struct {
 	BlurOpacity       float64           `json:"blur_opacity"`
 	WidgetBorder      bool              `json:"widget_border"`
 	Scale             float64           `json:"scale"`
+	Position          string            `json:"position"`
+	GapX              int               `json:"gap_x"`
+	GapY              int               `json:"gap_y"`
 	TimeFormat        string            `json:"time_format"`
 	MeasurementSystem string            `json:"measurement_system"`
 	Location          string            `json:"location"`
 	Autostart         bool              `json:"autostart"`
+	RowOrder          []string          `json:"row_order,omitempty"`
 	Slots             map[string]string `json:"slots"`
 }
 
@@ -44,10 +48,14 @@ func DefaultSettings() Settings {
 		BlurOpacity:       0.60,
 		WidgetBorder:      true,
 		Scale:             1.0,
+		Position:          "top_right",
+		GapX:              26,
+		GapY:              54,
 		TimeFormat:        "24h",
 		MeasurementSystem: "metric",
 		Location:          "Mumbai",
 		Autostart:         IsAutostartEnabled(),
+		RowOrder:          []string{"A", "B", "C", "D"},
 		Slots: map[string]string{
 			"A1": "CALN_2x1_WID",
 			"B1": "WEAT_1x1_MIN",
@@ -89,10 +97,20 @@ func LoadSettings() (Settings, error) {
 		s.BlurOpacity = 0.60
 	}
 
+	if s.Position == "" {
+		s.Position = "top_right"
+	}
+	if s.Scale <= 0 {
+		s.Scale = 1.0
+	}
+
 	s.Autostart = IsAutostartEnabled()
 
 	if s.Slots == nil {
 		s.Slots = DefaultSettings().Slots
+	}
+	if len(s.RowOrder) == 0 {
+		s.RowOrder = []string{"A", "B", "C", "D"}
 	}
 	return s, nil
 }

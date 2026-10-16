@@ -31,7 +31,270 @@ local SETTINGS = {
     }
 }
 
--- Palette
+local function hex2rgb(hex, a)
+    hex = hex:gsub("#", "")
+    local r = tonumber(hex:sub(1, 2), 16) / 255.0
+    local g = tonumber(hex:sub(3, 4), 16) / 255.0
+    local b = tonumber(hex:sub(5, 6), 16) / 255.0
+    return { r = r, g = g, b = b, a = a or 1.0 }
+end
+
+local PALETTES = {
+    dark = {
+        is_light = false,
+        bg_solid = "#16161A", bg_glass = "#1A1A1C",
+        sub_card_solid = "#101013", sub_card_glass = "#FFFFFF", sub_card_glass_a = 0.08,
+        border = "#FFFFFF", border_a = 0.08,
+        text_primary = "#F5F5F7", text_muted = "#8E8E93", text_dim = "#3A3A3C",
+        red = "#FF5A52", blue = "#0A84FF", green = "#30D158", amber = "#FF9F0A", purple = "#BF5AF2"
+    },
+    light = {
+        is_light = true,
+        bg_solid = "#FFFFFF", bg_glass = "#F6F6F8",
+        sub_card_solid = "#ECECEE", sub_card_glass = "#000000", sub_card_glass_a = 0.05,
+        border = "#000000", border_a = 0.08,
+        text_primary = "#1C1C1E", text_muted = "#636366", text_dim = "#D1D1D6",
+        red = "#E04038", blue = "#007AFF", green = "#28CD41", amber = "#FF9500", purple = "#AF52DE"
+    },
+    catppuccin = {
+        is_light = false,
+        bg_solid = "#1E1E2E", bg_glass = "#1E1E2E",
+        sub_card_solid = "#181825", sub_card_glass = "#313244", sub_card_glass_a = 0.35,
+        border = "#CBA6F7", border_a = 0.15,
+        text_primary = "#CDD6F4", text_muted = "#A6ADC8", text_dim = "#585B70",
+        red = "#F38BA8", blue = "#89B4FA", green = "#A6E3A1", amber = "#FAB387", purple = "#CBA6F7"
+    },
+    catppuccin_latte = {
+        is_light = true,
+        bg_solid = "#EFF1F5", bg_glass = "#E6E9EF",
+        sub_card_solid = "#DCE0E8", sub_card_glass = "#4C4F69", sub_card_glass_a = 0.06,
+        border = "#8839EF", border_a = 0.12,
+        text_primary = "#4C4F69", text_muted = "#6C6F85", text_dim = "#9CA0B0",
+        red = "#D20F39", blue = "#1E66F5", green = "#40A02B", amber = "#FE640B", purple = "#8839EF"
+    },
+    dracula = {
+        is_light = false,
+        bg_solid = "#282A36", bg_glass = "#282A36",
+        sub_card_solid = "#21222C", sub_card_glass = "#44475A", sub_card_glass_a = 0.35,
+        border = "#BD93F9", border_a = 0.18,
+        text_primary = "#F8F8F2", text_muted = "#6272A4", text_dim = "#44475A",
+        red = "#FF5555", blue = "#8BE9FD", green = "#50FA7B", amber = "#FFB86C", purple = "#BD93F9"
+    },
+    nord = {
+        is_light = false,
+        bg_solid = "#2E3440", bg_glass = "#2E3440",
+        sub_card_solid = "#3B4252", sub_card_glass = "#434C5E", sub_card_glass_a = 0.35,
+        border = "#88C0D0", border_a = 0.16,
+        text_primary = "#ECEFF4", text_muted = "#D8DEE9", text_dim = "#4C566A",
+        red = "#BF616A", blue = "#88C0D0", green = "#A3BE8C", amber = "#EBCB8B", purple = "#B48EAD"
+    },
+    tokyo_night = {
+        is_light = false,
+        bg_solid = "#1A1B26", bg_glass = "#1A1B26",
+        sub_card_solid = "#16161E", sub_card_glass = "#24283B", sub_card_glass_a = 0.35,
+        border = "#7AA2F7", border_a = 0.18,
+        text_primary = "#C0CAF5", text_muted = "#7982A9", text_dim = "#565F89",
+        red = "#F7768E", blue = "#7AA2F7", green = "#9ECE6A", amber = "#FF9E64", purple = "#BB9AF7"
+    },
+    one_dark = {
+        is_light = false,
+        bg_solid = "#282C34", bg_glass = "#282C34",
+        sub_card_solid = "#21252B", sub_card_glass = "#3E4451", sub_card_glass_a = 0.35,
+        border = "#61AFEF", border_a = 0.16,
+        text_primary = "#ABB2BF", text_muted = "#5C6370", text_dim = "#4B5263",
+        red = "#E06C75", blue = "#61AFEF", green = "#98C379", amber = "#E5C07B", purple = "#C678DD"
+    },
+    one_light = {
+        is_light = true,
+        bg_solid = "#FAFAFA", bg_glass = "#F0F0F0",
+        sub_card_solid = "#EAEAEB", sub_card_glass = "#383A42", sub_card_glass_a = 0.06,
+        border = "#4078F2", border_a = 0.12,
+        text_primary = "#383A42", text_muted = "#6A6C75", text_dim = "#A0A1A7",
+        red = "#E45649", blue = "#4078F2", green = "#50A14F", amber = "#C18401", purple = "#A626A4"
+    },
+    monokai = {
+        is_light = false,
+        bg_solid = "#2D2A2E", bg_glass = "#2D2A2E",
+        sub_card_solid = "#221F22", sub_card_glass = "#403E41", sub_card_glass_a = 0.35,
+        border = "#FF6188", border_a = 0.18,
+        text_primary = "#FCFCFA", text_muted = "#939293", text_dim = "#727072",
+        red = "#FF6188", blue = "#78DCE8", green = "#A9DC76", amber = "#FC9867", purple = "#AB9DF2"
+    },
+    gruvbox = {
+        is_light = false,
+        bg_solid = "#282828", bg_glass = "#282828",
+        sub_card_solid = "#1D2021", sub_card_glass = "#3C3836", sub_card_glass_a = 0.35,
+        border = "#FABD2F", border_a = 0.18,
+        text_primary = "#EBDBB2", text_muted = "#A89984", text_dim = "#504945",
+        red = "#FB4934", blue = "#83A598", green = "#B8BB26", amber = "#FABD2F", purple = "#D3869B"
+    },
+    gruvbox_light = {
+        is_light = true,
+        bg_solid = "#FBF1C7", bg_glass = "#F2E5BC",
+        sub_card_solid = "#EBDBB2", sub_card_glass = "#3C3836", sub_card_glass_a = 0.06,
+        border = "#D79921", border_a = 0.15,
+        text_primary = "#3C3836", text_muted = "#7C6F64", text_dim = "#A89984",
+        red = "#CC241D", blue = "#458588", green = "#98711A", amber = "#D79921", purple = "#B16286"
+    },
+    solarized_dark = {
+        is_light = false,
+        bg_solid = "#002B36", bg_glass = "#002B36",
+        sub_card_solid = "#073642", sub_card_glass = "#073642", sub_card_glass_a = 0.45,
+        border = "#268BD2", border_a = 0.18,
+        text_primary = "#93A1A1", text_muted = "#657B83", text_dim = "#586E75",
+        red = "#DC322F", blue = "#268BD2", green = "#859900", amber = "#B58900", purple = "#6C71C4"
+    },
+    solarized_light = {
+        is_light = true,
+        bg_solid = "#FDF6E3", bg_glass = "#EEE8D5",
+        sub_card_solid = "#EEE8D5", sub_card_glass = "#657B83", sub_card_glass_a = 0.06,
+        border = "#B58900", border_a = 0.15,
+        text_primary = "#657B83", text_muted = "#839496", text_dim = "#93A1A1",
+        red = "#DC322F", blue = "#268BD2", green = "#859900", amber = "#B58900", purple = "#6C71C4"
+    },
+    rose_pine = {
+        is_light = false,
+        bg_solid = "#191724", bg_glass = "#191724",
+        sub_card_solid = "#1F1D2E", sub_card_glass = "#26233A", sub_card_glass_a = 0.35,
+        border = "#C4A7E7", border_a = 0.18,
+        text_primary = "#E0DEF4", text_muted = "#908CAA", text_dim = "#6E6A86",
+        red = "#EB6F92", blue = "#9CCFD8", green = "#31748F", amber = "#F6C177", purple = "#C4A7E7"
+    },
+    rose_pine_moon = {
+        is_light = false,
+        bg_solid = "#232136", bg_glass = "#232136",
+        sub_card_solid = "#2A273F", sub_card_glass = "#393552", sub_card_glass_a = 0.35,
+        border = "#C4A7E7", border_a = 0.18,
+        text_primary = "#E0DEF4", text_muted = "#908CAA", text_dim = "#6E6A86",
+        red = "#EB6F92", blue = "#9CCFD8", green = "#3E8FB0", amber = "#F6C177", purple = "#C4A7E7"
+    },
+    rose_pine_dawn = {
+        is_light = true,
+        bg_solid = "#FAF4ED", bg_glass = "#F2E9DE",
+        sub_card_solid = "#FFFDF9", sub_card_glass = "#575279", sub_card_glass_a = 0.06,
+        border = "#907AA9", border_a = 0.14,
+        text_primary = "#575279", text_muted = "#797593", text_dim = "#9893A5",
+        red = "#B4637A", blue = "#56949F", green = "#286983", amber = "#EA9D34", purple = "#907AA9"
+    },
+    kanagawa = {
+        is_light = false,
+        bg_solid = "#1F1F28", bg_glass = "#1F1F28",
+        sub_card_solid = "#16161D", sub_card_glass = "#2A2A37", sub_card_glass_a = 0.35,
+        border = "#7E9CD8", border_a = 0.16,
+        text_primary = "#DCD7BA", text_muted = "#727169", text_dim = "#54546D",
+        red = "#C34043", blue = "#7E9CD8", green = "#76946A", amber = "#FFA066", purple = "#957FB8"
+    },
+    everforest_dark = {
+        is_light = false,
+        bg_solid = "#2D353B", bg_glass = "#2D353B",
+        sub_card_solid = "#232A2E", sub_card_glass = "#343F44", sub_card_glass_a = 0.35,
+        border = "#A7C080", border_a = 0.18,
+        text_primary = "#D3C6AA", text_muted = "#859289", text_dim = "#4F5B58",
+        red = "#E67E80", blue = "#7FBBB3", green = "#A7C080", amber = "#DBBC7F", purple = "#D699B6"
+    },
+    everforest_light = {
+        is_light = true,
+        bg_solid = "#FDF6E3", bg_glass = "#F4F0D9",
+        sub_card_solid = "#EFEAC7", sub_card_glass = "#5C6A72", sub_card_glass_a = 0.06,
+        border = "#8DA101", border_a = 0.15,
+        text_primary = "#5C6A72", text_muted = "#829181", text_dim = "#A6B0A0",
+        red = "#F85552", blue = "#3A94C5", green = "#8DA101", amber = "#DFA000", purple = "#DF69BA"
+    },
+    synthwave = {
+        is_light = false,
+        bg_solid = "#262335", bg_glass = "#262335",
+        sub_card_solid = "#1A1824", sub_card_glass = "#342E4F", sub_card_glass_a = 0.35,
+        border = "#F92AAD", border_a = 0.22,
+        text_primary = "#F92AAD", text_muted = "#B877DB", text_dim = "#614D85",
+        red = "#FE4450", blue = "#36F9F6", green = "#72F1B8", amber = "#FF8B39", purple = "#B877DB"
+    },
+    matrix = {
+        is_light = false,
+        bg_solid = "#0D1117", bg_glass = "#0D1117",
+        sub_card_solid = "#05080A", sub_card_glass = "#00FF66", sub_card_glass_a = 0.08,
+        border = "#00FF66", border_a = 0.22,
+        text_primary = "#00FF66", text_muted = "#00DD55", text_dim = "#005522",
+        red = "#33FF77", blue = "#00EE55", green = "#00FF66", amber = "#66FF99", purple = "#00CC44"
+    },
+    night_owl = {
+        is_light = false,
+        bg_solid = "#011627", bg_glass = "#011627",
+        sub_card_solid = "#01111D", sub_card_glass = "#0B2942", sub_card_glass_a = 0.35,
+        border = "#82AAFF", border_a = 0.18,
+        text_primary = "#D6DEEB", text_muted = "#637777", text_dim = "#4B6479",
+        red = "#EF5350", blue = "#82AAFF", green = "#22DA6E", amber = "#ECC48D", purple = "#C792EA"
+    },
+    ayu_dark = {
+        is_light = false,
+        bg_solid = "#0F1419", bg_glass = "#0F1419",
+        sub_card_solid = "#0A0D10", sub_card_glass = "#191F26", sub_card_glass_a = 0.35,
+        border = "#FFB454", border_a = 0.18,
+        text_primary = "#E6E1CF", text_muted = "#5C6773", text_dim = "#3E4B59",
+        red = "#F07178", blue = "#36A3D9", green = "#B8CC52", amber = "#FFB454", purple = "#D4BFFF"
+    },
+    cobalt2 = {
+        is_light = false,
+        bg_solid = "#193549", bg_glass = "#193549",
+        sub_card_solid = "#122738", sub_card_glass = "#1F4662", sub_card_glass_a = 0.35,
+        border = "#0088FF", border_a = 0.20,
+        text_primary = "#FFFFFF", text_muted = "#0088FF", text_dim = "#1F4662",
+        red = "#FF0055", blue = "#0088FF", green = "#3AD900", amber = "#FFC600", purple = "#FF9D00"
+    },
+    wallpaper = {
+        name = "Wallpaper Adaptive",
+        is_light = false,
+        bg_solid = "#131619", bg_glass = "#131619",
+        sub_card_solid = "#0C0F11", sub_card_glass = "#0070EF", sub_card_glass_a = 0.14,
+        border = "#0070EF", border_a = 0.20,
+        text_primary = "#F8FAFC", text_muted = "#94A3B8", text_dim = "#475569",
+        red = "#EF0014", blue = "#0070EF", green = "#2BEF73", amber = "#EFA72B", purple = "#EF44E0"
+    }
+}
+
+local wallpaper_palette_path = os.getenv("HOME") .. "/.config/conky/macwidget/settings/wallpaper_palette.json"
+local last_wallpaper_pal_str = ""
+
+local function load_wallpaper_palette()
+    local f = io.open(wallpaper_palette_path, "r")
+    if not f then return end
+    local str = f:read("*a")
+    f:close()
+    if not str or str == "" or str == last_wallpaper_pal_str then return end
+    last_wallpaper_pal_str = str
+
+    local function get_json_val(key)
+        return str:match('"' .. key .. '"%s*:%s*"([^"]+)"')
+    end
+    local function get_json_num(key)
+        local n = str:match('"' .. key .. '"%s*:%s*([%d%.]+)')
+        return n and tonumber(n) or nil
+    end
+    local is_lt = str:match('"is_light"%s*:%s*true') ~= nil
+
+    PALETTES["wallpaper"] = {
+        name = "Wallpaper Adaptive",
+        is_light = is_lt,
+        bg_solid = get_json_val("bg_solid") or "#131619",
+        bg_glass = get_json_val("bg_glass") or "#131619",
+        sub_card_solid = get_json_val("sub_card_solid") or "#0C0F11",
+        sub_card_glass = get_json_val("sub_card_glass") or "#0070EF",
+        sub_card_glass_a = get_json_num("sub_card_glass_a") or 0.14,
+        border = get_json_val("border") or "#0070EF",
+        border_a = get_json_num("border_a") or 0.20,
+        text_primary = get_json_val("text_primary") or "#F8FAFC",
+        text_muted = get_json_val("text_muted") or "#94A3B8",
+        text_dim = get_json_val("text_dim") or "#475569",
+        red = get_json_val("red") or "#EF0014",
+        blue = get_json_val("blue") or "#0070EF",
+        green = get_json_val("green") or "#2BEF73",
+        amber = get_json_val("amber") or "#EFA72B",
+        purple = get_json_val("purple") or "#EF44E0"
+    }
+end
+
+load_wallpaper_palette()
+
+-- Active theme surfaces
 local BG_COLOR     = { r = 0.086, g = 0.086, b = 0.102, a = 0.94 }
 local BORDER_COLOR = { r = 1.000, g = 1.000, b = 1.000, a = 0.08 }
 local TEXT_PRIMARY = { r = 0.960, g = 0.960, b = 0.970, a = 1.00 }
@@ -39,12 +302,17 @@ local TEXT_MUTED   = { r = 0.525, g = 0.525, b = 0.545, a = 1.00 }
 local TEXT_DIM     = { r = 0.227, g = 0.227, b = 0.235, a = 1.00 }
 local SUB_CARD_BG  = { r = 0.065, g = 0.065, b = 0.078, a = 0.85 }
 
--- Accents
+-- Active theme signature accents
 local CORAL_RED    = { r = 1.000, g = 0.353, b = 0.322, a = 1.00 } -- #FF5A52
 local BLUE_ROOT    = { r = 0.039, g = 0.518, b = 1.000, a = 1.00 } -- #0A84FF
 local GREEN_HOME   = { r = 0.188, g = 0.820, b = 0.345, a = 1.00 } -- #30D158
 local AMBER_CPU    = { r = 1.000, g = 0.624, b = 0.039, a = 1.00 } -- #FF9F0A
 local PURPLE_MEDIA = { r = 0.749, g = 0.353, b = 0.949, a = 1.00 } -- #BF5AF2
+
+local function is_theme_light(mode)
+    local p = PALETTES[mode or SETTINGS.color_mode]
+    return p and p.is_light or false
+end
 
 -- Network History
 local NET_BUFFER_LEN = 38
@@ -81,42 +349,32 @@ local blur_file = os.getenv("HOME") .. "/.cache/weget/blurred_wallpaper.png"
 
 local function apply_theme(mode, border_enabled, glass_effect)
     local opacity = SETTINGS.blur_opacity or 0.60
+    local p = PALETTES[mode] or PALETTES["dark"]
+
     if glass_effect then
-        if mode == "light" then
-            -- Light Frosted Acrylic: Translucent white with dark crisp text
-            BG_COLOR     = { r = 0.965, g = 0.965, b = 0.972, a = opacity }
-            BORDER_COLOR = { r = 0.000, g = 0.000, b = 0.000, a = border_enabled and 0.06 or 0.0 }
-            TEXT_PRIMARY = { r = 0.100, g = 0.100, b = 0.110, a = 1.00 }
-            TEXT_MUTED   = { r = 0.400, g = 0.400, b = 0.420, a = 1.00 }
-            TEXT_DIM     = { r = 0.700, g = 0.700, b = 0.720, a = 1.00 }
-            SUB_CARD_BG  = { r = 0.000, g = 0.000, b = 0.000, a = 0.05 }
-        else
-            -- Dark Smoke Acrylic: Clean #1A1A1C translucent acrylic
-            BG_COLOR     = { r = 0.102, g = 0.102, b = 0.110, a = opacity }
-            BORDER_COLOR = { r = 1.000, g = 1.000, b = 1.000, a = border_enabled and 0.08 or 0.0 }
-            TEXT_PRIMARY = { r = 1.000, g = 1.000, b = 1.000, a = 1.00 }
-            TEXT_MUTED   = { r = 0.557, g = 0.557, b = 0.576, a = 1.00 }
-            TEXT_DIM     = { r = 0.380, g = 0.380, b = 0.400, a = 1.00 }
-            SUB_CARD_BG  = { r = 1.000, g = 1.000, b = 1.000, a = 0.08 }
-        end
-    elseif mode == "light" then
-        BG_COLOR     = { r = 1.000, g = 1.000, b = 1.000, a = 0.96 }
-        BORDER_COLOR = { r = 0.000, g = 0.000, b = 0.000, a = border_enabled and 0.08 or 0.0 }
-        TEXT_PRIMARY = { r = 0.110, g = 0.110, b = 0.118, a = 1.00 }
-        TEXT_MUTED   = { r = 0.388, g = 0.388, b = 0.400, a = 1.00 }
-        TEXT_DIM     = { r = 0.850, g = 0.850, b = 0.870, a = 1.00 }
-        SUB_CARD_BG  = { r = 0.930, g = 0.930, b = 0.940, a = 0.90 }
+        BG_COLOR     = hex2rgb(p.bg_glass, opacity)
+        SUB_CARD_BG  = hex2rgb(p.sub_card_glass, p.sub_card_glass_a)
+        BORDER_COLOR = hex2rgb(p.border, border_enabled and p.border_a or 0.0)
     else
-        BG_COLOR     = { r = 0.086, g = 0.086, b = 0.102, a = 0.94 }
-        BORDER_COLOR = { r = 1.000, g = 1.000, b = 1.000, a = border_enabled and 0.08 or 0.0 }
-        TEXT_PRIMARY = { r = 0.960, g = 0.960, b = 0.970, a = 1.00 }
-        TEXT_MUTED   = { r = 0.525, g = 0.525, b = 0.545, a = 1.00 }
-        TEXT_DIM     = { r = 0.227, g = 0.227, b = 0.235, a = 1.00 }
-        SUB_CARD_BG  = { r = 0.065, g = 0.065, b = 0.078, a = 0.85 }
+        BG_COLOR     = hex2rgb(p.bg_solid, p.is_light and 0.96 or 0.94)
+        SUB_CARD_BG  = hex2rgb(p.sub_card_solid, p.is_light and 0.90 or 0.85)
+        BORDER_COLOR = hex2rgb(p.border, border_enabled and p.border_a or 0.0)
     end
+
+    TEXT_PRIMARY = hex2rgb(p.text_primary, 1.0)
+    TEXT_MUTED   = hex2rgb(p.text_muted, 1.0)
+    TEXT_DIM     = hex2rgb(p.text_dim, 1.0)
+
+    -- Signature accents
+    CORAL_RED    = hex2rgb(p.red, 1.0)
+    BLUE_ROOT    = hex2rgb(p.blue, 1.0)
+    GREEN_HOME   = hex2rgb(p.green, 1.0)
+    AMBER_CPU    = hex2rgb(p.amber, 1.0)
+    PURPLE_MEDIA = hex2rgb(p.purple, 1.0)
 end
 
 local function check_hot_reload()
+    load_wallpaper_palette()
     local f = io.open(settings_path, "r")
     if not f then return end
     local content = f:read("*a")
@@ -164,7 +422,31 @@ local function check_hot_reload()
         if w_border ~= nil then SETTINGS.widget_border = (w_border == "true") end
 
         local sc = content:match('"scale"%s*:%s*([%d%.]+)')
-        if sc then SETTINGS.scale = tonumber(sc) or 1.0 end
+        if sc then
+            local nsc = tonumber(sc) or 1.0
+            if nsc ~= SETTINGS.scale then
+                SETTINGS.scale = nsc
+                if blur_surface then
+                    pcall(cairo_surface_destroy, blur_surface)
+                    blur_surface = nil
+                    blur_surface_failed = false
+                end
+            end
+        end
+
+        local pos = content:match('"position"%s*:%s*"([^"]+)"')
+        local gx = content:match('"gap_x"%s*:%s*(%d+)')
+        local gy = content:match('"gap_y"%s*:%s*(%d+)')
+        if (pos and pos ~= SETTINGS.position) or (gx and tonumber(gx) ~= SETTINGS.gap_x) or (gy and tonumber(gy) ~= SETTINGS.gap_y) then
+            SETTINGS.position = pos or SETTINGS.position
+            SETTINGS.gap_x = tonumber(gx) or SETTINGS.gap_x
+            SETTINGS.gap_y = tonumber(gy) or SETTINGS.gap_y
+            if blur_surface then
+                pcall(cairo_surface_destroy, blur_surface)
+                blur_surface = nil
+                blur_surface_failed = false
+            end
+        end
 
         local tf = content:match('"time_format"%s*:%s*"([^"]+)"')
         if tf then SETTINGS.time_format = tf end
@@ -175,10 +457,32 @@ local function check_hot_reload()
         local loc = content:match('"location"%s*:%s*"([^"]+)"')
         if loc then SETTINGS.location = loc end
 
-        -- Parse all slots
-        for _, s in ipairs({"A1", "A2", "B1", "B2", "C1", "C2", "D1", "D2"}) do
-            local val = content:match('"' .. s .. '"%s*:%s*"([^"]+)"')
-            if val then SETTINGS.slots[s] = val end
+        -- Parse all slots dynamically: e.g. "A1": "...", "E2": "...", etc.
+        local slots_block = content:match('"slots"%s*:%s*{(.-)}')
+        if slots_block then
+            SETTINGS.slots = {}
+            for k, v in slots_block:gmatch('"([%w_]+)"%s*:%s*"([^"]+)"') do
+                SETTINGS.slots[k] = v
+            end
+        end
+
+        -- Parse row_order if provided: "row_order": ["A", "B", "C", ...]
+        local row_order_block = content:match('"row_order"%s*:%s*%[(.-)%]')
+        if row_order_block then
+            local new_rows = {}
+            for r in row_order_block:gmatch('"([%w_]+)"') do
+                table.insert(new_rows, r)
+            end
+            if not SETTINGS.row_order or #new_rows ~= #SETTINGS.row_order then
+                if blur_surface then
+                    pcall(cairo_surface_destroy, blur_surface)
+                    blur_surface = nil
+                    blur_surface_failed = false
+                end
+            end
+            SETTINGS.row_order = new_rows
+        else
+            SETTINGS.row_order = nil
         end
 
         apply_theme(SETTINGS.color_mode, SETTINGS.widget_border, SETTINGS.glass_effect)
@@ -288,7 +592,16 @@ local function rounded_rect(cr, x, y, w, h, r)
 end
 
 local function get_blur_surface()
-    if blur_surface then return blur_surface end
+    if blur_surface then
+        local ok, surf_h = pcall(cairo_image_surface_get_height, blur_surface)
+        if ok and surf_h and conky_window and conky_window.height and surf_h < conky_window.height then
+            pcall(cairo_surface_destroy, blur_surface)
+            blur_surface = nil
+            blur_surface_failed = false
+        else
+            return blur_surface
+        end
+    end
     if blur_surface_failed then
         blur_retry_count = blur_retry_count + 1
         if blur_retry_count < 4 then return nil end
@@ -299,7 +612,21 @@ local function get_blur_surface()
     local f = io.open(blur_file, "r")
     if not f then
         blur_surface_failed = true
-        os.execute("python3 helpers/blur.py >/dev/null 2>&1 &")
+        local home = os.getenv("HOME") or ""
+        local candidates = {
+            home .. "/.config/conky/macwidget/helpers/blur.py",
+            "helpers/blur.py",
+            home .. "/.local/share/weget/helpers/blur.py",
+            "/usr/share/weget/helpers/blur.py"
+        }
+        for _, p in ipairs(candidates) do
+            local test_f = io.open(p, "r")
+            if test_f then
+                test_f:close()
+                os.execute("python3 " .. p .. " >/dev/null 2>&1 &")
+                break
+            end
+        end
         return nil
     end
     f:close()
@@ -373,20 +700,7 @@ local function draw_sub_card(cr, x, y, w, h, r)
     local ch = h - 1
     rounded_rect(cr, cx, cy, cw, ch, rad)
     cairo_set_source_rgba(cr, SUB_CARD_BG.r, SUB_CARD_BG.g, SUB_CARD_BG.b, SUB_CARD_BG.a)
-    cairo_fill_preserve(cr)
-
-    if SETTINGS.glass_effect or SETTINGS.color_mode == "glass" then
-        -- Subtle elevated matte border
-        if SETTINGS.color_mode == "light" then
-            cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.04)
-        else
-            cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.04)
-        end
-        cairo_set_line_width(cr, 0.75)
-        cairo_stroke(cr)
-    else
-        cairo_new_path(cr)
-    end
+    cairo_fill(cr)
 end
 
 local function draw_text(cr, text, x, y, size, weight, color, align)
@@ -1086,7 +1400,7 @@ local function draw_analogue_clock_1x1_minimal(cr, card_x, card_y, card_w, card_
     draw_card(cr, card_x, card_y, card_w, card_h)
     local cx = card_x + card_w / 2
     local cy = card_y + card_h / 2
-    render_analog_clock(cr, cx, cy, 54, AMBER_CPU, SETTINGS.color_mode == "light", true)
+    render_analog_clock(cr, cx, cy, 54, AMBER_CPU, is_theme_light(SETTINGS.color_mode), true)
 end
 
 -- 3.2 Precision Squircle (1x1 Detailed)
@@ -1881,12 +2195,12 @@ local function render_row_pair(cr, m1, m2, cur_y)
     elseif act1 and not act2 then
         local w = is_1x1(m1) and 168 or LOGICAL_W
         local h = is_1x1(m1) and 152 or 0
-        local x = is_1x1(m1) and math.floor((LOGICAL_W - 168) / 2) or 0
+        local x = 0
         return dispatch_module(cr, m1, x, cur_y, w, h)
     elseif act2 and not act1 then
         local w = is_1x1(m2) and 168 or LOGICAL_W
         local h = is_1x1(m2) and 152 or 0
-        local x = is_1x1(m2) and math.floor((LOGICAL_W - 168) / 2) or 0
+        local x = is_1x1(m2) and 182 or 0
         return dispatch_module(cr, m2, x, cur_y, w, h)
     else
         -- Both active but at least one is 2x1 wide: render vertically
@@ -1961,18 +2275,31 @@ function conky_draw_widgets()
     local cur_y = 0
 
     local slots = SETTINGS.slots or {}
+    local row_order = SETTINGS.row_order
 
-    -- Row A (A1 & A2)
-    cur_y = cur_y + render_row_pair(cr, slots.A1, slots.A2, cur_y)
+    if not row_order or #row_order == 0 then
+        local seen = {}
+        row_order = {}
+        for k, _ in pairs(slots) do
+            local r = k:sub(1, 1)
+            if not seen[r] then
+                seen[r] = true
+                table.insert(row_order, r)
+            end
+        end
+        table.sort(row_order)
+        if #row_order == 0 then
+            row_order = {"A", "B", "C", "D"}
+        end
+    end
 
-    -- Row B (B1 & B2)
-    cur_y = cur_y + render_row_pair(cr, slots.B1, slots.B2, cur_y)
-
-    -- Row C (C1 & C2)
-    cur_y = cur_y + render_row_pair(cr, slots.C1, slots.C2, cur_y)
-
-    -- Row D (D1 & D2)
-    cur_y = cur_y + render_row_pair(cr, slots.D1, slots.D2, cur_y)
+    for _, row in ipairs(row_order) do
+        local m1 = slots[row .. "1"] or "EMPTY"
+        local m2 = slots[row .. "2"] or "EMPTY"
+        if m1 ~= "EMPTY" or m2 ~= "EMPTY" then
+            cur_y = cur_y + render_row_pair(cr, m1, m2, cur_y)
+        end
+    end
 
     cairo_surface_flush(cs)
     cairo_destroy(cr)
