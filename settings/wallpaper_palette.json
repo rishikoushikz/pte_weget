@@ -1,0 +1,20 @@
+{
+  "name": "Wallpaper Adaptive",
+  "is_light": false,
+  "wallpaper_path": "/home/rishi/.config/background",
+  "bg_solid": "#191314",
+  "bg_glass": "#191314",
+  "sub_card_solid": "#110C0D",
+  "sub_card_glass": "#2B86EF",
+  "sub_card_glass_a": 0.14,
+  "border": "#2B86EF",
+  "border_a": 0.2,
+  "text_primary": "#F8FAFC",
+  "text_muted": "#94A3B8",
+  "text_dim": "#475569",
+  "red": "#EF0417",
+  "blue": "#2B86EF",
+  "green": "#2BEF73",
+  "amber": "#EFC49A",
+  "purple": "#9D2BEF"
+}

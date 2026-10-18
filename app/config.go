@@ -28,16 +28,25 @@ type Settings struct {
 
 var settingsLock sync.RWMutex
 
+func getReadSettingsPath() string {
+	home := os.Getenv("HOME")
+	candidates := []string{
+		filepath.Join(home, ".config/conky/macwidget/settings/settings.json"),
+		"/usr/share/weget/settings/settings.json",
+		filepath.Join(home, ".local/share/weget/settings/settings.json"),
+		"engine/settings/settings.json",
+		"settings/settings.json",
+	}
+	for _, c := range candidates {
+		if _, err := os.Stat(c); err == nil {
+			return c
+		}
+	}
+	return filepath.Join(home, ".config/conky/macwidget/settings/settings.json")
+}
+
 func getSettingsPath() string {
-	primary := filepath.Join(os.Getenv("HOME"), ".config/conky/macwidget/settings/settings.json")
-	if _, err := os.Stat(primary); err == nil {
-		return primary
-	}
-	if _, err := os.Stat("engine/settings/settings.json"); err == nil {
-		p, _ := filepath.Abs("engine/settings/settings.json")
-		return p
-	}
-	return primary
+	return filepath.Join(os.Getenv("HOME"), ".config/conky/macwidget/settings/settings.json")
 }
 
 func DefaultSettings() Settings {
@@ -71,7 +80,7 @@ func LoadSettings() (Settings, error) {
 	defer settingsLock.RUnlock()
 
 	s := DefaultSettings()
-	path := getSettingsPath()
+	path := getReadSettingsPath()
 	data, err := os.ReadFile(path)
 	if err != nil {
 		s.Autostart = IsAutostartEnabled()

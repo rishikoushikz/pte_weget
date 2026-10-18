@@ -108,6 +108,18 @@ func handleAutostart(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 }
 
+func countActiveRows(slots map[string]string, rowOrder []string) int {
+	count := 0
+	for _, r := range rowOrder {
+		m1 := slots[r+"1"]
+		m2 := slots[r+"2"]
+		if (m1 != "" && m1 != "EMPTY") || (m2 != "" && m2 != "EMPTY") {
+			count++
+		}
+	}
+	return count
+}
+
 func handleSlots(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if r.Method != http.MethodPost {
@@ -127,6 +139,11 @@ func handleSlots(w http.ResponseWriter, r *http.Request) {
 	}
 
 	oldRowCount := len(s.RowOrder)
+	oldSlots := make(map[string]string)
+	for k, v := range s.Slots {
+		oldSlots[k] = v
+	}
+
 	var reqSingle struct {
 		Slot   string `json:"slot"`
 		Module string `json:"module"`
@@ -149,14 +166,25 @@ func handleSlots(w http.ResponseWriter, r *http.Request) {
 	}
 
 	SaveSettings(s)
-	if oldRowCount != len(s.RowOrder) {
+
+	rowStructureChanged := oldRowCount != len(s.RowOrder)
+	if !rowStructureChanged {
+		if countActiveRows(oldSlots, s.RowOrder) != countActiveRows(s.Slots, s.RowOrder) {
+			rowStructureChanged = true
+		}
+	}
+
+	if rowStructureChanged {
 		go func() {
 			time.Sleep(100 * time.Millisecond)
 			_ = GlobalDaemon.Restart()
 			time.Sleep(300 * time.Millisecond)
 			GlobalDaemon.updateBlur()
 		}()
+	} else {
+		go GlobalDaemon.updateBlur()
 	}
+
 	json.NewEncoder(w).Encode(map[string]interface{}{"status": "ok", "slots": s.Slots, "row_order": s.RowOrder})
 }
 

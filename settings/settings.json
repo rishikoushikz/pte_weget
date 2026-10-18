@@ -1,20 +1,33 @@
 {
-  "color_mode": "dark",
+  "color_mode": "wallpaper",
   "glass_effect": true,
   "blur_radius": 10,
   "blur_opacity": 0.5,
   "widget_border": true,
   "scale": 1,
+  "position": "top_right",
+  "gap_x": 26,
+  "gap_y": 54,
   "time_format": "12h",
   "measurement_system": "metric",
   "location": "Mumbai",
+  "autostart": true,
+  "row_order": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E"
+  ],
   "slots": {
-    "A1": "CLKD_1x1_MIN",
+    "A1": "CLKD_1x1_DET",
     "A2": "NETW_1x1_MIN",
     "B1": "CLKA_2x1_WID",
     "B2": "EMPTY",
-    "C1": "CLKD_2x1_WID",
+    "C1": "STOR_2x1_WID",
     "C2": "EMPTY",
-    "D1": "MEDI_2x1_WID"
+    "D1": "MEDI_2x1_WID",
+    "E1": "QUOT_2x1_WID",
+    "E2": "EMPTY"
   }
 }

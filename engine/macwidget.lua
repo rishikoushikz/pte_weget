@@ -340,7 +340,28 @@ end)()
 
 -- Watcher
 local last_settings_str = ""
-local settings_path = os.getenv("HOME") .. "/.config/conky/macwidget/settings/settings.json"
+
+local function resolve_settings_path()
+    local home = os.getenv("HOME") or ""
+    local candidates = {
+        home .. "/.config/conky/macwidget/settings/settings.json",
+        "/usr/share/weget/settings/settings.json",
+        home .. "/.local/share/weget/settings/settings.json",
+        "engine/settings/settings.json",
+        "settings/settings.json",
+        "settings.json"
+    }
+    for _, p in ipairs(candidates) do
+        local f = io.open(p, "r")
+        if f then
+            f:close()
+            return p
+        end
+    end
+    return home .. "/.config/conky/macwidget/settings/settings.json"
+end
+
+local settings_path = resolve_settings_path()
 
 local blur_surface = nil
 local blur_surface_failed = false
@@ -375,7 +396,8 @@ end
 
 local function check_hot_reload()
     load_wallpaper_palette()
-    local f = io.open(settings_path, "r")
+    local cur_path = resolve_settings_path()
+    local f = io.open(cur_path, "r")
     if not f then return end
     local content = f:read("*a")
     f:close()
@@ -473,16 +495,16 @@ local function check_hot_reload()
             for r in row_order_block:gmatch('"([%w_]+)"') do
                 table.insert(new_rows, r)
             end
-            if not SETTINGS.row_order or #new_rows ~= #SETTINGS.row_order then
-                if blur_surface then
-                    pcall(cairo_surface_destroy, blur_surface)
-                    blur_surface = nil
-                    blur_surface_failed = false
-                end
-            end
             SETTINGS.row_order = new_rows
         else
             SETTINGS.row_order = nil
+        end
+
+        -- Invalidate blur surface so card clips and geometry realign immediately
+        if blur_surface then
+            pcall(cairo_surface_destroy, blur_surface)
+            blur_surface = nil
+            blur_surface_failed = false
         end
 
         apply_theme(SETTINGS.color_mode, SETTINGS.widget_border, SETTINGS.glass_effect)
@@ -2272,6 +2294,10 @@ function conky_draw_widgets()
     cairo_surface_set_device_scale(cs, effective_scale, effective_scale)
 
     local cr = cairo_create(cs)
+    cairo_save(cr)
+    cairo_set_operator(cr, CAIRO_OPERATOR_CLEAR)
+    cairo_paint(cr)
+    cairo_restore(cr)
     local cur_y = 0
 
     local slots = SETTINGS.slots or {}
