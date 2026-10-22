@@ -49,11 +49,20 @@ type QuoteTelemetry struct {
 	Tag    string `json:"tag"`
 }
 
+type SystemTelemetry struct {
+	CPUPercent  int    `json:"cpu_percent"`
+	RAMPercent  int    `json:"ram_percent"`
+	DiskPercent int    `json:"disk_percent"`
+	DiskUsed    string `json:"disk_used"`
+	DiskTotal   string `json:"disk_total"`
+}
+
 type TelemetryPayload struct {
 	Weather WeatherTelemetry `json:"weather"`
 	Media   MediaTelemetry   `json:"media"`
 	Network NetworkTelemetry `json:"network"`
 	Quote   QuoteTelemetry   `json:"quote"`
+	System  SystemTelemetry  `json:"system"`
 	Updated int64            `json:"updated"`
 }
 
@@ -93,6 +102,13 @@ var GlobalDaemon = &DaemonManager{
 			Text:   "Simplicity is the soul of efficiency.",
 			Author: "Austin Freeman",
 			Tag:    "Engineering",
+		},
+		System: SystemTelemetry{
+			CPUPercent:  12,
+			RAMPercent:  48,
+			DiskPercent: 54,
+			DiskUsed:    "128G",
+			DiskTotal:   "500G",
 		},
 	},
 }
@@ -149,12 +165,14 @@ func (dm *DaemonManager) StartTelemetryLoop() {
 	// Initial synchronous save so Conky has immediate cached data
 	dm.updateQuote()
 	dm.updateNetwork()
+	dm.updateSystem()
 	dm.SaveTelemetry()
 
 	// Launch background pollers
 	go dm.pollWeatherLoop()
 	go dm.pollMediaLoop()
 	go dm.pollNetworkLoop()
+	go dm.pollSystemLoop()
 	go dm.pollBlurLoop()
 }
 
@@ -445,6 +463,104 @@ func (dm *DaemonManager) updateQuote() {
 	dm.mu.Lock()
 	dm.telemetry.Quote = q
 	dm.mu.Unlock()
+}
+
+func (dm *DaemonManager) pollSystemLoop() {
+	ticker := time.NewTicker(3 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			dm.updateSystem()
+		case <-dm.stopChan:
+			return
+		}
+	}
+}
+
+var (
+	lastCPUTotal uint64
+	lastCPUIdle  uint64
+)
+
+func (dm *DaemonManager) updateSystem() {
+	sys := SystemTelemetry{
+		CPUPercent:  10,
+		RAMPercent:  40,
+		DiskPercent: 50,
+		DiskUsed:    "0G",
+		DiskTotal:   "0G",
+	}
+
+	// 1. Disk usage via statfs
+	var stat syscall.Statfs_t
+	if err := syscall.Statfs("/", &stat); err == nil {
+		totalBytes := stat.Blocks * uint64(stat.Bsize)
+		freeBytes := stat.Bavail * uint64(stat.Bsize)
+		if totalBytes > 0 {
+			usedBytes := totalBytes - freeBytes
+			sys.DiskPercent = int((usedBytes * 100) / totalBytes)
+			totalGB := float64(totalBytes) / (1024 * 1024 * 1024)
+			usedGB := float64(usedBytes) / (1024 * 1024 * 1024)
+			sys.DiskUsed = fmt.Sprintf("%.1fG", usedGB)
+			sys.DiskTotal = fmt.Sprintf("%.1fG", totalGB)
+		}
+	}
+
+	// 2. RAM usage via /proc/meminfo
+	if data, err := os.ReadFile("/proc/meminfo"); err == nil {
+		var memTotal, memAvailable uint64
+		for _, line := range strings.Split(string(data), "\n") {
+			fields := strings.Fields(line)
+			if len(fields) >= 2 {
+				if fields[0] == "MemTotal:" {
+					memTotal, _ = strconv.ParseUint(fields[1], 10, 64)
+				} else if fields[0] == "MemAvailable:" {
+					memAvailable, _ = strconv.ParseUint(fields[1], 10, 64)
+				}
+			}
+		}
+		if memTotal > 0 && memAvailable <= memTotal {
+			used := memTotal - memAvailable
+			sys.RAMPercent = int((used * 100) / memTotal)
+		}
+	}
+
+	// 3. CPU usage via /proc/stat
+	if data, err := os.ReadFile("/proc/stat"); err == nil {
+		lines := strings.Split(string(data), "\n")
+		if len(lines) > 0 && strings.HasPrefix(lines[0], "cpu ") {
+			fields := strings.Fields(lines[0])
+			if len(fields) >= 5 {
+				var total uint64
+				for _, f := range fields[1:] {
+					v, _ := strconv.ParseUint(f, 10, 64)
+					total += v
+				}
+				idle, _ := strconv.ParseUint(fields[4], 10, 64)
+				if len(fields) >= 6 {
+					iowait, _ := strconv.ParseUint(fields[5], 10, 64)
+					idle += iowait
+				}
+
+				if lastCPUTotal > 0 && total > lastCPUTotal {
+					deltaTotal := total - lastCPUTotal
+					deltaIdle := idle - lastCPUIdle
+					if deltaTotal > 0 && deltaTotal >= deltaIdle {
+						sys.CPUPercent = int(((deltaTotal - deltaIdle) * 100) / deltaTotal)
+					}
+				}
+				lastCPUTotal = total
+				lastCPUIdle = idle
+			}
+		}
+	}
+
+	dm.mu.Lock()
+	dm.telemetry.System = sys
+	dm.mu.Unlock()
+	dm.SaveTelemetry()
 }
 
 func findBlurHelper() string {

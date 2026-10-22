@@ -323,9 +323,6 @@ for i = 1, NET_BUFFER_LEN do
     net_down_history[i] = 0.0
 end
 
--- Click Zones
-local CLICK_ZONES = {}
-
 -- Dynamic Hardware Sensor Detection
 local HWMON_TEMP_VAR = (function()
     for i = 0, 8 do
@@ -2074,7 +2071,6 @@ end
 -- 9.1 Album Spotlight (1x1 Minimal)
 local function draw_media_1x1_minimal(cr, card_x, card_y, card_w, card_h)
     draw_card(cr, card_x, card_y, card_w, card_h)
-    CLICK_ZONES["media_scroll"] = { x = card_x, y = card_y, w = card_w, h = card_h }
 
     local is_playing = TELEMETRY.media.is_playing
     local title = TELEMETRY.media.title or "No Track"
@@ -2087,38 +2083,39 @@ local function draw_media_1x1_minimal(cr, card_x, card_y, card_w, card_h)
     draw_sub_card(cr, ax, ay, asize, asize, 12)
     draw_icon(cr, "󰝚", ax + asize / 2, ay + asize / 2 + 5, 22, PURPLE_MEDIA, 'center')
 
-    -- Apple Music Logo (Top-Right)
+    -- Audio Glyph (Top-Right)
     draw_icon(cr, "󰝚", card_x + card_w - 24, card_y + 32, 16, TEXT_PRIMARY, 'center')
 
     -- Title & Artist (Middle)
     draw_text(cr, title, card_x + 18, card_y + 86, 12, CAIRO_FONT_WEIGHT_BOLD, TEXT_PRIMARY, 'left')
     draw_text(cr, artist, card_x + 18, card_y + 102, 9.5, CAIRO_FONT_WEIGHT_NORMAL, TEXT_MUTED, 'left')
 
-    -- Floating Apple ▶ Play / ⏸ Pause Pill Button (Bottom)
-    local btn_x = card_x + 18
-    local btn_y = card_y + 112
-    local btn_w = 82
-    local btn_h = 28
-    CLICK_ZONES["play"] = { x = btn_x, y = btn_y, w = btn_w, h = btn_h }
-    draw_pill(cr, btn_x, btn_y, btn_w, btn_h, 14, { r = 1, g = 1, b = 1, a = 0.20 })
-    draw_icon(cr, is_playing and "󰏤" or "󰐊", btn_x + 18, btn_y + 18, 12, TEXT_PRIMARY, 'center')
-    draw_text(cr, is_playing and "Pause" or "Play", btn_x + 46, btn_y + 18, 10.5, CAIRO_FONT_WEIGHT_BOLD, TEXT_PRIMARY, 'center')
+    -- Informational Play / Pause Status Badge (Display-only, non-clickable)
+    local badge_x = card_x + 18
+    local badge_y = card_y + 112
+    local badge_w = 88
+    local badge_h = 26
+    local status_text = is_playing and "Playing" or "Paused"
+    local status_icon = is_playing and "󰐊" or "󰏤"
+    local badge_color = is_playing and PURPLE_MEDIA or { r = 1, g = 1, b = 1, a = 0.12 }
+    draw_pill(cr, badge_x, badge_y, badge_w, badge_h, 13, badge_color)
+    draw_icon(cr, status_icon, badge_x + 16, badge_y + 17, 11, { r = 1, g = 1, b = 1 }, 'center')
+    draw_text(cr, status_text, badge_x + 50, badge_y + 17, 10, CAIRO_FONT_WEIGHT_BOLD, { r = 1, g = 1, b = 1 }, 'center')
 end
 
 -- 9.2 Track Controller (1x1 Detailed)
 local function draw_media_1x1_detailed(cr, card_x, card_y, card_w, card_h)
     draw_card(cr, card_x, card_y, card_w, card_h)
-    CLICK_ZONES["media_scroll"] = { x = card_x, y = card_y, w = card_w, h = card_h }
 
     local is_playing = TELEMETRY.media.is_playing
     local title = TELEMETRY.media.title or "No Track"
     local artist = TELEMETRY.media.artist or "Weget Audio Engine"
     local p_frac = TELEMETRY.media.progress or 0.0
+    local p_time = TELEMETRY.media.time or "00:00 / 00:00"
+    if p_time == "--:--" then p_time = "00:00 / 00:00" end
 
     local p_name = TELEMETRY.media.player_name or "Audio"
     local p_icon = TELEMETRY.media.player_icon or "󰝚"
-    local p_idx = TELEMETRY.media.player_index or 1
-    local p_tot = TELEMETRY.media.total_players or 0
 
     draw_text(cr, title, card_x + 18, card_y + 26, 11, CAIRO_FONT_WEIGHT_BOLD, TEXT_PRIMARY, 'left')
     draw_text(cr, artist, card_x + 18, card_y + 40, 9, CAIRO_FONT_WEIGHT_NORMAL, TEXT_MUTED, 'left')
@@ -2128,49 +2125,34 @@ local function draw_media_1x1_detailed(cr, card_x, card_y, card_w, card_h)
     draw_pill(cr, card_x + 18, card_y + 54, bar_w, 4, 2, { r = 1, g = 1, b = 1, a = 0.12 })
     draw_pill(cr, card_x + 18, card_y + 54, math.max(6, bar_w * p_frac), 4, 2, PURPLE_MEDIA)
 
-    -- Playback controls
-    local ctrl_y = card_y + 76
-    CLICK_ZONES["prev"] = { x = card_x + 18, y = ctrl_y, w = 36, h = 32 }
-    CLICK_ZONES["play"] = { x = card_x + card_w / 2 - 18, y = ctrl_y, w = 36, h = 32 }
-    CLICK_ZONES["next"] = { x = card_x + card_w - 54, y = ctrl_y, w = 36, h = 32 }
+    -- Playback info row: Status Badge & Time Readout (Display-only)
+    local badge_x = card_x + 18
+    local badge_y = card_y + 74
+    local badge_w = 88
+    local badge_h = 26
+    local status_text = is_playing and "Playing" or "Paused"
+    local status_icon = is_playing and "󰐊" or "󰏤"
+    local badge_color = is_playing and PURPLE_MEDIA or { r = 1, g = 1, b = 1, a = 0.12 }
 
-    -- Prev
-    draw_pill(cr, card_x + 18, ctrl_y, 36, 32, 10, { r = 1, g = 1, b = 1, a = 0.08 })
-    draw_icon(cr, "󰒮", card_x + 36, ctrl_y + 20, 13, TEXT_PRIMARY, 'center')
+    draw_pill(cr, badge_x, badge_y, badge_w, badge_h, 13, badge_color)
+    draw_icon(cr, status_icon, badge_x + 16, badge_y + 17, 11, { r = 1, g = 1, b = 1 }, 'center')
+    draw_text(cr, status_text, badge_x + 50, badge_y + 17, 10, CAIRO_FONT_WEIGHT_BOLD, { r = 1, g = 1, b = 1 }, 'center')
 
-    -- Play/Pause
-    draw_pill(cr, card_x + card_w / 2 - 18, ctrl_y, 36, 32, 10, PURPLE_MEDIA)
-    draw_icon(cr, is_playing and "󰏤" or "󰐊", card_x + card_w / 2, ctrl_y + 20, 14, { r = 1, g = 1, b = 1 }, 'center')
+    -- Time readout
+    draw_text(cr, p_time, card_x + card_w - 18, card_y + 90, 8.5, CAIRO_FONT_WEIGHT_NORMAL, TEXT_MUTED, 'right')
 
-    -- Next
-    draw_pill(cr, card_x + card_w - 54, ctrl_y, 36, 32, 10, { r = 1, g = 1, b = 1, a = 0.08 })
-    draw_icon(cr, "󰒭", card_x + card_w - 36, ctrl_y + 20, 13, TEXT_PRIMARY, 'center')
-
-    -- Footer: Carousel switcher if multi-player, or "NOW PLAYING"
-    if p_tot > 1 then
-        local footer_y = card_y + 120
-        local chev_w = 26
-        local footer_h = 20
-        CLICK_ZONES["player_prev"] = { x = card_x + 14, y = footer_y, w = chev_w, h = footer_h }
-        draw_text(cr, "‹", card_x + 14 + chev_w / 2, footer_y + 14, 13, CAIRO_FONT_WEIGHT_BOLD, TEXT_PRIMARY, 'center')
-
-        local d_icon = p_icon
-        if not d_icon or d_icon == "" or d_icon:find("\\") or #d_icon > 4 then d_icon = "󰝚" end
-        draw_icon(cr, d_icon, card_x + card_w / 2 - 24, footer_y + 14, 11, PURPLE_MEDIA, 'center')
-        local label = p_name:sub(1, 6) .. " (" .. tostring(p_idx) .. "/" .. tostring(p_tot) .. ")"
-        draw_text(cr, label, card_x + card_w / 2 + 8, footer_y + 13, 8.5, CAIRO_FONT_WEIGHT_BOLD, TEXT_PRIMARY, 'center')
-
-        CLICK_ZONES["player_next"] = { x = card_x + card_w - 14 - chev_w, y = footer_y, w = chev_w, h = footer_h }
-        draw_text(cr, "›", card_x + card_w - 14 - chev_w / 2, footer_y + 14, 13, CAIRO_FONT_WEIGHT_BOLD, TEXT_PRIMARY, 'center')
-    else
-        draw_text(cr, "NOW PLAYING", card_x + card_w / 2, card_y + 134, 8, CAIRO_FONT_WEIGHT_BOLD, TEXT_MUTED, 'center')
-    end
+    -- Footer: Player Source Readout (Display-only, no chevrons)
+    local footer_y = card_y + 122
+    local d_icon = p_icon
+    if not d_icon or d_icon == "" or d_icon:find("\\") or #d_icon > 4 then d_icon = "󰝚" end
+    draw_icon(cr, d_icon, card_x + 24, footer_y + 12, 11, PURPLE_MEDIA, 'center')
+    local label = (p_name and p_name ~= "") and p_name or "Audio Engine"
+    draw_text(cr, label, card_x + 38, footer_y + 11, 9, CAIRO_FONT_WEIGHT_BOLD, TEXT_MUTED, 'left')
 end
 
 -- 9.3 Studio Master Deck (2x1 Wide)
 local function draw_media_2x1_wide(cr, card_x, card_y, card_w, card_h)
     draw_card(cr, card_x, card_y, card_w, card_h)
-    CLICK_ZONES["media_scroll"] = { x = card_x, y = card_y, w = card_w, h = card_h }
 
     local is_playing = TELEMETRY.media.is_playing
     local title = TELEMETRY.media.title or "No Media Playing"
@@ -2181,8 +2163,6 @@ local function draw_media_2x1_wide(cr, card_x, card_y, card_w, card_h)
 
     local p_name = TELEMETRY.media.player_name or "Audio"
     local p_icon = TELEMETRY.media.player_icon or "󰝚"
-    local p_idx = TELEMETRY.media.player_index or 1
-    local p_tot = TELEMETRY.media.total_players or 0
 
     -- Album art / Disc square (Left)
     local ax = card_x + 18
@@ -2196,34 +2176,11 @@ local function draw_media_2x1_wide(cr, card_x, card_y, card_w, card_h)
     end
     draw_icon(cr, d_icon, ax + asize / 2, ay + asize / 2 + 5, 22, PURPLE_MEDIA, 'center')
 
-    -- Top-Right: Single glyph or Multi-Player Carousel Switcher (Option A: Minimalist Integrated Pill)
-    if p_tot > 1 then
-        local pill_w = 90
-        local pill_h = 22
-        local pill_x = card_x + card_w - pill_w - 16
-        local pill_y = card_y + 18
-
-        draw_pill(cr, pill_x, pill_y, pill_w, pill_h, 11, { r = 1, g = 1, b = 1, a = 0.08 })
-
-        -- Left chevron: ‹
-        local chev_w = 20
-        CLICK_ZONES["player_prev"] = { x = pill_x, y = pill_y, w = chev_w, h = pill_h }
-        draw_text(cr, "‹", pill_x + chev_w / 2, pill_y + 15, 13, CAIRO_FONT_WEIGHT_BOLD, TEXT_PRIMARY, 'center')
-
-        -- Middle: Icon + count
-        draw_icon(cr, d_icon, pill_x + 36, pill_y + 15, 11, PURPLE_MEDIA, 'center')
-        local count_label = tostring(p_idx) .. "/" .. tostring(p_tot)
-        draw_text(cr, count_label, pill_x + 55, pill_y + 14, 9, CAIRO_FONT_WEIGHT_BOLD, TEXT_PRIMARY, 'center')
-
-        -- Right chevron: ›
-        CLICK_ZONES["player_next"] = { x = pill_x + pill_w - chev_w, y = pill_y, w = chev_w, h = pill_h }
-        draw_text(cr, "›", pill_x + pill_w - chev_w / 2, pill_y + 15, 13, CAIRO_FONT_WEIGHT_BOLD, TEXT_PRIMARY, 'center')
+    -- Top-Right: Active source display (Display-only, no chevrons)
+    if p_name and p_name ~= "Audio" and p_name ~= "Weget Audio" then
+        draw_text(cr, p_name, card_x + card_w - 18, card_y + 30, 9.5, CAIRO_FONT_WEIGHT_BOLD, TEXT_MUTED, 'right')
     else
-        if p_name and p_name ~= "Audio" and p_name ~= "Weget Audio" then
-            draw_text(cr, p_name, card_x + card_w - 18, card_y + 30, 9.5, CAIRO_FONT_WEIGHT_BOLD, TEXT_MUTED, 'right')
-        else
-            draw_icon(cr, d_icon, card_x + card_w - 24, card_y + 30, 16, TEXT_MUTED, 'center')
-        end
+        draw_icon(cr, d_icon, card_x + card_w - 24, card_y + 30, 16, TEXT_MUTED, 'center')
     end
 
     -- Title & Artist (Beside album art)
@@ -2240,29 +2197,20 @@ local function draw_media_2x1_wide(cr, card_x, card_y, card_w, card_h)
         draw_pill(cr, bar_x, bar_y, math.max(6, bar_w * p_frac), 4, 2.0, PURPLE_MEDIA)
     end
 
-    -- Bottom controls: Apple ▶ Play capsule + prev/next
-    local btn_y = card_y + 76
-    local play_w = 80
-    local btn_h = 28
+    -- Bottom info row: Playback Status Badge (Display-only, non-clickable) & Time
+    local badge_y = card_y + 76
+    local badge_w = 88
+    local badge_h = 26
+    local status_text = is_playing and "Playing" or "Paused"
+    local status_icon = is_playing and "󰐊" or "󰏤"
+    local badge_color = is_playing and PURPLE_MEDIA or { r = 1, g = 1, b = 1, a = 0.12 }
 
-    CLICK_ZONES["play"] = { x = text_x, y = btn_y, w = play_w, h = btn_h }
-    draw_pill(cr, text_x, btn_y, play_w, btn_h, 14, { r = 1, g = 1, b = 1, a = 0.20 })
-    draw_icon(cr, is_playing and "󰏤" or "󰐊", text_x + 18, btn_y + 18, 12, TEXT_PRIMARY, 'center')
-    draw_text(cr, is_playing and "Pause" or "Play", text_x + 46, btn_y + 18, 10.5, CAIRO_FONT_WEIGHT_BOLD, TEXT_PRIMARY, 'center')
-
-    -- Prev & Next
-    local prev_x = text_x + play_w + 10
-    CLICK_ZONES["prev"] = { x = prev_x, y = btn_y, w = 32, h = btn_h }
-    draw_pill(cr, prev_x, btn_y, 32, btn_h, 14, { r = 1, g = 1, b = 1, a = 0.10 })
-    draw_icon(cr, "󰒮", prev_x + 16, btn_y + 19, 12, TEXT_PRIMARY, 'center')
-
-    local next_x = prev_x + 40
-    CLICK_ZONES["next"] = { x = next_x, y = btn_y, w = 32, h = btn_h }
-    draw_pill(cr, next_x, btn_y, 32, btn_h, 14, { r = 1, g = 1, b = 1, a = 0.10 })
-    draw_icon(cr, "󰒭", next_x + 16, btn_y + 19, 12, TEXT_PRIMARY, 'center')
+    draw_pill(cr, text_x, badge_y, badge_w, badge_h, 13, badge_color)
+    draw_icon(cr, status_icon, text_x + 16, badge_y + 17, 11, { r = 1, g = 1, b = 1 }, 'center')
+    draw_text(cr, status_text, text_x + 50, badge_y + 17, 10, CAIRO_FONT_WEIGHT_BOLD, { r = 1, g = 1, b = 1 }, 'center')
 
     -- Time readout
-    draw_text(cr, p_time, card_x + card_w - 20, card_y + 94, 9, CAIRO_FONT_WEIGHT_NORMAL, TEXT_MUTED, 'right')
+    draw_text(cr, p_time, card_x + card_w - 20, card_y + 93, 9.5, CAIRO_FONT_WEIGHT_NORMAL, TEXT_MUTED, 'right')
 end
 
 -- =======================================================================
@@ -2411,73 +2359,6 @@ local function get_media_helper_cmd()
     return CACHED_HELPER_CMD
 end
 
--- -----------------------------------------------------------------------
--- Mouse Click & Scroll Event Handler
--- -----------------------------------------------------------------------
-function conky_mouse_event(event)
-    if not event then return false end
-
-    local ev_type = event.type or ""
-    local x = event.x or 0
-    local y = event.y or 0
-    local btn = event.button
-
-    local scale = EFFECTIVE_SCALE or 1.0
-    if scale <= 0 then scale = 1.0 end
-
-    local lx = x / scale
-    local ly = y / scale
-
-    local helper_cmd = get_media_helper_cmd()
-
-    -- 1. Handle mouse wheel scroll over media card for side-scroll player carousel
-    if ev_type == "button_scroll" or ev_type == "mouse_scroll" or btn == "up" or btn == "down" then
-        local scroll_box = CLICK_ZONES["media_scroll"]
-        if scroll_box and lx >= scroll_box.x and lx <= (scroll_box.x + scroll_box.w)
-           and ly >= scroll_box.y and ly <= (scroll_box.y + scroll_box.h) then
-            local dir = tostring(event.direction or btn or "")
-            if dir == "up" or btn == 4 or dir == "left" or dir == "scroll_up" then
-                os.execute(helper_cmd .. " player-prev &")
-                return true
-            elseif dir == "down" or btn == 5 or dir == "right" or dir == "scroll_down" then
-                os.execute(helper_cmd .. " player-next &")
-                return true
-            end
-        end
-        return false
-    end
-
-    -- 2. Handle button clicks (button_down or button_up or click)
-    if ev_type ~= "button_down" and ev_type ~= "button_up" and ev_type ~= "click" then
-        return false
-    end
-
-    -- Accept left click: button can be "left", 1, or nil
-    local is_left = (btn == "left" or btn == 1 or btn == nil)
-    if not is_left then
-        return false
-    end
-
-    for action, box in pairs(CLICK_ZONES) do
-        if action ~= "media_scroll" and lx >= box.x and lx <= (box.x + box.w) and ly >= box.y and ly <= (box.y + box.h) then
-            if action == "prev" then
-                os.execute(helper_cmd .. " prev &")
-            elseif action == "play" then
-                os.execute(helper_cmd .. " play-pause &")
-            elseif action == "next" then
-                os.execute(helper_cmd .. " next &")
-            elseif action == "player_prev" then
-                os.execute(helper_cmd .. " player-prev &")
-            elseif action == "player_next" then
-                os.execute(helper_cmd .. " player-next &")
-            end
-            return true
-        end
-    end
-
-    return false
-end
-
 local FRAME_COUNTER = 0
 
 -- -----------------------------------------------------------------------
@@ -2487,20 +2368,9 @@ function conky_draw_widgets()
     if conky_window == nil then return end
     if (tonumber(conky_parse('${updates}')) or 0) < 1 then return end
 
-    CLICK_ZONES = {}
-
     FRAME_COUNTER = (FRAME_COUNTER or 0) + 1
     if FRAME_COUNTER % 4 == 0 then
         check_hot_reload()
-    end
-
-    -- Non-blocking background telemetry sync (every 1s if playing, 2s if paused/idle)
-    local sync_cadence = (TELEMETRY and TELEMETRY.media and TELEMETRY.media.is_playing) and 2 or 4
-    if FRAME_COUNTER % sync_cadence == 0 then
-        local helper_cmd = get_media_helper_cmd()
-        if helper_cmd and helper_cmd ~= "playerctl" then
-            os.execute(helper_cmd .. " sync &")
-        end
     end
 
     update_telemetry()

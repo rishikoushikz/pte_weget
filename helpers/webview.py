@@ -12,7 +12,7 @@ try:
     import gi
     gi.require_version("Gtk", "3.0")
     gi.require_version("WebKit2", "4.1")
-    from gi.repository import Gtk, WebKit2, GLib
+    from gi.repository import Gtk, WebKit2, GLib, Gdk
 except Exception as e:
     sys.stderr.write(f"WebKit2GTK initialization error: {e}\n")
     sys.exit(1)
@@ -25,8 +25,8 @@ def main():
     url = sys.argv[1]
     title = sys.argv[2] if len(sys.argv) > 2 else "Weget — Modern Desktop Widgets"
     icon_path = sys.argv[3] if len(sys.argv) > 3 else ""
-    width = int(sys.argv[4]) if len(sys.argv) > 4 else 820
-    height = int(sys.argv[5]) if len(sys.argv) > 5 else 680
+    width = int(sys.argv[4]) if len(sys.argv) > 4 else 1120
+    height = int(sys.argv[5]) if len(sys.argv) > 5 else 760
 
     # Ensure application identity and WM_CLASS / Wayland app_id are set
     # This links the running window to weget.desktop on dock, taskbar, and alt-tab
@@ -37,6 +37,12 @@ def main():
     win = Gtk.Window(title=title)
     win.set_default_size(width, height)
     win.set_position(Gtk.WindowPosition.CENTER)
+
+    # Set minimum window bounds using GTK geometry hints to prevent collapse or freezing on resize/minimize
+    geom = Gdk.Geometry()
+    geom.min_width = 880
+    geom.min_height = 580
+    win.set_geometry_hints(None, geom, Gdk.WindowHints.MIN_SIZE)
 
     # Prefer dark theme for window decorations and controls
     gtk_settings = Gtk.Settings.get_default()

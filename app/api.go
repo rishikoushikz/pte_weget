@@ -21,6 +21,8 @@ func SetupAPIRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/reset", handleReset)
 	mux.HandleFunc("/api/wallpaper-palette", handleWallpaperPalette)
 	mux.HandleFunc("/api/wallpaper-palette/refresh", handleWallpaperPaletteRefresh)
+	mux.HandleFunc("/api/telemetry", handleTelemetry)
+	mux.HandleFunc("/api/logs", handleLogs)
 }
 
 func handleSettings(w http.ResponseWriter, r *http.Request) {
@@ -298,3 +300,39 @@ func handleWallpaperPaletteRefresh(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write(out)
 }
+
+func handleTelemetry(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	for _, p := range getTelemetryPaths() {
+		if data, err := os.ReadFile(p); err == nil && len(data) > 0 {
+			var diskTel TelemetryPayload
+			if err := json.Unmarshal(data, &diskTel); err == nil && diskTel.Updated > 0 {
+				GlobalDaemon.mu.Lock()
+				if diskTel.Updated >= GlobalDaemon.telemetry.Updated {
+					if diskTel.System.DiskTotal == "" && GlobalDaemon.telemetry.System.DiskTotal != "" {
+						diskTel.System = GlobalDaemon.telemetry.System
+					}
+					GlobalDaemon.telemetry = diskTel
+				}
+				GlobalDaemon.mu.Unlock()
+				break
+			}
+		}
+	}
+	GlobalDaemon.mu.RLock()
+	defer GlobalDaemon.mu.RUnlock()
+	json.NewEncoder(w).Encode(GlobalDaemon.telemetry)
+}
+
+func handleLogs(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	home := os.Getenv("HOME")
+	logPath := filepath.Join(home, ".cache/weget/conky.log")
+	data, err := os.ReadFile(logPath)
+	if err != nil {
+		w.Write([]byte("No log output available yet."))
+		return
+	}
+	w.Write(data)
+}
+

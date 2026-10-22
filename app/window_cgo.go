@@ -22,6 +22,12 @@ static void setup_window(GtkWidget *window, GtkWidget *webview, const char *titl
 
     gtk_window_set_title(GTK_WINDOW(window), title);
     gtk_window_set_default_size(GTK_WINDOW(window), width, height);
+
+    GdkGeometry hints;
+    hints.min_width = 880;
+    hints.min_height = 580;
+    gtk_window_set_geometry_hints(GTK_WINDOW(window), NULL, &hints, GDK_HINT_MIN_SIZE);
+
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
     if (icon_path != NULL && g_file_test(icon_path, G_FILE_TEST_EXISTS)) {
         gtk_window_set_icon_from_file(GTK_WINDOW(window), icon_path, NULL);

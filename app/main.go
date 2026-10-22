@@ -256,5 +256,5 @@ func main() {
 	}()
 
 	iconPath := findAppIcon()
-	launchAppWindow(url, "Weget — Modern Desktop Widgets", iconPath, 840, 700)
+	launchAppWindow(url, "Weget — Modern Desktop Widgets", iconPath, 1120, 760)
 }
