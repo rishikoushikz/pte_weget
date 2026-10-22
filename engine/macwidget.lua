@@ -338,6 +338,22 @@ local HWMON_TEMP_VAR = (function()
     return "${acpitemp}"
 end)()
 
+-- Safe Battery Device Detection (prevents polling missing BAT1 sysfs files)
+local BATTERY_DEV = (function()
+    for _, name in ipairs({"BAT0", "BAT1", "BAT2"}) do
+        local f = io.open("/sys/class/power_supply/" .. name .. "/uevent", "r")
+        if f then f:close(); return name end
+    end
+    return nil
+end)()
+
+local function get_battery_info()
+    if not BATTERY_DEV then return 100, "100" end
+    local s = conky_parse("${battery_percent " .. BATTERY_DEV .. "}")
+    local n = tonumber(s) or 100
+    return n, (s and s ~= "" and s or tostring(n))
+end
+
 -- Watcher
 local last_settings_str = ""
 
@@ -529,7 +545,11 @@ local TELEMETRY = {
         title = "No Media Playing",
         artist = "Weget Audio Engine",
         progress = 0.0,
-        time = "--:--"
+        time = "--:--",
+        player_name = "Audio",
+        player_icon = "󰝚",
+        player_index = 1,
+        total_players = 0
     },
     network = {
         ssid = "WiFi"
@@ -567,18 +587,37 @@ local function update_telemetry()
                 if w_icon then TELEMETRY.weather.icon = w_icon end
 
                 -- Media
-                local m_status = str:match('"status"%s*:%s*"([^"]+)"')
+                local m_status = str:match('"status"%s*:%s*"(.-)"%s*[,}\r\n]')
                 if m_status then TELEMETRY.media.status = m_status end
                 local m_play = str:match('"is_playing"%s*:%s*(%a+)')
                 if m_play ~= nil then TELEMETRY.media.is_playing = (m_play == "true") end
-                local m_title = str:match('"title"%s*:%s*"([^"]+)"')
-                if m_title then TELEMETRY.media.title = m_title end
-                local m_artist = str:match('"artist"%s*:%s*"([^"]+)"')
-                if m_artist then TELEMETRY.media.artist = m_artist end
+                local m_title = str:match('"title"%s*:%s*"(.-)"%s*[,}\r\n]')
+                local m_artist = str:match('"artist"%s*:%s*"(.-)"%s*[,}\r\n]')
+                local function clean_str(s)
+                    if not s then return s end
+                    s = s:gsub('\\"', '"')
+                    s = s:gsub('\\/', '/')
+                    s = s:gsub('\\\\', '\\')
+                    return s
+                end
+
+                if m_title then TELEMETRY.media.title = clean_str(m_title) end
+                if m_artist then TELEMETRY.media.artist = clean_str(m_artist) end
                 local m_prog = str:match('"progress"%s*:%s*([%d%.]+)')
                 if m_prog then TELEMETRY.media.progress = tonumber(m_prog) or 0.0 end
-                local m_time = str:match('"time"%s*:%s*"([^"]+)"')
+                local m_time = str:match('"time"%s*:%s*"(.-)"%s*[,}\r\n]')
                 if m_time then TELEMETRY.media.time = m_time end
+                local m_pname = str:match('"player_name"%s*:%s*"(.-)"%s*[,}\r\n]')
+                if m_pname then TELEMETRY.media.player_name = clean_str(m_pname) end
+                local m_picon = str:match('"player_icon"%s*:%s*"(.-)"%s*[,}\r\n]')
+                if m_picon then
+                    if m_picon:find("\\") or #m_picon > 6 then m_picon = "󰝚" end
+                    TELEMETRY.media.player_icon = m_picon
+                end
+                local m_pidx = str:match('"player_index"%s*:%s*(%d+)')
+                if m_pidx then TELEMETRY.media.player_index = tonumber(m_pidx) or 1 end
+                local m_tot = str:match('"total_players"%s*:%s*(%d+)')
+                if m_tot then TELEMETRY.media.total_players = tonumber(m_tot) or 0 end
 
                 -- Network
                 local n_ssid = str:match('"ssid"%s*:%s*"([^"]+)"')
@@ -725,20 +764,73 @@ local function draw_sub_card(cr, x, y, w, h, r)
     cairo_fill(cr)
 end
 
-local function draw_text(cr, text, x, y, size, weight, color, align)
-    cairo_select_font_face(cr, 'Noto Sans', CAIRO_FONT_SLANT_NORMAL, weight or CAIRO_FONT_WEIGHT_NORMAL)
+local SHARED_TEXT_EXTENTS = cairo_text_extents_t:create()
+
+local function has_non_ascii(str)
+    if not str then return false end
+    for i = 1, #str do
+        if str:byte(i) > 127 then return true end
+    end
+    return false
+end
+
+local function is_tamil(str)
+    if not str then return false end
+    return str:find("\224\174") ~= nil or str:find("\224\175") ~= nil
+end
+
+local function draw_text(cr, text, x, y, size, weight, color, align, custom_font)
+    if not text or text == "" then return end
+
+    local font_weight = weight or CAIRO_FONT_WEIGHT_NORMAL
     cairo_set_font_size(cr, size)
-    
+
+    -- If string contains Tamil characters, render word-by-word to blend Tamil and Latin fonts seamlessly
+    if is_tamil(text) and not custom_font then
+        local draw_x = x
+        if align == 'center' or align == 'right' then
+            local total_w = 0
+            for word, space in text:gmatch("(%S+)(%s*)") do
+                local face = is_tamil(word) and 'Noto Sans Tamil' or 'Noto Sans'
+                cairo_select_font_face(cr, face, CAIRO_FONT_SLANT_NORMAL, font_weight)
+                cairo_text_extents(cr, word .. space, SHARED_TEXT_EXTENTS)
+                total_w = total_w + (SHARED_TEXT_EXTENTS.x_advance > 0 and SHARED_TEXT_EXTENTS.x_advance or SHARED_TEXT_EXTENTS.width)
+            end
+            if align == 'center' then draw_x = x - total_w / 2
+            elseif align == 'right' then draw_x = x - total_w end
+        end
+
+        if SETTINGS.color_mode == "glass" and (color.r > 0.8 and color.g > 0.8 and color.b > 0.8) then
+            cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.40 * (color.a or 1.0))
+            cairo_move_to(cr, draw_x, y + 1)
+            for word, space in text:gmatch("(%S+)(%s*)") do
+                local face = is_tamil(word) and 'Noto Sans Tamil' or 'Noto Sans'
+                cairo_select_font_face(cr, face, CAIRO_FONT_SLANT_NORMAL, font_weight)
+                cairo_show_text(cr, word .. space)
+            end
+        end
+
+        cairo_set_source_rgba(cr, color.r, color.g, color.b, color.a or 1.0)
+        cairo_move_to(cr, draw_x, y)
+        for word, space in text:gmatch("(%S+)(%s*)") do
+            local face = is_tamil(word) and 'Noto Sans Tamil' or 'Noto Sans'
+            cairo_select_font_face(cr, face, CAIRO_FONT_SLANT_NORMAL, font_weight)
+            cairo_show_text(cr, word .. space)
+        end
+        return
+    end
+
+    local font_face = custom_font or (has_non_ascii(text) and 'FreeSans' or 'Noto Sans')
+    cairo_select_font_face(cr, font_face, CAIRO_FONT_SLANT_NORMAL, font_weight)
+
     local draw_x = x
     if align == 'center' or align == 'right' then
-        local ext = cairo_text_extents_t:create()
-        cairo_text_extents(cr, text, ext)
-        if align == 'center' then draw_x = x - ext.width / 2
-        elseif align == 'right' then draw_x = x - ext.width end
+        cairo_text_extents(cr, text, SHARED_TEXT_EXTENTS)
+        if align == 'center' then draw_x = x - SHARED_TEXT_EXTENTS.width / 2
+        elseif align == 'right' then draw_x = x - SHARED_TEXT_EXTENTS.width end
     end
 
     if SETTINGS.color_mode == "glass" and (color.r > 0.8 and color.g > 0.8 and color.b > 0.8) then
-        -- Micro text shadow for optical legibility over varied wallpapers
         cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.40 * (color.a or 1.0))
         cairo_move_to(cr, draw_x, y + 1)
         cairo_show_text(cr, text)
@@ -755,10 +847,9 @@ local function draw_icon(cr, icon_char, x, y, size, color, align)
     
     local draw_x = x
     if align == 'center' or align == 'right' then
-        local ext = cairo_text_extents_t:create()
-        cairo_text_extents(cr, icon_char, ext)
-        if align == 'center' then draw_x = x - ext.width / 2
-        elseif align == 'right' then draw_x = x - ext.width end
+        cairo_text_extents(cr, icon_char, SHARED_TEXT_EXTENTS)
+        if align == 'center' then draw_x = x - SHARED_TEXT_EXTENTS.width / 2
+        elseif align == 'right' then draw_x = x - SHARED_TEXT_EXTENTS.width end
     end
 
     if SETTINGS.color_mode == "glass" and (color.r > 0.8 and color.g > 0.8 and color.b > 0.8) then
@@ -1725,7 +1816,7 @@ local function draw_rings_1x1_minimal(cr, card_x, card_y, card_w, card_h)
 
     local cpu_frac = read_pct("${cpu cpu0}")
     local ram_frac = read_pct("${memperc}")
-    local bat_val = tonumber(conky_parse("${battery_percent BAT1}")) or 100
+    local bat_val, bat_str_val = get_battery_info()
     local bat_frac = bat_val / 100
     local temp_c = tonumber(conky_parse(HWMON_TEMP_VAR)) or 52
     local temp_frac = math.min(1.0, temp_c / 100.0)
@@ -1768,9 +1859,8 @@ local function draw_rings_1x1_detailed(cr, card_x, card_y, card_w, card_h)
     local cpu_frac = read_pct("${cpu cpu0}")
     local ram_val = conky_parse("${memperc}")
     local ram_frac = read_pct("${memperc}")
-    local bat_val = conky_parse("${battery_percent BAT1}")
-    if bat_val == "" or bat_val == nil then bat_val = "100" end
-    local bat_frac = (tonumber(bat_val) or 100) / 100
+    local bat_num, bat_val = get_battery_info()
+    local bat_frac = bat_num / 100
     local temp_val = conky_parse(HWMON_TEMP_VAR)
     if temp_val == "" or temp_val == nil then temp_val = "52" end
     local temp_frac = math.min(1.0, (tonumber(temp_val) or 52) / 100.0)
@@ -1809,12 +1899,13 @@ local function draw_rings_2x1_wide(cr, card_x, card_y, card_w, card_h)
 
     local cpu_str = conky_parse("${cpu cpu0}") .. "%"
     local ram_str = conky_parse("${memperc}") .. "%"
-    local bat_str = (conky_parse("${battery_percent BAT1}") or "100") .. "%"
+    local bat_num, bat_val = get_battery_info()
+    local bat_str = bat_val .. "%"
     local temp_str = (conky_parse(HWMON_TEMP_VAR) or "52") .. "°C"
 
     local cpu_frac = read_pct("${cpu cpu0}")
     local ram_frac = read_pct("${memperc}")
-    local bat_frac = (tonumber(conky_parse("${battery_percent BAT1}")) or 100) / 100
+    local bat_frac = bat_num / 100
     local temp_frac = math.min(1.0, (tonumber(conky_parse(HWMON_TEMP_VAR)) or 52) / 100.0)
 
     local sensors = {
@@ -1983,6 +2074,7 @@ end
 -- 9.1 Album Spotlight (1x1 Minimal)
 local function draw_media_1x1_minimal(cr, card_x, card_y, card_w, card_h)
     draw_card(cr, card_x, card_y, card_w, card_h)
+    CLICK_ZONES["media_scroll"] = { x = card_x, y = card_y, w = card_w, h = card_h }
 
     local is_playing = TELEMETRY.media.is_playing
     local title = TELEMETRY.media.title or "No Track"
@@ -2016,11 +2108,17 @@ end
 -- 9.2 Track Controller (1x1 Detailed)
 local function draw_media_1x1_detailed(cr, card_x, card_y, card_w, card_h)
     draw_card(cr, card_x, card_y, card_w, card_h)
+    CLICK_ZONES["media_scroll"] = { x = card_x, y = card_y, w = card_w, h = card_h }
 
     local is_playing = TELEMETRY.media.is_playing
     local title = TELEMETRY.media.title or "No Track"
     local artist = TELEMETRY.media.artist or "Weget Audio Engine"
     local p_frac = TELEMETRY.media.progress or 0.0
+
+    local p_name = TELEMETRY.media.player_name or "Audio"
+    local p_icon = TELEMETRY.media.player_icon or "󰝚"
+    local p_idx = TELEMETRY.media.player_index or 1
+    local p_tot = TELEMETRY.media.total_players or 0
 
     draw_text(cr, title, card_x + 18, card_y + 26, 11, CAIRO_FONT_WEIGHT_BOLD, TEXT_PRIMARY, 'left')
     draw_text(cr, artist, card_x + 18, card_y + 40, 9, CAIRO_FONT_WEIGHT_NORMAL, TEXT_MUTED, 'left')
@@ -2048,12 +2146,31 @@ local function draw_media_1x1_detailed(cr, card_x, card_y, card_w, card_h)
     draw_pill(cr, card_x + card_w - 54, ctrl_y, 36, 32, 10, { r = 1, g = 1, b = 1, a = 0.08 })
     draw_icon(cr, "󰒭", card_x + card_w - 36, ctrl_y + 20, 13, TEXT_PRIMARY, 'center')
 
-    draw_text(cr, "NOW PLAYING", card_x + card_w / 2, card_y + 134, 8, CAIRO_FONT_WEIGHT_BOLD, TEXT_MUTED, 'center')
+    -- Footer: Carousel switcher if multi-player, or "NOW PLAYING"
+    if p_tot > 1 then
+        local footer_y = card_y + 120
+        local chev_w = 26
+        local footer_h = 20
+        CLICK_ZONES["player_prev"] = { x = card_x + 14, y = footer_y, w = chev_w, h = footer_h }
+        draw_text(cr, "‹", card_x + 14 + chev_w / 2, footer_y + 14, 13, CAIRO_FONT_WEIGHT_BOLD, TEXT_PRIMARY, 'center')
+
+        local d_icon = p_icon
+        if not d_icon or d_icon == "" or d_icon:find("\\") or #d_icon > 4 then d_icon = "󰝚" end
+        draw_icon(cr, d_icon, card_x + card_w / 2 - 24, footer_y + 14, 11, PURPLE_MEDIA, 'center')
+        local label = p_name:sub(1, 6) .. " (" .. tostring(p_idx) .. "/" .. tostring(p_tot) .. ")"
+        draw_text(cr, label, card_x + card_w / 2 + 8, footer_y + 13, 8.5, CAIRO_FONT_WEIGHT_BOLD, TEXT_PRIMARY, 'center')
+
+        CLICK_ZONES["player_next"] = { x = card_x + card_w - 14 - chev_w, y = footer_y, w = chev_w, h = footer_h }
+        draw_text(cr, "›", card_x + card_w - 14 - chev_w / 2, footer_y + 14, 13, CAIRO_FONT_WEIGHT_BOLD, TEXT_PRIMARY, 'center')
+    else
+        draw_text(cr, "NOW PLAYING", card_x + card_w / 2, card_y + 134, 8, CAIRO_FONT_WEIGHT_BOLD, TEXT_MUTED, 'center')
+    end
 end
 
 -- 9.3 Studio Master Deck (2x1 Wide)
 local function draw_media_2x1_wide(cr, card_x, card_y, card_w, card_h)
     draw_card(cr, card_x, card_y, card_w, card_h)
+    CLICK_ZONES["media_scroll"] = { x = card_x, y = card_y, w = card_w, h = card_h }
 
     local is_playing = TELEMETRY.media.is_playing
     local title = TELEMETRY.media.title or "No Media Playing"
@@ -2062,15 +2179,52 @@ local function draw_media_2x1_wide(cr, card_x, card_y, card_w, card_h)
     if p_time == "--:--" then p_time = "00:00 / 00:00" end
     local p_frac = TELEMETRY.media.progress or 0.0
 
+    local p_name = TELEMETRY.media.player_name or "Audio"
+    local p_icon = TELEMETRY.media.player_icon or "󰝚"
+    local p_idx = TELEMETRY.media.player_index or 1
+    local p_tot = TELEMETRY.media.total_players or 0
+
     -- Album art / Disc square (Left)
     local ax = card_x + 18
     local ay = card_y + 18
     local asize = 52
     draw_sub_card(cr, ax, ay, asize, asize, 12)
-    draw_icon(cr, "󰝚", ax + asize / 2, ay + asize / 2 + 5, 24, PURPLE_MEDIA, 'center')
 
-    -- Top-Right Music glyph
-    draw_icon(cr, "󰝚", card_x + card_w - 24, card_y + 30, 16, TEXT_MUTED, 'center')
+    local d_icon = p_icon
+    if not d_icon or d_icon == "" or d_icon:find("\\") or #d_icon > 4 then
+        d_icon = "󰝚"
+    end
+    draw_icon(cr, d_icon, ax + asize / 2, ay + asize / 2 + 5, 22, PURPLE_MEDIA, 'center')
+
+    -- Top-Right: Single glyph or Multi-Player Carousel Switcher (Option A: Minimalist Integrated Pill)
+    if p_tot > 1 then
+        local pill_w = 90
+        local pill_h = 22
+        local pill_x = card_x + card_w - pill_w - 16
+        local pill_y = card_y + 18
+
+        draw_pill(cr, pill_x, pill_y, pill_w, pill_h, 11, { r = 1, g = 1, b = 1, a = 0.08 })
+
+        -- Left chevron: ‹
+        local chev_w = 20
+        CLICK_ZONES["player_prev"] = { x = pill_x, y = pill_y, w = chev_w, h = pill_h }
+        draw_text(cr, "‹", pill_x + chev_w / 2, pill_y + 15, 13, CAIRO_FONT_WEIGHT_BOLD, TEXT_PRIMARY, 'center')
+
+        -- Middle: Icon + count
+        draw_icon(cr, d_icon, pill_x + 36, pill_y + 15, 11, PURPLE_MEDIA, 'center')
+        local count_label = tostring(p_idx) .. "/" .. tostring(p_tot)
+        draw_text(cr, count_label, pill_x + 55, pill_y + 14, 9, CAIRO_FONT_WEIGHT_BOLD, TEXT_PRIMARY, 'center')
+
+        -- Right chevron: ›
+        CLICK_ZONES["player_next"] = { x = pill_x + pill_w - chev_w, y = pill_y, w = chev_w, h = pill_h }
+        draw_text(cr, "›", pill_x + pill_w - chev_w / 2, pill_y + 15, 13, CAIRO_FONT_WEIGHT_BOLD, TEXT_PRIMARY, 'center')
+    else
+        if p_name and p_name ~= "Audio" and p_name ~= "Weget Audio" then
+            draw_text(cr, p_name, card_x + card_w - 18, card_y + 30, 9.5, CAIRO_FONT_WEIGHT_BOLD, TEXT_MUTED, 'right')
+        else
+            draw_icon(cr, d_icon, card_x + card_w - 24, card_y + 30, 16, TEXT_MUTED, 'center')
+        end
+    end
 
     -- Title & Artist (Beside album art)
     local text_x = card_x + 82
@@ -2232,46 +2386,99 @@ local function render_row_pair(cr, m1, m2, cur_y)
     end
 end
 
+local EFFECTIVE_SCALE = 1.0
+
+local CACHED_HELPER_CMD = nil
+local function get_media_helper_cmd()
+    if CACHED_HELPER_CMD then return CACHED_HELPER_CMD end
+    local home = os.getenv("HOME") or ""
+    local candidates = {
+        home .. "/.config/conky/macwidget/helpers/media.py",
+        home .. "/.local/share/weget/helpers/media.py",
+        "helpers/media.py",
+        "engine/helpers/media.py",
+        "/usr/share/weget/helpers/media.py"
+    }
+    for _, c in ipairs(candidates) do
+        local f = io.open(c, "r")
+        if f then
+            f:close()
+            CACHED_HELPER_CMD = "python3 " .. c
+            return CACHED_HELPER_CMD
+        end
+    end
+    CACHED_HELPER_CMD = "playerctl"
+    return CACHED_HELPER_CMD
+end
+
 -- -----------------------------------------------------------------------
--- Mouse Click Event Handler
+-- Mouse Click & Scroll Event Handler
 -- -----------------------------------------------------------------------
 function conky_mouse_event(event)
-    if not event then return end
+    if not event then return false end
+
+    local ev_type = event.type or ""
     local x = event.x or 0
     local y = event.y or 0
-    local scale = SETTINGS.scale or 1.0
+    local btn = event.button
+
+    local scale = EFFECTIVE_SCALE or 1.0
+    if scale <= 0 then scale = 1.0 end
 
     local lx = x / scale
     local ly = y / scale
 
-    local helper_cmd = (function()
-        local home = os.getenv("HOME") or ""
-        local candidates = {
-            home .. "/.config/conky/macwidget/helpers/media.py",
-            home .. "/.local/share/weget/helpers/media.py",
-            "/usr/share/weget/helpers/media.py",
-            "helpers/media.py"
-        }
-        for _, c in ipairs(candidates) do
-            local f = io.open(c, "r")
-            if f then f:close(); return "python3 " .. c end
+    local helper_cmd = get_media_helper_cmd()
+
+    -- 1. Handle mouse wheel scroll over media card for side-scroll player carousel
+    if ev_type == "button_scroll" or ev_type == "mouse_scroll" or btn == "up" or btn == "down" then
+        local scroll_box = CLICK_ZONES["media_scroll"]
+        if scroll_box and lx >= scroll_box.x and lx <= (scroll_box.x + scroll_box.w)
+           and ly >= scroll_box.y and ly <= (scroll_box.y + scroll_box.h) then
+            local dir = tostring(event.direction or btn or "")
+            if dir == "up" or btn == 4 or dir == "left" or dir == "scroll_up" then
+                os.execute(helper_cmd .. " player-prev &")
+                return true
+            elseif dir == "down" or btn == 5 or dir == "right" or dir == "scroll_down" then
+                os.execute(helper_cmd .. " player-next &")
+                return true
+            end
         end
-        return "playerctl"
-    end)()
+        return false
+    end
+
+    -- 2. Handle button clicks (button_down or button_up or click)
+    if ev_type ~= "button_down" and ev_type ~= "button_up" and ev_type ~= "click" then
+        return false
+    end
+
+    -- Accept left click: button can be "left", 1, or nil
+    local is_left = (btn == "left" or btn == 1 or btn == nil)
+    if not is_left then
+        return false
+    end
 
     for action, box in pairs(CLICK_ZONES) do
-        if lx >= box.x and lx <= (box.x + box.w) and ly >= box.y and ly <= (box.y + box.h) then
+        if action ~= "media_scroll" and lx >= box.x and lx <= (box.x + box.w) and ly >= box.y and ly <= (box.y + box.h) then
             if action == "prev" then
                 os.execute(helper_cmd .. " prev &")
             elseif action == "play" then
                 os.execute(helper_cmd .. " play-pause &")
             elseif action == "next" then
                 os.execute(helper_cmd .. " next &")
+            elseif action == "player_prev" then
+                os.execute(helper_cmd .. " player-prev &")
+            elseif action == "player_next" then
+                os.execute(helper_cmd .. " player-next &")
             end
-            break
+            return true
         end
     end
+
+    return false
 end
+
+local FRAME_COUNTER = 0
 
 -- -----------------------------------------------------------------------
 -- Main Conky Render Hook
@@ -2280,13 +2487,30 @@ function conky_draw_widgets()
     if conky_window == nil then return end
     if (tonumber(conky_parse('${updates}')) or 0) < 1 then return end
 
-    check_hot_reload()
+    CLICK_ZONES = {}
+
+    FRAME_COUNTER = (FRAME_COUNTER or 0) + 1
+    if FRAME_COUNTER % 4 == 0 then
+        check_hot_reload()
+    end
+
+    -- Non-blocking background telemetry sync (every 1s if playing, 2s if paused/idle)
+    local sync_cadence = (TELEMETRY and TELEMETRY.media and TELEMETRY.media.is_playing) and 2 or 4
+    if FRAME_COUNTER % sync_cadence == 0 then
+        local helper_cmd = get_media_helper_cmd()
+        if helper_cmd and helper_cmd ~= "playerctl" then
+            os.execute(helper_cmd .. " sync &")
+        end
+    end
+
     update_telemetry()
 
     local user_scale = SETTINGS.scale or 1.0
     local base_scale = math.floor(conky_window.width / LOGICAL_W + 0.5)
     if base_scale < 1 then base_scale = 1 end
-    local effective_scale = base_scale * user_scale
+    EFFECTIVE_SCALE = base_scale * user_scale
+    if EFFECTIVE_SCALE <= 0 then EFFECTIVE_SCALE = 1.0 end
+    local effective_scale = EFFECTIVE_SCALE
 
     local cs = cairo_xlib_surface_create(
         conky_window.display, conky_window.drawable, conky_window.visual,
@@ -2330,4 +2554,5 @@ function conky_draw_widgets()
     cairo_surface_flush(cs)
     cairo_destroy(cr)
     cairo_surface_destroy(cs)
+    collectgarbage("step", 100)
 end

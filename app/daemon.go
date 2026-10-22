@@ -26,12 +26,17 @@ type WeatherTelemetry struct {
 }
 
 type MediaTelemetry struct {
-	Status    string  `json:"status"`
-	IsPlaying bool    `json:"is_playing"`
-	Title     string  `json:"title"`
-	Artist    string  `json:"artist"`
-	Progress  float64 `json:"progress"`
-	Time      string  `json:"time"`
+	Status       string  `json:"status"`
+	IsPlaying    bool    `json:"is_playing"`
+	Title        string  `json:"title"`
+	Artist       string  `json:"artist"`
+	Progress     float64 `json:"progress"`
+	Time         string  `json:"time"`
+	Player       string  `json:"player,omitempty"`
+	PlayerName   string  `json:"player_name,omitempty"`
+	PlayerIcon   string  `json:"player_icon,omitempty"`
+	PlayerIndex  int     `json:"player_index,omitempty"`
+	TotalPlayers int     `json:"total_players,omitempty"`
 }
 
 type NetworkTelemetry struct {
@@ -312,7 +317,7 @@ func findMediaHelper() string {
 }
 
 func (dm *DaemonManager) updateMedia() {
-	ctx, cancel := context.WithTimeout(context.Background(), 750*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 2500*time.Millisecond)
 	defer cancel()
 
 	helper := findMediaHelper()
@@ -832,13 +837,18 @@ func (dm *DaemonManager) Status() (bool, string, string, string) {
 }
 
 func (dm *DaemonManager) HandleMediaAction(action string) {
-	switch action {
-	case "play-pause", "play", "pause":
-		_ = exec.Command("playerctl", "play-pause").Run()
-	case "next":
-		_ = exec.Command("playerctl", "next").Run()
-	case "prev", "previous":
-		_ = exec.Command("playerctl", "previous").Run()
+	helper := findMediaHelper()
+	if helper != "" {
+		_ = exec.Command("python3", helper, action).Run()
+	} else if _, pErr := exec.LookPath("playerctl"); pErr == nil {
+		switch action {
+		case "play-pause", "play", "pause":
+			_ = exec.Command("playerctl", "play-pause").Run()
+		case "next":
+			_ = exec.Command("playerctl", "next").Run()
+		case "prev", "previous":
+			_ = exec.Command("playerctl", "previous").Run()
+		}
 	}
 	go dm.updateMedia()
 }
